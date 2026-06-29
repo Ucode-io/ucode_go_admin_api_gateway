@@ -42,6 +42,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	var (
 		limitsResp  *pb.GetPricingLimitsResponse
 		metricsResp *pb.GetAiTokenUsageMetricsResponse
+		packResp    *pb.GetTokenPackBalanceResponse
 	)
 
 	g, gCtx := errgroup.WithContext(ctx)
@@ -53,6 +54,11 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	g.Go(func() error {
 		var err error
 		metricsResp, err = p.h.companyServices.Billing().GetAiTokenUsageMetrics(gCtx, &pb.GetAiTokenUsageMetricsRequest{CompanyId: p.companyId})
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		packResp, err = p.h.companyServices.Billing().GetTokenPackBalance(gCtx, &pb.GetTokenPackBalanceRequest{CompanyId: p.companyId})
 		return err
 	})
 	if err := g.Wait(); err != nil {
@@ -76,8 +82,11 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 		return
 	}
 
-	snap.DayUsed = metricsResp.GetTodayInputTokens() + metricsResp.GetTodayOutputTokens()
-	snap.MonthUsed = metricsResp.GetMonthlyInputTokens() + metricsResp.GetMonthlyOutputTokens()
+	// Plan (fare) budget excludes pack-funded tokens so it recovers cleanly each
+	// period; the pack pool is a separate company-scoped fallback that never resets.
+	snap.DayUsed = metricsResp.GetTodayPlanTokens()
+	snap.MonthUsed = metricsResp.GetMonthlyPlanTokens()
+	snap.PackRemain = packResp.GetRemainingTokens()
 
 	remain := int64(-1)
 	if snap.DayLimit > 0 {
@@ -96,26 +105,54 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	p.tokenBudgetEnabled = true
 	p.tokenBudgetSnap = snap
 	atomic.StoreInt64(&p.tokenBudgetRemain, remain)
+	atomic.StoreInt64(&p.tokenPackRemain, snap.PackRemain)
 
-	log.Printf("[TOKEN BUDGET] initialized: remain=%d (day %d/%d, month %d/%d)",
-		remain, snap.DayUsed, snap.DayLimit, snap.MonthUsed, snap.MonthLimit)
+	log.Printf("[TOKEN BUDGET] initialized: plan_remain=%d pack_remain=%d (day %d/%d, month %d/%d)",
+		remain, snap.PackRemain, snap.DayUsed, snap.DayLimit, snap.MonthUsed, snap.MonthLimit)
 }
 
 func (p *ChatProcessor) Check() error {
 	if !p.tokenBudgetEnabled || p.tokenLimitExempt() {
 		return nil
 	}
-	if atomic.LoadInt64(&p.tokenBudgetRemain) <= 0 {
+	// Blocked only when the fare budget AND the pack pool are both exhausted; the
+	// pack is the automatic fallback once the fare day/month limit is reached.
+	if atomic.LoadInt64(&p.tokenBudgetRemain) <= 0 && atomic.LoadInt64(&p.tokenPackRemain) <= 0 {
 		return p.buildTokenLimitError()
 	}
 	return nil
+}
+
+// splitBudget decides how a usage of `total` tokens is funded: fare first, then
+// the pack pool for whatever the fare cannot cover. It is read-only so RecordUsage
+// (which reports the pack portion) and Deduct (which applies it) agree on the split.
+func (p *ChatProcessor) splitBudget(total int64) (planPortion, packPortion int64) {
+	if total <= 0 {
+		return 0, 0
+	}
+	planRemain := atomic.LoadInt64(&p.tokenBudgetRemain)
+	if planRemain <= 0 {
+		return 0, total
+	}
+	if total <= planRemain {
+		return total, 0
+	}
+	return planRemain, total - planRemain
 }
 
 func (p *ChatProcessor) Deduct(tokens int64) {
 	if !p.tokenBudgetEnabled || tokens <= 0 {
 		return
 	}
-	atomic.AddInt64(&p.tokenBudgetRemain, -tokens)
+	planPortion, packPortion := p.splitBudget(tokens)
+	if planPortion > 0 {
+		atomic.AddInt64(&p.tokenBudgetRemain, -planPortion)
+	}
+	if packPortion > 0 {
+		if newRemain := atomic.AddInt64(&p.tokenPackRemain, -packPortion); newRemain < 0 {
+			atomic.StoreInt64(&p.tokenPackRemain, 0)
+		}
+	}
 }
 
 func (p *ChatProcessor) buildTokenLimitError() *TokenLimitError {
@@ -156,6 +193,10 @@ func (p *ChatProcessor) tokenLimitData(err *TokenLimitError) models.TokenLimitDa
 	if err.Period == "day" {
 		code = models.PaymentCodeTokenDayLimit
 	}
+	packRemain := atomic.LoadInt64(&p.tokenPackRemain)
+	if packRemain < 0 {
+		packRemain = 0
+	}
 	return models.TokenLimitData{
 		Type:       models.PaymentRequiredType,
 		Code:       code,
@@ -167,5 +208,6 @@ func (p *ChatProcessor) tokenLimitData(err *TokenLimitError) models.TokenLimitDa
 		DayLimit:   snap.DayLimit,
 		MonthUsed:  snap.MonthUsed + spent,
 		MonthLimit: snap.MonthLimit,
+		PackRemain: packRemain,
 	}
 }

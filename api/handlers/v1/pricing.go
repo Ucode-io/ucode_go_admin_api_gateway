@@ -253,6 +253,7 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 	var (
 		tokenMetrics = new(company_service.GetAiTokenUsageMetricsResponse)
 		limitsResp   = new(company_service.GetPricingLimitsResponse)
+		packResp     = new(company_service.GetTokenPackBalanceResponse)
 		projectCount int32
 		builderCount int32
 		userCount    int32
@@ -267,6 +268,16 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 			return nil
 		}
 		limitsResp = resp
+		return nil
+	})
+
+	g.Go(func() error {
+		resp, err := h.companyServices.Billing().GetTokenPackBalance(gCtx, &company_service.GetTokenPackBalanceRequest{CompanyId: companyId})
+		if err != nil {
+			h.log.Error("[GetCompanyStats] GetTokenPackBalance", logger.Error(err))
+			return nil
+		}
+		packResp = resp
 		return nil
 	})
 
@@ -342,10 +353,30 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 		}
 	}
 
+	dailyPlanTokens := tokenMetrics.GetTodayPlanTokens()
+	monthlyPlanTokens := tokenMetrics.GetMonthlyPlanTokens()
+	packRemaining := packResp.GetRemainingTokens()
+
+	dailyLimitReached := dailyTokenLimit > 0 && dailyPlanTokens >= dailyTokenLimit
+	monthlyLimitReached := monthlyTokenLimit > 0 && monthlyPlanTokens >= monthlyTokenLimit
+
+	// Once either fare limit is reached, usage falls back to the pack pool; the
+	// active source mirrors the gateway's automatic plan→pack→exhausted switch.
+	activeSource := "plan"
+	if dailyLimitReached || monthlyLimitReached {
+		if packRemaining > 0 {
+			activeSource = "pack"
+		} else {
+			activeSource = "exhausted"
+		}
+	}
+
 	h.HandleResponse(c, status_http.OK, models.CompanyStatsResponse{
 		Tokens: models.CompanyTokenStats{
-			Daily:   models.CompanyTokenStat{InputTokens: tokenMetrics.GetTodayInputTokens(), OutputTokens: tokenMetrics.GetTodayOutputTokens(), Limit: dailyTokenLimit},
-			Monthly: models.CompanyTokenStat{InputTokens: tokenMetrics.GetMonthlyInputTokens(), OutputTokens: tokenMetrics.GetMonthlyOutputTokens(), Limit: monthlyTokenLimit},
+			Daily:   models.CompanyTokenStat{InputTokens: tokenMetrics.GetTodayInputTokens(), OutputTokens: tokenMetrics.GetTodayOutputTokens(), PlanTokens: dailyPlanTokens, Limit: dailyTokenLimit, LimitReached: dailyLimitReached},
+			Monthly: models.CompanyTokenStat{InputTokens: tokenMetrics.GetMonthlyInputTokens(), OutputTokens: tokenMetrics.GetMonthlyOutputTokens(), PlanTokens: monthlyPlanTokens, Limit: monthlyTokenLimit, LimitReached: monthlyLimitReached},
+			PackRemaining: packRemaining,
+			ActiveSource:  activeSource,
 		},
 		ProjectCount: models.CompanyStat{Current: projectCount, Limit: projectLimit},
 		Builders:     models.CompanyStat{Current: builderCount, Limit: builderLimit},
