@@ -212,6 +212,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 				fareItem.DELETE("/:id", h.V1.DeleteFareItem)
 			}
 		}
+		tokenPack := v1.Group("/token-pack")
+		{
+			tokenPack.GET("", h.V1.ListTokenPacks)
+			tokenPack.GET("/balance", h.V1.GetTokenPackBalance)
+			tokenPack.POST("/purchase", h.V1.PurchaseTokenPack)
+			tokenPack.POST("", h.V1.CreateTokenPack)
+			tokenPack.PUT("", h.V1.UpdateTokenPack)
+			tokenPack.DELETE("/:id", h.V1.DeleteTokenPack)
+		}
+
 		transaction := v1.Group("/transaction")
 		{
 			transaction.POST("", h.V1.CreateTransaction)

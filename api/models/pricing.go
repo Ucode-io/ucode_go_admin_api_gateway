@@ -63,12 +63,23 @@ type CompanyStat struct {
 type CompanyTokenStat struct {
 	InputTokens  int64 `json:"input_tokens"`
 	OutputTokens int64 `json:"output_tokens"`
+	// PlanTokens is the portion of usage charged against the fare limit; it excludes
+	// pack-funded tokens, so PlanTokens vs Limit is the true fare-budget position.
+	PlanTokens   int64 `json:"plan_tokens"`
 	Limit        int64 `json:"limit"`
+	LimitReached bool  `json:"limit_reached"`
 }
 
 type CompanyTokenStats struct {
 	Daily   CompanyTokenStat `json:"daily"`
 	Monthly CompanyTokenStat `json:"monthly"`
+	// PackRemaining is the company's remaining add-on token-pack pool. When a fare
+	// limit is reached, usage is automatically funded from this pool.
+	PackRemaining int64 `json:"pack_remaining"`
+	// ActiveSource is the bucket the next tokens will draw from: "plan" while the
+	// fare budget has room, "pack" once a fare limit is reached and the pool has
+	// tokens, or "exhausted" when both are spent.
+	ActiveSource string `json:"active_source"`
 }
 
 type CompanyStatsResponse struct {

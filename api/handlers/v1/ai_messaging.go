@@ -78,7 +78,8 @@ type ChatProcessor struct {
 	cachedImagePool *helper.ImagePoolResult
 
 	tokenBudgetEnabled bool
-	tokenBudgetRemain  int64
+	tokenBudgetRemain  int64 // remaining fare (day/month) budget; drained first
+	tokenPackRemain    int64 // remaining company token-pack pool; drained after fare
 	tokenBudgetSnap    models.TokenBudgetSnapshot
 
 	ucodeMcpProjectId string

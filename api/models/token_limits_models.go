@@ -11,6 +11,7 @@ type TokenLimitData struct {
 	DayLimit   int64  `json:"day_limit"`
 	MonthUsed  int64  `json:"month_used"`
 	MonthLimit int64  `json:"month_limit"`
+	PackRemain int64  `json:"pack_remain"` // remaining add-on pack tokens (0 when blocked)
 }
 
 type TokenBudgetSnapshot struct {
@@ -18,4 +19,5 @@ type TokenBudgetSnapshot struct {
 	DayUsed    int64
 	MonthLimit int64
 	MonthUsed  int64
+	PackRemain int64 // company token-pack pool at budget init
 }
