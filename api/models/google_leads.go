@@ -1,5 +1,10 @@
 package models
 
+import (
+	"bytes"
+	"encoding/json"
+)
+
 // Google Lead Form Ads webhook payload and gateway request/response contracts.
 // Reference: https://support.google.com/google-ads/answer/9423234 (webhook lead delivery)
 //
@@ -7,15 +12,40 @@ package models
 // no second fetch. Authentication and routing both rely on google_key — a secret
 // we generate and the advertiser pastes into the Google Ads lead form settings.
 
+// FlexString accepts a JSON value that is either a quoted string or a bare number
+// and stores it as a string. Google sends ids (form_id, campaign_id, ...) as
+// numbers in test payloads and as strings in real ones, so we normalize to string.
+type FlexString string
+
+func (f *FlexString) UnmarshalJSON(data []byte) error {
+	data = bytes.TrimSpace(data)
+	if len(data) == 0 || string(data) == "null" {
+		*f = ""
+		return nil
+	}
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		*f = FlexString(s)
+		return nil
+	}
+	*f = FlexString(data)
+	return nil
+}
+
+func (f FlexString) String() string { return string(f) }
+
 type (
 	GoogleLeadWebhookEvent struct {
 		LeadID         string                 `json:"lead_id"`
 		APIVersion     string                 `json:"api_version"`
-		FormID         string                 `json:"form_id"`
-		CampaignID     string                 `json:"campaign_id"`
+		FormID         FlexString             `json:"form_id"`
+		CampaignID     FlexString             `json:"campaign_id"`
 		GclID          string                 `json:"gcl_id"`
-		AdgroupID      string                 `json:"adgroup_id"`
-		CreativeID     string                 `json:"creative_id"`
+		AdgroupID      FlexString             `json:"adgroup_id"`
+		CreativeID     FlexString             `json:"creative_id"`
 		IsTest         bool                   `json:"is_test"`
 		GoogleKey      string                 `json:"google_key"`
 		UserColumnData []GoogleLeadColumnData `json:"user_column_data"`
