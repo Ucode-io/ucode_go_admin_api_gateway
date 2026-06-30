@@ -1651,6 +1651,7 @@ func (h *HandlerV1) redirectInstagramOAuth(c *gin.Context, out instagramOAuthOut
 	if base == "" {
 		base = "/"
 	}
+	base = applyInstagramRedirectPlaceholders(base, out.state)
 	u, err := url.Parse(base)
 	if err != nil {
 		c.Redirect(http.StatusTemporaryRedirect, base)
@@ -1667,6 +1668,15 @@ func (h *HandlerV1) redirectInstagramOAuth(c *gin.Context, out instagramOAuthOut
 		if out.detail != "" {
 			q.Set("detail", out.detail)
 		}
+	}
+	if out.state.ProjectID != "" {
+		q.Set("project_id", out.state.ProjectID)
+	}
+	if out.state.EnvironmentID != "" {
+		q.Set("environment_id", out.state.EnvironmentID)
+	}
+	if out.state.McpProjectID != "" {
+		q.Set("mcp_project_id", out.state.McpProjectID)
 	}
 	u.RawQuery = q.Encode()
 	c.Redirect(http.StatusTemporaryRedirect, u.String())
@@ -1694,6 +1704,21 @@ func resolveInstagramRedirectURL(c *gin.Context) string {
 		return raw
 	}
 	return strings.TrimSpace(c.GetHeader("Referer"))
+}
+
+func applyInstagramRedirectPlaceholders(target string, state instagramOAuthState) string {
+	replacer := strings.NewReplacer(
+		"{project_id}", url.PathEscape(state.ProjectID),
+		":project_id", url.PathEscape(state.ProjectID),
+		"YOUR_PROJECT_ID", url.PathEscape(state.ProjectID),
+		"{environment_id}", url.PathEscape(state.EnvironmentID),
+		":environment_id", url.PathEscape(state.EnvironmentID),
+		"YOUR_ENVIRONMENT_ID", url.PathEscape(state.EnvironmentID),
+		"{mcp_project_id}", url.PathEscape(state.McpProjectID),
+		":mcp_project_id", url.PathEscape(state.McpProjectID),
+		"YOUR_MCP_PROJECT_ID", url.PathEscape(state.McpProjectID),
+	)
+	return replacer.Replace(target)
 }
 
 func instagramMappingFromQuery(c *gin.Context) instagramChatMappingRequest {
