@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -168,6 +169,17 @@ type instagramMessagingEvent struct {
 	Optin     json.RawMessage      `json:"optin"`
 	Referral  json.RawMessage      `json:"referral"`
 	Raw       map[string]any       `json:"-"`
+}
+
+func (e *instagramMessagingEvent) UnmarshalJSON(data []byte) error {
+	type alias instagramMessagingEvent
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*e = instagramMessagingEvent(decoded)
+	_ = json.Unmarshal(data, &e.Raw)
+	return nil
 }
 
 type instagramWebhookUser struct {
@@ -1160,6 +1172,7 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 						logger.String("event_type", instagramEventType(messageEvent)),
 						logger.String("sender_id", instagramSenderID(messageEvent)),
 						logger.String("recipient_id", messageEvent.Recipient.ID),
+						logger.Any("event_keys", instagramRawKeys(messageEvent.Raw)),
 					)
 					continue
 				}
@@ -1909,6 +1922,18 @@ func instagramEventType(event instagramMessagingEvent) string {
 	default:
 		return "unknown"
 	}
+}
+
+func instagramRawKeys(raw map[string]any) []string {
+	if len(raw) == 0 {
+		return nil
+	}
+	keys := make([]string, 0, len(raw))
+	for key := range raw {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func instagramEventKey(event instagramMessagingEvent) string {
