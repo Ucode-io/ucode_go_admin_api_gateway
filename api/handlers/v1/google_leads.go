@@ -15,6 +15,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -112,6 +113,10 @@ func (h *HandlerV1) processGoogleLeadEvent(event models.GoogleLeadWebhookEvent) 
 	for _, resource := range resources {
 		credentials := resource.GetSettings().GetGoogleLeads()
 		if credentials == nil {
+			h.log.Warn("google lead: resource has no google_leads settings, skipping",
+				logger.String("resource_id", resource.GetId()),
+				logger.String("project_id", resource.GetProjectId()),
+			)
 			continue
 		}
 
@@ -196,12 +201,33 @@ func (h *HandlerV1) writeGoogleLead(ctx context.Context, resource *pb.ProjectRes
 		return err
 	}
 
-	_, err = services.GetBuilderServiceByType(resourceModel.NodeType).ObjectBuilder().Create(ctx, &obs.CommonMessage{
-		TableSlug: credentials.GetTableSlug(),
-		Data:      structData,
-		ProjectId: resourceModel.ResourceEnvironmentId,
-	})
-	return err
+	// Postgres and Mongo projects are served by different builder services, so the
+	// write must be routed by the project's resource type (Mongo uses the legacy
+	// ObjectBuilder, Postgres the new Go object builder).
+	switch resourceModel.GetResourceType() {
+	case pb.ResourceType_POSTGRESQL:
+		_, err = services.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
+			TableSlug: credentials.GetTableSlug(),
+			Data:      structData,
+			ProjectId: resourceModel.GetResourceEnvironmentId(),
+		})
+	default:
+		_, err = services.GetBuilderServiceByType(resourceModel.GetNodeType()).ObjectBuilder().Create(ctx, &obs.CommonMessage{
+			TableSlug: credentials.GetTableSlug(),
+			Data:      structData,
+			ProjectId: resourceModel.GetResourceEnvironmentId(),
+		})
+	}
+	if err != nil {
+		return err
+	}
+
+	h.log.Info("google lead: written",
+		logger.String("project_id", resource.GetProjectId()),
+		logger.String("table_slug", credentials.GetTableSlug()),
+		logger.String("lead_id", event.LeadID),
+	)
+	return nil
 }
 
 // googleLeadValues flattens user_column_data into column_id -> value.
