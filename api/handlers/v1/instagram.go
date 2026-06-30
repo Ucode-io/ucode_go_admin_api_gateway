@@ -1113,19 +1113,13 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 	}()
 	ctx := context.Background()
 	for _, entry := range event.Entry {
-		if strings.TrimSpace(entry.ID) == "" {
-			continue
-		}
-		resources, err := h.companyServices.Resource().GetProjectResourcesByExternalId(ctx, &pb.GetByExternalIdRequest{
-			ExternalId: entry.ID,
-			Type:       pb.ResourceType_INSTAGRAM,
-		})
+		resources, resolvedIgID, err := h.instagramResourcesForWebhookEntry(ctx, entry)
 		if err != nil {
-			h.log.Error("instagram webhook: resolve resource failed", logger.Error(err), logger.String("ig_id", entry.ID))
+			h.log.Error("instagram webhook: resolve resource failed", logger.Error(err), logger.String("ig_id", resolvedIgID))
 			continue
 		}
 		if len(resources.GetResources()) == 0 {
-			h.log.Warn("instagram webhook: no project mapped for account", logger.String("ig_id", entry.ID))
+			h.log.Warn("instagram webhook: no project mapped for account", logger.String("ig_id", resolvedIgID))
 			continue
 		}
 		for _, resource := range resources.GetResources() {
@@ -1149,6 +1143,39 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 			}
 		}
 	}
+}
+
+func (h *HandlerV1) instagramResourcesForWebhookEntry(ctx context.Context, entry instagramWebhookEntry) (*pb.ListProjectResource, string, error) {
+	candidates := make([]string, 0, 1+len(entry.Messaging))
+	addCandidate := func(value string) {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			return
+		}
+		for _, existing := range candidates {
+			if existing == value {
+				return
+			}
+		}
+		candidates = append(candidates, value)
+	}
+	addCandidate(entry.ID)
+	for _, event := range entry.Messaging {
+		addCandidate(event.Recipient.ID)
+	}
+	for _, candidate := range candidates {
+		resources, err := h.companyServices.Resource().GetProjectResourcesByExternalId(ctx, &pb.GetByExternalIdRequest{
+			ExternalId: candidate,
+			Type:       pb.ResourceType_INSTAGRAM,
+		})
+		if err != nil {
+			return nil, candidate, err
+		}
+		if len(resources.GetResources()) > 0 {
+			return resources, candidate, nil
+		}
+	}
+	return &pb.ListProjectResource{}, strings.Join(candidates, ","), nil
 }
 
 func (h *HandlerV1) persistInstagramIncomingEvent(ctx context.Context, target *instagramProjectTarget, mapping *pb.InstagramChatMapping, event instagramMessagingEvent, raw string) error {
