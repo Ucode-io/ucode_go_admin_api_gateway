@@ -367,6 +367,7 @@ message Settings {
     TelegramCredentials telegram = 11;
     FacebookLeadsCredentials facebook_leads = 12;
     InstagramCredentials instagram = 13;
+    GoogleLeadsCredentials google_leads = 14;
 }
 
 message SmsCredentials {
@@ -527,6 +528,30 @@ message InstagramChatMapping {
     string unread_count_field = 9;
     string status_field = 10;
     string conversation_id_field = 11;
+}
+
+// Google Lead Form Ads (webhook-only). external_id of the project_resource holds
+// the generated google_key — it is both the webhook auth secret and the routing
+// key. Unlike Meta there are no OAuth tokens: Google pushes the full lead data to
+// our webhook, so nothing is fetched back. One form == one resource == one key,
+// hence the mapping is flat (table_slug + fields) instead of nested per form.
+message GoogleLeadsCredentials {
+    string google_key = 1;     // generated secret; mirrored into external_id
+    string form_id = 2;        // optional: validate incoming form_id ("" = accept any)
+    string form_name = 3;
+    string table_slug = 4;
+    string status = 5;
+    string connected_at = 6;
+    repeated GoogleLeadFieldMapping fields = 7;
+}
+
+// One Google lead column mapped to one ucode table field. lead_column is the
+// Google column_id (== user_column_data[].column_id, e.g. FULL_NAME, EMAIL), not
+// the human label.
+message GoogleLeadFieldMapping {
+    string lead_column = 1;
+    string table_field = 2;
+    bool required = 3;
 }
 
 message Github {

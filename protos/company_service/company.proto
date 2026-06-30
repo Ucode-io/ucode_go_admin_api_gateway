@@ -38,6 +38,7 @@ enum ResourceType {
     TELEGRAM = 17;
     META_LEADS = 18;
     INSTAGRAM = 19;
+    GOOGLE_LEADS = 20;
 }
 
 enum SettingType {

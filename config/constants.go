@@ -150,6 +150,8 @@ const (
 	FacebookSignatureHeader  = "X-Hub-Signature-256"
 	FacebookSignaturePrefix  = "sha256="
 
+	GoogleLeadsStatusActive = "active"
+
 	// Instagram Direct Messaging
 	InstagramOAuthStatePrefix = "instagram-oauth-state:"
 	InstagramOAuthStateTTL    = 10 * time.Minute
