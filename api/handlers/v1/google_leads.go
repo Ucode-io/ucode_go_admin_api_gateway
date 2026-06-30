@@ -103,7 +103,7 @@ func (h *HandlerV1) processGoogleLeadEvent(event models.GoogleLeadWebhookEvent) 
 	resources := list.GetResources()
 	if len(resources) == 0 {
 		h.log.Warn("google lead: no project mapped for key",
-			logger.String("form_id", event.FormID),
+			logger.String("form_id", event.FormID.String()),
 		)
 		return
 	}
@@ -130,9 +130,9 @@ func (h *HandlerV1) processGoogleLeadEvent(event models.GoogleLeadWebhookEvent) 
 		}
 
 		// An optional form_id pins the resource to one form; empty accepts any.
-		if formID := credentials.GetFormId(); formID != "" && formID != event.FormID {
+		if formID := credentials.GetFormId(); formID != "" && formID != event.FormID.String() {
 			h.log.Info("google lead: form not mapped, skipping",
-				logger.String("form_id", event.FormID),
+				logger.String("form_id", event.FormID.String()),
 				logger.String("project_id", resource.GetProjectId()),
 			)
 			continue
@@ -428,10 +428,11 @@ func (h *HandlerV1) GoogleLeadsDisconnect(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, gin.H{"resource_id": resourceID})
 }
 
-// generateGoogleKey returns a 32-byte random hex secret used both to authenticate
-// the webhook and to route a lead to its project_resource.
+// generateGoogleKey returns a 24-byte random hex secret (48 chars) used both to
+// authenticate the webhook and to route a lead to its project_resource. Google's
+// lead form Key field caps at 50 characters, so the length must stay under it.
 func generateGoogleKey() (string, error) {
-	buf := make([]byte, 32)
+	buf := make([]byte, 24)
 	if _, err := rand.Read(buf); err != nil {
 		return "", err
 	}
