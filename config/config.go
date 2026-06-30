@@ -187,6 +187,10 @@ type BaseConfig struct {
 	FacebookGraphAPIVersion string
 
 	FacebookWebhookVerifyToken string
+
+	// GoogleLeadsWebhookURL is the public URL Google posts leads to; returned to
+	// the user so they can paste it into the Google Ads lead form settings.
+	GoogleLeadsWebhookURL string
 }
 
 func BaseLoad() BaseConfig {
@@ -305,6 +309,8 @@ func BaseLoad() BaseConfig {
 	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
 	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
 	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
+
+	config.GoogleLeadsWebhookURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("GOOGLE_LEADS_WEBHOOK_URL", "")), "/")
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

@@ -149,6 +149,8 @@ const (
 	FacebookWebhookFieldLead = "leadgen"
 	FacebookSignatureHeader  = "X-Hub-Signature-256"
 	FacebookSignaturePrefix  = "sha256="
+
+	GoogleLeadsStatusActive = "active"
 )
 
 var (

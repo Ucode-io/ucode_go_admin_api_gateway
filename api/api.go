@@ -715,6 +715,21 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		facebook.DELETE("/integration/:id", h.V1.FacebookDisconnect)
 	}
 
+	// Google Lead Form Ads webhook — public, Google posts leads here (no OAuth).
+	r.POST("/webhook/google", h.V1.GoogleWebhookReceive)
+
+	googleLeads := r.Group("/v1/google-leads")
+	googleLeads.Use(h.V1.AuthMiddleware(cfg))
+	{
+		googleLeads.GET("/columns", h.V1.GoogleLeadsColumns)
+
+		googleLeads.POST("", h.V1.GoogleLeadsCreate)
+		googleLeads.PUT("/mapping/:id", h.V1.GoogleLeadsSaveMapping)
+
+		googleLeads.GET("/integration", h.V1.GoogleLeadsIntegration)
+		googleLeads.DELETE("/integration/:id", h.V1.GoogleLeadsDisconnect)
+	}
+
 	github := r.Group("/v1/github")
 	github.Use(h.V1.AuthMiddleware(cfg))
 	{
