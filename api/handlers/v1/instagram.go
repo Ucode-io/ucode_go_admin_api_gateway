@@ -154,6 +154,7 @@ type instagramWebhookEntry struct {
 	ID        string                    `json:"id"`
 	Time      int64                     `json:"time"`
 	Messaging []instagramMessagingEvent `json:"messaging"`
+	Changes   []json.RawMessage         `json:"changes"`
 }
 
 type instagramMessagingEvent struct {
@@ -490,6 +491,10 @@ func (h *HandlerV1) InstagramWebhookReceive(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 		return
 	}
+	h.log.Info("instagram webhook: accepted",
+		logger.String("object", event.Object),
+		logger.Int("entries", len(event.Entry)),
+	)
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 	go h.processInstagramWebhookEvent(event)
 }
@@ -1113,6 +1118,11 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 	}()
 	ctx := context.Background()
 	for _, entry := range event.Entry {
+		h.log.Info("instagram webhook: processing entry",
+			logger.String("entry_id", entry.ID),
+			logger.Int("messaging_count", len(entry.Messaging)),
+			logger.Int("changes_count", len(entry.Changes)),
+		)
 		resources, resolvedIgID, err := h.instagramResourcesForWebhookEntry(ctx, entry)
 		if err != nil {
 			h.log.Error("instagram webhook: resolve resource failed", logger.Error(err), logger.String("ig_id", resolvedIgID))
@@ -1128,18 +1138,43 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 				h.log.Error("instagram webhook: resolve target failed", logger.Error(err), logger.String("project_id", resource.GetProjectId()))
 				continue
 			}
+			if resource.GetSettings() == nil || resource.GetSettings().GetInstagram() == nil || resource.GetSettings().GetInstagram().GetMapping() == nil {
+				h.log.Error("instagram webhook: resource mapping missing",
+					logger.String("resource_id", resource.GetId()),
+					logger.String("project_id", resource.GetProjectId()),
+				)
+				continue
+			}
 			mapping := resource.GetSettings().GetInstagram().GetMapping()
 			for _, messageEvent := range entry.Messaging {
 				if messageEvent.Message != nil && messageEvent.Message.IsEcho {
+					h.log.Info("instagram webhook: echo ignored",
+						logger.String("ig_id", resolvedIgID),
+						logger.String("message_id", messageEvent.Message.Mid),
+					)
 					continue
 				}
 				if !instagramEventIsPersistable(messageEvent) {
+					h.log.Info("instagram webhook: event ignored",
+						logger.String("ig_id", resolvedIgID),
+						logger.String("event_type", instagramEventType(messageEvent)),
+						logger.String("sender_id", instagramSenderID(messageEvent)),
+						logger.String("recipient_id", messageEvent.Recipient.ID),
+					)
 					continue
 				}
 				raw, _ := json.Marshal(messageEvent)
 				if err = h.persistInstagramIncomingEvent(ctx, target, mapping, messageEvent, string(raw)); err != nil {
 					h.log.Error("instagram webhook: persist event failed", logger.Error(err), logger.String("project_id", resource.GetProjectId()))
+					continue
 				}
+				h.log.Info("instagram webhook: event persisted",
+					logger.String("ig_id", resolvedIgID),
+					logger.String("event_id", instagramEventKey(messageEvent)),
+					logger.String("event_type", instagramEventType(messageEvent)),
+					logger.String("sender_id", instagramSenderID(messageEvent)),
+					logger.String("project_id", resource.GetProjectId()),
+				)
 			}
 		}
 	}
@@ -1852,6 +1887,28 @@ func instagramMessageChatRelationField(mapping *pb.InstagramChatMapping) (string
 
 func instagramEventIsPersistable(event instagramMessagingEvent) bool {
 	return event.Message != nil || event.Postback != nil || event.Reaction != nil
+}
+
+func instagramEventType(event instagramMessagingEvent) string {
+	switch {
+	case event.Message != nil:
+		if event.Message.IsEcho {
+			return "message_echo"
+		}
+		return "message"
+	case event.Postback != nil:
+		return "postback"
+	case event.Reaction != nil:
+		return "reaction"
+	case event.Read != nil:
+		return "read"
+	case len(event.Optin) > 0:
+		return "optin"
+	case len(event.Referral) > 0:
+		return "referral"
+	default:
+		return "unknown"
+	}
 }
 
 func instagramEventKey(event instagramMessagingEvent) string {
