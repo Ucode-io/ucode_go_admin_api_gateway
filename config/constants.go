@@ -151,6 +151,17 @@ const (
 	FacebookSignaturePrefix  = "sha256="
 
 	GoogleLeadsStatusActive = "active"
+
+	// Instagram Direct Messaging
+	InstagramOAuthStatePrefix = "instagram-oauth-state:"
+	InstagramOAuthStateTTL    = 10 * time.Minute
+	InstagramIntegrationName  = "Instagram Support"
+	InstagramOAuthScopes      = "instagram_business_basic,instagram_business_manage_messages"
+	InstagramSubscribedFields = "messages,messaging_postbacks,messaging_reactions,messaging_seen,messaging_optins"
+	InstagramStatusPendingUI  = "pending_ui"
+	InstagramStatusConnected  = "connected"
+	InstagramSignatureHeader  = "X-Hub-Signature-256"
+	InstagramSignaturePrefix  = "sha256="
 )
 
 var (

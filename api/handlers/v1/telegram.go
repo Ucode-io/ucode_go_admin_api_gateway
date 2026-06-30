@@ -1001,6 +1001,7 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 	if mapping.GetTelegramChatIdField() == "" {
 		mapping.TelegramChatIdField = "telegram_chat_id"
 	}
+	normalizeTelegramMappingFields(mapping)
 
 	fields, err := target.Services.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{TableId: table.GetId(), ProjectId: target.ResourceEnvID, Limit: 500})
 	if err != nil {
@@ -1030,16 +1031,10 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 		}); err != nil {
 			return nil, fmt.Errorf("create telegram mapping field %s: %w", mapping.GetTelegramChatIdField(), err)
 		}
+		known[mapping.GetTelegramChatIdField()] = &pbo.Field{Slug: mapping.GetTelegramChatIdField(), Type: "SINGLE_LINE", Unique: true}
 	}
-	for _, field := range []string{
-		mapping.GetTelegramUserIdField(), mapping.GetDisplayNameField(), mapping.GetUsernameField(), mapping.GetLastMessageField(), mapping.GetLastMessageAtField(), mapping.GetUnreadCountField(), mapping.GetStatusField(),
-	} {
-		if field == "" {
-			continue
-		}
-		if !telegramIdentifierPattern.MatchString(field) || known[field] == nil {
-			return nil, fmt.Errorf("mapped optional field %q does not exist in table", field)
-		}
+	if err = h.ensureTelegramMappedOptionalFields(ctx, target, table.GetId(), known, mapping); err != nil {
+		return nil, err
 	}
 	if field := mapping.GetLastMessageAtField(); field != "" && known[field].GetType() != "DATE_TIME" {
 		return nil, fmt.Errorf("mapped last_message_at field %q must use DATE_TIME", field)
@@ -1048,6 +1043,55 @@ func (h *HandlerV1) prepareTelegramMapping(ctx context.Context, target *telegram
 		return nil, fmt.Errorf("mapped unread_count field %q must use NUMBER", field)
 	}
 	return mapping, nil
+}
+
+func (h *HandlerV1) ensureTelegramMappedOptionalFields(ctx context.Context, target *telegramProjectTarget, tableID string, known map[string]*pbo.Field, mapping *pb.TelegramChatMapping) error {
+	definitions := map[string]telegramSystemField{
+		mapping.GetTelegramUserIdField(): {"telegram_user_id", "Telegram user ID", "SINGLE_LINE", false},
+		mapping.GetDisplayNameField():    {"customer_name", "Customer name", "SINGLE_LINE", false},
+		mapping.GetUsernameField():       {"telegram_username", "Telegram username", "SINGLE_LINE", false},
+		mapping.GetLastMessageField():    {"last_message", "Last message", "MULTI_LINE", false},
+		mapping.GetLastMessageAtField():  {"last_message_at", "Last message at", "DATE_TIME", false},
+		mapping.GetUnreadCountField():    {"unread_count", "Unread count", "NUMBER", false},
+		mapping.GetStatusField():         {"status", "Status", "SINGLE_LINE", false},
+	}
+
+	for _, field := range []string{
+		mapping.GetTelegramUserIdField(),
+		mapping.GetDisplayNameField(),
+		mapping.GetUsernameField(),
+		mapping.GetLastMessageField(),
+		mapping.GetLastMessageAtField(),
+		mapping.GetUnreadCountField(),
+		mapping.GetStatusField(),
+	} {
+		if field == "" {
+			continue
+		}
+		if !telegramIdentifierPattern.MatchString(field) {
+			return fmt.Errorf("invalid mapped optional field %q", field)
+		}
+		if known[field] != nil {
+			continue
+		}
+		definition, ok := definitions[field]
+		if !ok || definition.slug == "" {
+			return fmt.Errorf("mapped optional field %q does not exist in table", field)
+		}
+		attrs, attrErr := helperFunc.ConvertMapToStruct(map[string]any{"label_en": definition.label, "telegram_system": true})
+		if attrErr != nil {
+			return attrErr
+		}
+		if _, err := target.Services.GoObjectBuilderService().Field().Create(ctx, &pbo.CreateFieldRequest{
+			Id: uuid.NewString(), TableId: tableID, ProjectId: target.ResourceEnvID, EnvId: target.EnvironmentID,
+			Slug: field, Label: definition.label, Type: definition.typeID, Unique: definition.unique,
+			IsVisible: false, Attributes: attrs,
+		}); err != nil {
+			return fmt.Errorf("create telegram mapping field %s: %w", field, err)
+		}
+		known[field] = &pbo.Field{Slug: field, Type: definition.typeID, Unique: definition.unique}
+	}
+	return nil
 }
 
 func (h *HandlerV1) applyTelegramDefaultMappingFields(ctx context.Context, target *telegramProjectTarget, mapping *pb.TelegramChatMapping) error {
@@ -1090,6 +1134,15 @@ func applyTelegramDefaultMappingFieldsFromKnown(mapping *pb.TelegramChatMapping,
 	}
 	if mapping.StatusField == "" {
 		mapping.StatusField = telegramFirstExistingField(known, "", "status")
+	}
+}
+
+func normalizeTelegramMappingFields(mapping *pb.TelegramChatMapping) {
+	if mapping == nil {
+		return
+	}
+	if mapping.GetLastMessageField() == mapping.GetLastMessageAtField() && mapping.GetLastMessageAtField() == "last_message_at" {
+		mapping.LastMessageField = "last_message"
 	}
 }
 

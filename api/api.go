@@ -115,6 +115,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			telegram.GET("/messages/:message_id/attachments/:attachment_id", h.V1.ProxyTelegramAttachment)
 		}
 
+		instagram := v1.Group("/instagram")
+		{
+			instagram.GET("/chats", h.V1.ListInstagramChats)
+			instagram.GET("/chats/:chat_id/messages", h.V1.ListInstagramMessages)
+			instagram.POST("/chats/:chat_id/messages", h.V1.SendInstagramMessage)
+			instagram.GET("/messages/:message_id/attachments", h.V1.ListInstagramMessageAttachments)
+			instagram.GET("/messages/:message_id/attachments/:attachment_id", h.V1.ProxyInstagramAttachment)
+		}
+
 		v1.POST("/connections", h.V1.CreateConnectionAndSchema)
 		v1.GET("/connections/:connection_id/tables", h.V1.GetTrackedUntrackedTables)
 		v1.GET("/connections", h.V1.GetTrackedConnections)
@@ -383,6 +392,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 				telegram.DELETE("", h.V1.DisconnectTelegramIntegration)
 				telegram.GET("/inbox-prompt", h.V1.GetTelegramInboxPrompt)
 				telegram.POST("/inbox-ready", h.V1.MarkTelegramInboxReady)
+			}
+
+			instagram := mcpProject.Group("/:mcp_project_id/instagram")
+			{
+				instagram.GET("/mapping-options", h.V1.GetInstagramMappingOptions)
+				instagram.GET("/connect", h.V1.InstagramConnect)
+				instagram.GET("", h.V1.GetInstagramIntegration)
+				instagram.DELETE("", h.V1.DisconnectInstagramIntegration)
+				instagram.GET("/inbox-prompt", h.V1.GetInstagramInboxPrompt)
+				instagram.POST("/inbox-ready", h.V1.MarkInstagramInboxReady)
 			}
 
 			mcpProject.POST("/create-plan", h.V1.McpGeneratePlan)
@@ -695,8 +714,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.GET("/webhook/facebook", h.V1.FacebookWebhookVerify)
 	r.POST("/webhook/facebook", h.V1.FacebookWebhookReceive)
 
+	// Instagram Direct Messaging webhook - public, Meta calls it.
+	r.GET("/webhook/instagram", h.V1.InstagramWebhookVerify)
+	r.POST("/webhook/instagram", h.V1.InstagramWebhookReceive)
+
 	// Public Facebook (Meta) OAuth callback (no auth — Metzxllla calls this)
 	r.GET("/v1/facebook/callback", h.V1.FacebookCallback)
+
+	// Public Instagram OAuth callback (no auth - Instagram calls this).
+	r.GET("/v1/instagram/callback", h.V1.InstagramCallback)
 
 	facebook := r.Group("/v1/facebook")
 	facebook.Use(h.V1.AuthMiddleware(cfg))
