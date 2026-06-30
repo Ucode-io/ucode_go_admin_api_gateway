@@ -24,6 +24,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (h *HandlerV1) authContext(c *gin.Context) (models.FacebookOAuthState, bool) {
@@ -252,6 +254,15 @@ func (h *HandlerV1) writeFacebookLead(ctx context.Context, resource *pb.ProjectR
 		})
 	}
 	if err != nil {
+		// A duplicate guid means this lead was already ingested (Meta retries the
+		// webhook). Dedup is expected, not a failure.
+		if st, ok := status.FromError(err); ok && st.Code() == codes.AlreadyExists {
+			h.log.Info("facebook lead: duplicate, already ingested",
+				logger.String("leadgen_id", value.LeadgenID),
+				logger.String("table_slug", mapping.GetTableSlug()),
+			)
+			return nil
+		}
 		return err
 	}
 

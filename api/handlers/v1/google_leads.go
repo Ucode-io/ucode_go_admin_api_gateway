@@ -22,6 +22,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // googleLeadStandardColumns are the built-in Google lead form column ids offered
@@ -219,6 +221,15 @@ func (h *HandlerV1) writeGoogleLead(ctx context.Context, resource *pb.ProjectRes
 		})
 	}
 	if err != nil {
+		// A duplicate guid means this lead was already ingested (Google retries and
+		// resends test leads). Dedup is expected, not a failure.
+		if st, ok := status.FromError(err); ok && st.Code() == codes.AlreadyExists {
+			h.log.Info("google lead: duplicate, already ingested",
+				logger.String("lead_id", event.LeadID),
+				logger.String("table_slug", credentials.GetTableSlug()),
+			)
+			return nil
+		}
 		return err
 	}
 
