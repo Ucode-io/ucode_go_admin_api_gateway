@@ -49,6 +49,11 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Any("v1/functions/:function-id/run", h.V1.FunctionRun)
 
 	r.Any("/v1/transcoder/webhook", h.V1.TranscoderWebhook)
+	// Telegram webhooks are deliberately public. Each handler validates the
+	// secret Telegram sends in X-Telegram-Bot-Api-Secret-Token before reading
+	// or changing project data.
+	r.POST("/v1/telegram/manager/webhook", h.V1.TelegramManagerWebhook)
+	r.POST("/v1/telegram/webhook/:project_id/:environment_id/:resource_id", h.V1.TelegramProjectWebhook)
 
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
@@ -100,6 +105,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.PUT("/table", h.V1.UpdateTable)
 		v1.PUT("/table/:collection/mcp", h.V1.UpdateTableByMCP)
 		v1.DELETE("/table/:table_id", h.V1.DeleteTable)
+
+		telegram := v1.Group("/telegram")
+		{
+			telegram.GET("/chats", h.V1.ListTelegramChats)
+			telegram.GET("/chats/:chat_id/messages", h.V1.ListTelegramMessages)
+			telegram.POST("/chats/:chat_id/messages", h.V1.SendTelegramMessage)
+			telegram.GET("/messages/:message_id/attachments", h.V1.ListTelegramMessageAttachments)
+			telegram.GET("/messages/:message_id/attachments/:attachment_id", h.V1.ProxyTelegramAttachment)
+		}
 
 		v1.POST("/connections", h.V1.CreateConnectionAndSchema)
 		v1.GET("/connections/:connection_id/tables", h.V1.GetTrackedUntrackedTables)
@@ -198,6 +212,16 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 				fareItem.DELETE("/:id", h.V1.DeleteFareItem)
 			}
 		}
+		tokenPack := v1.Group("/token-pack")
+		{
+			tokenPack.GET("", h.V1.ListTokenPacks)
+			tokenPack.GET("/balance", h.V1.GetTokenPackBalance)
+			tokenPack.POST("/purchase", h.V1.PurchaseTokenPack)
+			tokenPack.POST("", h.V1.CreateTokenPack)
+			tokenPack.PUT("", h.V1.UpdateTokenPack)
+			tokenPack.DELETE("/:id", h.V1.DeleteTokenPack)
+		}
+
 		transaction := v1.Group("/transaction")
 		{
 			transaction.POST("", h.V1.CreateTransaction)
@@ -349,6 +373,18 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		mcpProject := v1Admin.Group("/mcp_project")
 		{
+			telegram := mcpProject.Group("/:mcp_project_id/telegram")
+			{
+				telegram.GET("/mapping-options", h.V1.GetTelegramMappingOptions)
+				telegram.POST("/managed-session", h.V1.CreateTelegramManagedSession)
+				telegram.GET("/managed-session/:session_id", h.V1.GetTelegramManagedSession)
+				telegram.POST("/connect-existing", h.V1.ConnectExistingTelegramBot)
+				telegram.GET("", h.V1.GetTelegramIntegration)
+				telegram.DELETE("", h.V1.DisconnectTelegramIntegration)
+				telegram.GET("/inbox-prompt", h.V1.GetTelegramInboxPrompt)
+				telegram.POST("/inbox-ready", h.V1.MarkTelegramInboxReady)
+			}
+
 			mcpProject.POST("/create-plan", h.V1.McpGeneratePlan)
 			mcpProject.POST("/generate-project/with-plan", h.V1.McpGenerateProjectV2)
 
@@ -653,6 +689,30 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		googleCalendar.GET("/connect", h.V1.GoogleCalendarConnect)
 		googleCalendar.GET("/mapping", h.V1.GetGoogleCalendarMapping)
 		googleCalendar.PUT("/mapping", h.V1.UpdateGoogleCalendarMapping)
+	}
+
+	// Facebook (Meta) Lead Ads webhook — public, Meta calls it
+	r.GET("/webhook/facebook", h.V1.FacebookWebhookVerify)
+	r.POST("/webhook/facebook", h.V1.FacebookWebhookReceive)
+
+	// Public Facebook (Meta) OAuth callback (no auth — Metzxllla calls this)
+	r.GET("/v1/facebook/callback", h.V1.FacebookCallback)
+
+	facebook := r.Group("/v1/facebook")
+	facebook.Use(h.V1.AuthMiddleware(cfg))
+	{
+		facebook.GET("/connect", h.V1.FacebookConnect)
+		facebook.GET("/status", h.V1.FacebookStatus)
+
+		facebook.GET("/pages", h.V1.FacebookPages)
+		facebook.GET("/pages/:page_id/forms", h.V1.FacebookPageForms)
+		facebook.GET("/forms/:form_id/questions", h.V1.FacebookFormQuestions)
+
+		facebook.POST("/subscribe", h.V1.FacebookSubscribe)
+		facebook.PUT("/mapping", h.V1.FacebookSaveMapping)
+
+		facebook.GET("/integration", h.V1.FacebookIntegration)
+		facebook.DELETE("/integration/:id", h.V1.FacebookDisconnect)
 	}
 
 	github := r.Group("/v1/github")

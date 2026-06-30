@@ -135,6 +135,20 @@ const (
 	KeyBillingFareId   = "billing:fare_id:%s"   // projectId → fareId string, TTL=30min
 
 	UgenSuperAdminUserId = "c12c163c-38ee-4b37-8854-1dc9285fc3f8"
+
+	// Meta (Facebook) Lead Ads
+	FacebookOAuthStatePrefix = "facebook-oauth-state:"
+	FacebookOAuthStateTTL    = 10 * time.Minute
+	FacebookIntegrationName  = "Facebook Lead Ads"
+	FacebookOAuthScopes      = "pages_show_list,pages_read_engagement,leads_retrieval,pages_manage_ads"
+	FacebookSubscribedFields = "leadgen"
+	FacebookResourceType     = "META_LEADS"
+	FacebookStatusActive     = "active"
+	FacebookStatusRevoked    = "revoked"
+	FacebookStatusError      = "error"
+	FacebookWebhookFieldLead = "leadgen"
+	FacebookSignatureHeader  = "X-Hub-Signature-256"
+	FacebookSignaturePrefix  = "sha256="
 )
 
 var (

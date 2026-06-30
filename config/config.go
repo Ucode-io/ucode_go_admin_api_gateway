@@ -172,7 +172,21 @@ type BaseConfig struct {
 	GoogleCalendarFrontendSuccessURL string
 	GoogleCalendarFrontendErrorURL   string
 
+	TelegramManagerBotToken      string
+	TelegramManagerBotUsername   string
+	TelegramManagerWebhookSecret string
+	TelegramWebhookBaseURL       string
+
 	YandexMetricToken string
+
+	FacebookAppID           string
+	FacebookAppSecret       string
+	FacebookRedirectURI     string
+	FacebookGraphBaseURL    string
+	FacebookAuthBaseURL     string
+	FacebookGraphAPIVersion string
+
+	FacebookWebhookVerifyToken string
 }
 
 func BaseLoad() BaseConfig {
@@ -277,7 +291,20 @@ func BaseLoad() BaseConfig {
 	config.GoogleCalendarFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/google-drive-success"))
 	config.GoogleCalendarFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GOOGLE_CALENDAR_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/google-drive-error"))
 
+	config.TelegramManagerBotToken = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_BOT_TOKEN", ""))
+	config.TelegramManagerBotUsername = strings.TrimPrefix(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_BOT_USERNAME", "")), "@")
+	config.TelegramManagerWebhookSecret = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_WEBHOOK_SECRET", ""))
+	config.TelegramWebhookBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_WEBHOOK_BASE_URL", config.UcodeBaseUrl)), "/")
+
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
+
+	config.FacebookAppID = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_ID", ""))
+	config.FacebookAppSecret = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_SECRET", ""))
+	config.FacebookRedirectURI = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_REDIRECT_URI", ""))
+	config.FacebookAuthBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_AUTH_BASE_URL", "https://graph.facebook.com")), "/")
+	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
+	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
+	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

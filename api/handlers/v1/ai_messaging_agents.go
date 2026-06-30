@@ -32,6 +32,15 @@ func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description st
 	if p.mcpUcodeProjectId != "" {
 		projectId = p.mcpUcodeProjectId
 	}
+
+	// Report how many of these tokens are pack-funded so company-service debits the
+	// company pool and excludes them from the fare day/month metrics. splitBudget is
+	// read-only and the paired Deduct applies the same split, so the two agree.
+	var packTokens int64
+	if p.tokenBudgetEnabled {
+		_, packTokens = p.splitBudget(int64(usage.InputTokens + usage.OutputTokens))
+	}
+
 	go func() {
 		_, recErr := p.service.CompanyService().Billing().RecordAiTokenUsage(
 			context.Background(),
@@ -43,6 +52,7 @@ func (p *ChatProcessor) RecordUsage(usage models.LLMUsage, model, description st
 				Model:        model,
 				Description:  description,
 				Product:      config.PRODUCT_TYPE_UGEN,
+				PackTokens:   packTokens,
 			},
 		)
 		if recErr != nil {
