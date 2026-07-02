@@ -681,9 +681,7 @@ func ugenTemplateReactionTypeToResponse(reactionType pb.UgenTemplateReactionType
 type CreateProjectFromTemplateReq struct {
 	TemplateId  string `json:"template_id" binding:"required"`
 	ProjectName string `json:"project_name"`
-	// IdempotencyKey, when set, makes the template charge safe to retry: a repeat
-	// request with the same key returns the original charge instead of debiting
-	// the balance again. Left empty, each request is charged independently.
+
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
@@ -729,10 +727,6 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get template: %v", err))
 		return
 	}
-	if tmpl.GetMcpProjectId() == "" {
-		h.HandleResponse(c, status_http.InvalidArgument, "template source mcp_project_id is required")
-		return
-	}
 
 	projectName := req.ProjectName
 	if projectName == "" {
@@ -760,54 +754,44 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
+	// The new project's MCP project and chat live in the head project's builder
+	// resource env, exactly like manually created u-gen projects.
 	mainResourceEnvID := headResource.GetResourceEnvironmentId()
 	mainService, err := h.GetProjectSrvc(ctx, projectId.(string), headResource.GetNodeType())
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get main project service: %v", err))
+		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get head project service: %v", err))
 		return
 	}
 
-	sourceDataResourceEnvID := tmpl.GetSourceResourceEnvId()
-	if sourceDataResourceEnvID == "" {
-		sourceDataResourceEnvID = mainResourceEnvID
-	}
-	sourceMcpResourceEnvID := tmpl.GetSourceMcpResourceEnvId()
-	if sourceMcpResourceEnvID == "" {
-		sourceMcpResourceEnvID = sourceDataResourceEnvID
-	}
-	sourceProjectID := tmpl.GetSourceProjectId()
-	if sourceProjectID == "" {
-		sourceProjectID = projectId.(string)
-	}
-	sourceNodeType := tmpl.GetSourceNodeType()
-	if sourceNodeType == "" {
-		sourceNodeType = headResource.GetNodeType()
-	}
-
-	sourceService, err := h.GetProjectSrvc(ctx, sourceProjectID, sourceNodeType)
+	// Source project the template was captured from. Everything below reads
+	// straight from the template's stored source fields — no fallbacks.
+	sourceService, err := h.GetProjectSrvc(ctx, tmpl.GetSourceProjectId(), tmpl.GetSourceNodeType())
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get source project service: %v", err))
 		return
 	}
 
+	// MCP project metadata (title / env / visibility / type) is read from the data
+	// resource env (source_resource_env_id); its project_files are ignored here.
 	sourceMcp, err := sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx,
 		&pbo.McpProjectId{
-			ResourceEnvId: sourceMcpResourceEnvID,
+			ResourceEnvId: tmpl.GetSourceResourceEnvId(),
 			Id:            tmpl.GetMcpProjectId(),
+			WithoutFiles:  true,
 		},
 	)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get source mcp project: %v", err))
 		return
 	}
-	sourceMcpFiles := cloneMcpProjectFiles(sourceMcp.GetProjectFiles())
-	if len(sourceMcpFiles) == 0 {
-		sourceMcpFiles, err = h.getTemplateMicrofrontendFiles(ctx, sourceService, tmpl, sourceDataResourceEnvID, c.GetHeader("Authorization"))
-		if err != nil {
-			h.HandleResponse(c, status_http.InvalidArgument, err.Error())
-			return
-		}
+
+	// Microfrontend files come straight from the microfrontend repo, resolved via
+	// the MCP resource env (source_mcp_resource_env_id) — not from project_files.
+	sourceMcpFiles, err := h.getTemplateMicrofrontendFiles(ctx, sourceService, tmpl, tmpl.GetSourceMcpResourceEnvId(), c.GetHeader("Authorization"))
+	if err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
 	}
 	if len(sourceMcpFiles) == 0 {
 		h.HandleResponse(c, status_http.InvalidArgument, "template source has no microfrontend files")
@@ -823,6 +807,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		chargeTxID    string
 		chargedAmount float64
 	)
+
 	if tmpl.GetPrice() > 0 {
 		idempotencyKey := req.IdempotencyKey
 		if idempotencyKey == "" {
@@ -954,7 +939,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			ResourceType:   int32(targetResource.GetResourceType()),
 		}
 
-		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, sourceDataResourceEnvID, targetProjectData.ResourceEnvId); err != nil {
+		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId); err != nil {
 			return nil, fmt.Errorf("copy template data: %v", err)
 		}
 
@@ -989,8 +974,8 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			"microfrontend_branch":       published.Data.Branch,
 			"template_preview_url":       tmpl.GetPreviewUrl(),
 			"source_mcp_project_id":      tmpl.GetMcpProjectId(),
-			"source_resource_env_id":     sourceDataResourceEnvID,
-			"source_mcp_resource_env_id": sourceMcpResourceEnvID,
+			"source_resource_env_id":     tmpl.GetSourceResourceEnvId(),
+			"source_mcp_resource_env_id": tmpl.GetSourceMcpResourceEnvId(),
 			"source_repo_id":             tmpl.GetSourceRepoId(),
 			"source_function_id":         tmpl.GetSourceFunctionId(),
 		}, nil
@@ -1042,18 +1027,6 @@ func (h *HandlerV1) respondBillingError(c *gin.Context, err error) {
 	}
 }
 
-func cloneMcpProjectFiles(files []*pbo.McpProjectFiles) []*pbo.McpProjectFiles {
-	copied := make([]*pbo.McpProjectFiles, 0, len(files))
-	for _, file := range files {
-		copied = append(copied, &pbo.McpProjectFiles{
-			Path:      file.GetPath(),
-			Content:   file.GetContent(),
-			FileGraph: file.GetFileGraph(),
-		})
-	}
-	return copied
-}
-
 type templateMicrofrontendFilesResponse struct {
 	Data struct {
 		Files []struct {
@@ -1064,12 +1037,12 @@ type templateMicrofrontendFilesResponse struct {
 	} `json:"data"`
 }
 
-func (h *HandlerV1) getTemplateMicrofrontendFiles(ctx context.Context, sourceService servicepkg.ServiceManagerI, tmpl *pb.UgenTemplate, sourceDataResourceEnvID, authToken string) ([]*pbo.McpProjectFiles, error) {
+func (h *HandlerV1) getTemplateMicrofrontendFiles(ctx context.Context, sourceService servicepkg.ServiceManagerI, tmpl *pb.UgenTemplate, sourceMcpResourceEnvID, authToken string) ([]*pbo.McpProjectFiles, error) {
 	repoID := tmpl.GetSourceRepoId()
 	if repoID == "" && tmpl.GetSourceFunctionId() != "" {
 		function, err := sourceService.GoObjectBuilderService().Function().GetSingle(ctx, &pbo.FunctionPrimaryKey{
 			Id:        tmpl.GetSourceFunctionId(),
-			ProjectId: sourceDataResourceEnvID,
+			ProjectId: sourceMcpResourceEnvID,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("get template source function: %w", err)
