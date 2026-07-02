@@ -187,6 +187,21 @@ type BaseConfig struct {
 	FacebookGraphAPIVersion string
 
 	FacebookWebhookVerifyToken string
+
+	// GoogleLeadsWebhookURL is the public URL Google posts leads to; returned to
+	// the user so they can paste it into the Google Ads lead form settings.
+	GoogleLeadsWebhookURL string
+
+	InstagramClientID            string
+	InstagramClientSecret        string
+	InstagramRedirectURI         string
+	InstagramFrontendSuccessURL  string
+	InstagramFrontendErrorURL    string
+	InstagramGraphBaseURL        string
+	InstagramGraphVersion        string
+	InstagramWebhookVerifyToken  string
+	InstagramOAuthAuthorizeURL   string
+	InstagramOAuthAccessTokenURL string
 }
 
 func BaseLoad() BaseConfig {
@@ -305,6 +320,19 @@ func BaseLoad() BaseConfig {
 	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
 	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
 	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
+
+	config.GoogleLeadsWebhookURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("GOOGLE_LEADS_WEBHOOK_URL", "")), "/")
+
+	config.InstagramClientID = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_CLIENT_ID", ""))
+	config.InstagramClientSecret = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_CLIENT_SECRET", ""))
+	config.InstagramRedirectURI = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_REDIRECT_URI", ""))
+	config.InstagramFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/instagram-success"))
+	config.InstagramFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/instagram-error"))
+	config.InstagramGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_GRAPH_BASE_URL", "https://graph.instagram.com")), "/")
+	config.InstagramGraphVersion = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_GRAPH_VERSION", "v25.0"))
+	config.InstagramWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_WEBHOOK_VERIFY_TOKEN", ""))
+	config.InstagramOAuthAuthorizeURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_OAUTH_AUTHORIZE_URL", "https://www.instagram.com/oauth/authorize")), "/")
+	config.InstagramOAuthAccessTokenURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_OAUTH_ACCESS_TOKEN_URL", "https://api.instagram.com/oauth/access_token")), "/")
 
 	config.MaxTokens = cast.ToInt(GetOrReturnDefaultValue("MAX_TOKENS", 12000))
 	config.AnalyseProjectMaxTokens = cast.ToInt(GetOrReturnDefaultValue("ANALYSE_PROJECT_MAX_TOKENS", 5000))

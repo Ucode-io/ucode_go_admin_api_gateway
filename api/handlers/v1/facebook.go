@@ -7,6 +7,7 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -16,12 +17,15 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	obs "ucode/ucode_go_api_gateway/genproto/object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/helper"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (h *HandlerV1) authContext(c *gin.Context) (models.FacebookOAuthState, bool) {
@@ -168,15 +172,13 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 		}
 
 		if lead == nil {
-			// TEST: skip Graph fetch — test webhooks send fake leadgen ids that 404.
-			// fetched, err := h.facebookFetchLead(ctx, value.LeadgenID, credentials.GetPageAccessToken())
-			// if err != nil {
-			// 	h.log.Error("facebook lead: fetch failed", logger.Error(err),
-			// 		logger.String("leadgen_id", value.LeadgenID))
-			// 	return
-			// }
-			// lead = &fetched
-			lead = &models.FacebookLead{}
+			fetched, err := h.facebookFetchLead(ctx, value.LeadgenID, credentials.GetPageAccessToken())
+			if err != nil {
+				h.log.Error("facebook lead: fetch failed", logger.Error(err),
+					logger.String("leadgen_id", value.LeadgenID))
+				return
+			}
+			lead = &fetched
 		}
 
 		if err := h.writeFacebookLead(ctx, resource, mapping, *lead, value); err != nil {
@@ -189,26 +191,20 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 }
 
 func (h *HandlerV1) writeFacebookLead(ctx context.Context, resource *pb.ProjectResource, mapping *pb.FacebookLeadFormMapping, lead models.FacebookLead, value models.FacebookLeadChangeValue) error {
-	//var (
-	//	values = facebookLeadValues(lead.FieldData)
-	//	data   = map[string]any{}
-	//)
-	//
-	//for _, field := range mapping.GetFields() {
-	//	raw, present := values[strings.ToLower(field.GetLeadField())]
-	//	if !present || raw == "" {
-	//		if field.GetRequired() {
-	//			return fmt.Errorf("required lead field %q is missing", field.GetLeadField())
-	//		}
-	//		continue
-	//	}
-	//	data[field.GetTableField()] = raw
-	//}
-	//
-	// TEST: fill every mapped field with a placeholder instead of real lead data.
-	data := map[string]any{}
+	var (
+		values = facebookLeadValues(lead.FieldData)
+		data   = map[string]any{}
+	)
+
 	for _, field := range mapping.GetFields() {
-		data[field.GetTableField()] = "hello world"
+		raw, present := values[strings.ToLower(field.GetLeadField())]
+		if !present || raw == "" {
+			if field.GetRequired() {
+				return fmt.Errorf("required lead field %q is missing", field.GetLeadField())
+			}
+			continue
+		}
+		data[field.GetTableField()] = raw
 	}
 
 	if len(data) == 0 {
@@ -240,12 +236,42 @@ func (h *HandlerV1) writeFacebookLead(ctx context.Context, resource *pb.ProjectR
 		return err
 	}
 
-	_, err = services.GetBuilderServiceByType(resourceModel.NodeType).ObjectBuilder().Create(ctx, &obs.CommonMessage{
-		TableSlug: mapping.GetTableSlug(),
-		Data:      structData,
-		ProjectId: resourceModel.ResourceEnvironmentId,
-	})
-	return err
+	// Postgres and Mongo projects are served by different builder services, so the
+	// write must be routed by the project's resource type (Mongo uses the legacy
+	// ObjectBuilder, Postgres the new Go object builder).
+	switch resourceModel.GetResourceType() {
+	case pb.ResourceType_POSTGRESQL:
+		_, err = services.GoObjectBuilderService().Items().Create(ctx, &nb.CommonMessage{
+			TableSlug: mapping.GetTableSlug(),
+			Data:      structData,
+			ProjectId: resourceModel.GetResourceEnvironmentId(),
+		})
+	default:
+		_, err = services.GetBuilderServiceByType(resourceModel.GetNodeType()).ObjectBuilder().Create(ctx, &obs.CommonMessage{
+			TableSlug: mapping.GetTableSlug(),
+			Data:      structData,
+			ProjectId: resourceModel.GetResourceEnvironmentId(),
+		})
+	}
+	if err != nil {
+		// A duplicate guid means this lead was already ingested (Meta retries the
+		// webhook). Dedup is expected, not a failure.
+		if st, ok := status.FromError(err); ok && st.Code() == codes.AlreadyExists {
+			h.log.Info("facebook lead: duplicate, already ingested",
+				logger.String("leadgen_id", value.LeadgenID),
+				logger.String("table_slug", mapping.GetTableSlug()),
+			)
+			return nil
+		}
+		return err
+	}
+
+	h.log.Info("facebook lead: written",
+		logger.String("project_id", resource.GetProjectId()),
+		logger.String("table_slug", mapping.GetTableSlug()),
+		logger.String("leadgen_id", value.LeadgenID),
+	)
+	return nil
 }
 
 func facebookLeadValues(fieldData []models.FacebookFieldData) map[string]string {

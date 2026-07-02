@@ -25,6 +25,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -52,6 +54,8 @@ type ugenTemplateResponse struct {
 	LikeCount              int32    `json:"like_count"`
 	DislikeCount           int32    `json:"dislike_count"`
 	CurrentUserReaction    string   `json:"current_user_reaction"`
+	Price                  float64  `json:"price"`
+	CurrencyId             string   `json:"currency_id"`
 }
 
 type ugenTemplateListResponse struct {
@@ -373,6 +377,47 @@ func (h *HandlerV1) UpdateUgenTemplate(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, newUgenTemplateResponse(resp))
 }
 
+type setUgenTemplatePriceRequest struct {
+	Price      float64 `json:"price"`
+	CurrencyId string  `json:"currency_id"`
+}
+
+// SetUgenTemplatePrice is the admin-only price control. Templates are created for
+// free and users cannot set a price via create/update — only this endpoint
+// (called from the admin panel) assigns or updates a template's price and
+// currency. Price 0 makes the template free again.
+func (h *HandlerV1) SetUgenTemplatePrice(c *gin.Context) {
+	id := c.Param("id")
+	if !util.IsValidUUID(id) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid id")
+		return
+	}
+
+	var req setUgenTemplatePriceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	if req.Price < 0 {
+		h.HandleResponse(c, status_http.BadRequest, "price cannot be negative")
+		return
+	}
+
+	resp, err := h.companyServices.UgenTemplate().SetPrice(
+		c.Request.Context(),
+		&pb.SetUgenTemplatePriceReq{
+			Id:         id,
+			Price:      req.Price,
+			CurrencyId: req.CurrencyId,
+		},
+	)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	h.HandleResponse(c, status_http.OK, newUgenTemplateResponse(resp))
+}
+
 func (h *HandlerV1) DeleteUgenTemplate(c *gin.Context) {
 	id := c.Param("id")
 	if !util.IsValidUUID(id) {
@@ -536,6 +581,8 @@ func newUgenTemplateResponse(t *pb.UgenTemplate) *ugenTemplateResponse {
 		LikeCount:              t.GetLikeCount(),
 		DislikeCount:           t.GetDislikeCount(),
 		CurrentUserReaction:    ugenTemplateReactionTypeToResponse(t.GetCurrentUserReaction()),
+		Price:                  t.GetPrice(),
+		CurrencyId:             t.GetCurrencyId(),
 	}
 }
 
@@ -634,6 +681,10 @@ func ugenTemplateReactionTypeToResponse(reactionType pb.UgenTemplateReactionType
 type CreateProjectFromTemplateReq struct {
 	TemplateId  string `json:"template_id" binding:"required"`
 	ProjectName string `json:"project_name"`
+	// IdempotencyKey, when set, makes the template charge safe to retry: a repeat
+	// request with the same key returns the original charge instead of debiting
+	// the balance again. Left empty, each request is charged independently.
+	IdempotencyKey string `json:"idempotency_key"`
 }
 
 // CreateProjectFromTemplate provisions a new isolated ucode project from a
@@ -763,157 +814,232 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
-	targetProject, err := h.companyServices.Project().Create(
-		ctx, &pb.CreateProjectRequest{
-			Title:        sanitizeProjectNameForBackend(projectName),
-			CompanyId:    headProject.GetCompanyId(),
-			K8SNamespace: headProject.GetK8SNamespace(),
-		},
+	// Charge the head project's balance for a paid template before provisioning
+	// anything. Free templates (price 0) skip billing entirely. The charge is
+	// atomic and overdraft-checked in the billing service; on any later
+	// provisioning failure we issue a compensating refund below so the user never
+	// pays for a project that was not fully created.
+	var (
+		chargeTxID    string
+		chargedAmount float64
 	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("create target project: %v", err))
-		return
+	if tmpl.GetPrice() > 0 {
+		idempotencyKey := req.IdempotencyKey
+		if idempotencyKey == "" {
+			idempotencyKey = uuid.NewString()
+		}
+		creatorID := authInfo.GetUserIdAuth()
+		if creatorID == "" {
+			creatorID = authInfo.GetUserId()
+		}
+		charge, chargeErr := h.companyServices.Billing().ChargeProjectBalance(ctx, &pb.ChargeProjectBalanceRequest{
+			ProjectId:       projectId.(string),
+			Amount:          tmpl.GetPrice(),
+			CurrencyId:      tmpl.GetCurrencyId(),
+			CreatorId:       creatorID,
+			Comment:         "ugen template: " + tmpl.GetName(),
+			TransactionType: "template_purchase",
+			ExternalId:      idempotencyKey,
+		})
+		if chargeErr != nil {
+			h.respondBillingError(c, chargeErr)
+			return
+		}
+		chargeTxID = charge.GetTransactionId()
+		chargedAmount = charge.GetChargedAmount()
 	}
 
-	targetEnv, err := h.companyServices.Environment().CreateV2(
-		ctx, &pb.CreateEnvironmentRequest{
-			CompanyId:    headProject.GetCompanyId(),
-			ProjectId:    targetProject.GetProjectId(),
-			UserId:       authInfo.GetUserIdAuth(),
-			ClientTypeId: authInfo.GetClientTypeId(),
-			RoleId:       authInfo.GetRoleId(),
-			Name:         "Production",
-			DisplayColor: "#00FF00",
-			Description:  "Production Environment",
-		},
-	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("create target env: %v", err))
-		return
-	}
+	// provision performs every mutating step of the template clone. It is a
+	// closure so it captures the already-resolved source/target context without a
+	// wide parameter list; any error it returns triggers the compensating refund.
+	provision := func() (gin.H, error) {
+		targetProject, err := h.companyServices.Project().Create(
+			ctx, &pb.CreateProjectRequest{
+				Title:        sanitizeProjectNameForBackend(projectName),
+				CompanyId:    headProject.GetCompanyId(),
+				K8SNamespace: headProject.GetK8SNamespace(),
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create target project: %v", err)
+		}
 
-	targetResource, err := h.companyServices.ServiceResource().GetSingle(
-		ctx,
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     targetProject.GetProjectId(),
-			EnvironmentId: targetEnv.GetId(),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get target resource: %v", err))
-		return
-	}
+		targetEnv, err := h.companyServices.Environment().CreateV2(
+			ctx, &pb.CreateEnvironmentRequest{
+				CompanyId:    headProject.GetCompanyId(),
+				ProjectId:    targetProject.GetProjectId(),
+				UserId:       authInfo.GetUserIdAuth(),
+				ClientTypeId: authInfo.GetClientTypeId(),
+				RoleId:       authInfo.GetRoleId(),
+				Name:         "Production",
+				DisplayColor: "#00FF00",
+				Description:  "Production Environment",
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create target env: %v", err)
+		}
 
-	targetService, err := h.GetProjectSrvc(ctx, targetProject.GetProjectId(), targetResource.GetNodeType())
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get target project service: %v", err))
-		return
-	}
+		targetResource, err := h.companyServices.ServiceResource().GetSingle(
+			ctx,
+			&pb.GetSingleServiceResourceReq{
+				ProjectId:     targetProject.GetProjectId(),
+				EnvironmentId: targetEnv.GetId(),
+				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("get target resource: %v", err)
+		}
 
-	apiKeys, err := h.authService.ApiKey().GetList(
-		ctx, &as.GetListReq{
-			EnvironmentId: targetEnv.GetId(),
-			ProjectId:     targetProject.GetProjectId(),
-			Limit:         1,
-		},
-	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get api keys: %v", err))
-		return
-	}
-	var apiKey string
-	if len(apiKeys.GetData()) > 0 {
-		apiKey = apiKeys.GetData()[0].GetAppId()
-	}
+		targetService, err := h.GetProjectSrvc(ctx, targetProject.GetProjectId(), targetResource.GetNodeType())
+		if err != nil {
+			return nil, fmt.Errorf("get target project service: %v", err)
+		}
 
-	newMcpProject, err := mainService.GoObjectBuilderService().McpProject().CreateMcpProject(
-		ctx, &pbo.CreateMcpProjectReqeust{
-			ResourceEnvId:  mainResourceEnvID,
-			Title:          projectName,
-			Description:    "Created from template: " + tmpl.GetName(),
-			ProjectFiles:   sourceMcpFiles,
-			ProjectEnv:     sourceMcp.GetProjectEnv(),
+		apiKeys, err := h.authService.ApiKey().GetList(
+			ctx, &as.GetListReq{
+				EnvironmentId: targetEnv.GetId(),
+				ProjectId:     targetProject.GetProjectId(),
+				Limit:         1,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("get api keys: %v", err)
+		}
+		var apiKey string
+		if len(apiKeys.GetData()) > 0 {
+			apiKey = apiKeys.GetData()[0].GetAppId()
+		}
+
+		newMcpProject, err := mainService.GoObjectBuilderService().McpProject().CreateMcpProject(
+			ctx, &pbo.CreateMcpProjectReqeust{
+				ResourceEnvId:  mainResourceEnvID,
+				Title:          projectName,
+				Description:    "Created from template: " + tmpl.GetName(),
+				ProjectFiles:   sourceMcpFiles,
+				ProjectEnv:     sourceMcp.GetProjectEnv(),
+				UcodeProjectId: targetProject.GetProjectId(),
+				ApiKey:         apiKey,
+				EnvironmentId:  targetEnv.GetId(),
+				Status:         "ready",
+				AppVisibility:  sourceMcp.GetAppVisibility(),
+				ProjectType:    sourceMcp.GetProjectType(),
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create mcp project: %v", err)
+		}
+
+		chat, err := mainService.GoObjectBuilderService().AiChat().CreateChat(
+			ctx,
+			&pbo.CreateChatRequest{
+				ResourceEnvId: mainResourceEnvID,
+				ProjectId:     newMcpProject.GetId(),
+				Title:         projectName,
+				Description:   "Created from template: " + tmpl.GetName(),
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("create template project chat: %v", err)
+		}
+
+		targetProjectData := &models.ProjectData{
+			McpProjectId:   newMcpProject.GetId(),
 			UcodeProjectId: targetProject.GetProjectId(),
 			ApiKey:         apiKey,
 			EnvironmentId:  targetEnv.GetId(),
-			Status:         "ready",
-			AppVisibility:  sourceMcp.GetAppVisibility(),
-			ProjectType:    sourceMcp.GetProjectType(),
-		},
-	)
+			ResourceEnvId:  targetResource.GetResourceEnvironmentId(),
+			NodeType:       targetResource.GetNodeType(),
+			ResourceType:   int32(targetResource.GetResourceType()),
+		}
+
+		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, sourceDataResourceEnvID, targetProjectData.ResourceEnvId); err != nil {
+			return nil, fmt.Errorf("copy template data: %v", err)
+		}
+
+		published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, mainResourceEnvID, c.GetHeader("Authorization"))
+		if err != nil {
+			return nil, fmt.Errorf("publish template microfrontend: %v", err)
+		}
+
+		if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+			ResourceEnvId:       mainResourceEnvID,
+			Id:                  newMcpProject.GetId(),
+			MicrofrontendId:     published.Data.ID,
+			MicrofrontendRepoId: published.Data.RepoId,
+			MicrofrontendBranch: published.Data.Branch,
+			MicrofrontendUrl:    published.Data.Url,
+		}); err != nil {
+			return nil, fmt.Errorf("save template microfrontend refs: %v", err)
+		}
+
+		return gin.H{
+			"project_id":                 targetProject.GetProjectId(),
+			"ucode_project_id":           targetProject.GetProjectId(),
+			"environment_id":             targetEnv.GetId(),
+			"mcp_project_id":             newMcpProject.GetId(),
+			"chat_id":                    chat.GetId(),
+			"api_key":                    apiKey,
+			"resource_env_id":            targetProjectData.ResourceEnvId,
+			"main_resource_env_id":       mainResourceEnvID,
+			"microfrontend_id":           published.Data.ID,
+			"microfrontend_repo_id":      published.Data.RepoId,
+			"microfrontend_url":          published.Data.Url,
+			"microfrontend_branch":       published.Data.Branch,
+			"template_preview_url":       tmpl.GetPreviewUrl(),
+			"source_mcp_project_id":      tmpl.GetMcpProjectId(),
+			"source_resource_env_id":     sourceDataResourceEnvID,
+			"source_mcp_resource_env_id": sourceMcpResourceEnvID,
+			"source_repo_id":             tmpl.GetSourceRepoId(),
+			"source_function_id":         tmpl.GetSourceFunctionId(),
+		}, nil
+	}
+
+	result, err := provision()
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("create mcp project: %v", err))
+		// Compensating refund: the charge succeeded but provisioning did not, so
+		// give the money back. Best-effort — a failed refund is logged loudly for
+		// manual reconciliation rather than masking the original error.
+		if chargeTxID != "" {
+			if _, refundErr := h.companyServices.Billing().RefundProjectBalance(ctx, &pb.RefundProjectBalanceRequest{
+				ProjectId:     projectId.(string),
+				TransactionId: chargeTxID,
+				Comment:       "refund: template provisioning failed",
+			}); refundErr != nil {
+				log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", projectId.(string), chargeTxID, refundErr)
+			}
+		}
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
-	chat, err := mainService.GoObjectBuilderService().AiChat().CreateChat(
-		ctx,
-		&pbo.CreateChatRequest{
-			ResourceEnvId: mainResourceEnvID,
-			ProjectId:     newMcpProject.GetId(),
-			Title:         projectName,
-			Description:   "Created from template: " + tmpl.GetName(),
-		},
-	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("create template project chat: %v", err))
+	if chargeTxID != "" {
+		result["charged_amount"] = chargedAmount
+		result["charge_transaction_id"] = chargeTxID
+	}
+	h.HandleResponse(c, status_http.OK, result)
+}
+
+// respondBillingError maps the billing service's gRPC status codes to the HTTP
+// codes the UI expects: insufficient funds -> 402, missing project/template ->
+// 404, bad input -> 400, everything else -> generic gRPC error.
+func (h *HandlerV1) respondBillingError(c *gin.Context, err error) {
+	st, ok := status.FromError(err)
+	if !ok {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-
-	targetProjectData := &models.ProjectData{
-		McpProjectId:   newMcpProject.GetId(),
-		UcodeProjectId: targetProject.GetProjectId(),
-		ApiKey:         apiKey,
-		EnvironmentId:  targetEnv.GetId(),
-		ResourceEnvId:  targetResource.GetResourceEnvironmentId(),
-		NodeType:       targetResource.GetNodeType(),
-		ResourceType:   int32(targetResource.GetResourceType()),
+	switch st.Code() {
+	case codes.NotFound:
+		h.HandleResponse(c, status_http.NotFound, st.Message())
+	case codes.FailedPrecondition:
+		h.HandleResponse(c, status_http.PaymentRequired, st.Message())
+	case codes.InvalidArgument:
+		h.HandleResponse(c, status_http.InvalidArgument, st.Message())
+	default:
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
 	}
-
-	if err = h.copyUgenTemplateData(ctx, sourceService, targetService, sourceDataResourceEnvID, targetProjectData.ResourceEnvId); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("copy template data: %v", err))
-		return
-	}
-
-	published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, mainResourceEnvID, c.GetHeader("Authorization"))
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("publish template microfrontend: %v", err))
-		return
-	}
-
-	if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
-		ResourceEnvId:       mainResourceEnvID,
-		Id:                  newMcpProject.GetId(),
-		MicrofrontendId:     published.Data.ID,
-		MicrofrontendRepoId: published.Data.RepoId,
-		MicrofrontendBranch: published.Data.Branch,
-		MicrofrontendUrl:    published.Data.Url,
-	}); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("save template microfrontend refs: %v", err))
-		return
-	}
-
-	h.HandleResponse(c, status_http.OK, gin.H{
-		"project_id":                 targetProject.GetProjectId(),
-		"ucode_project_id":           targetProject.GetProjectId(),
-		"environment_id":             targetEnv.GetId(),
-		"mcp_project_id":             newMcpProject.GetId(),
-		"chat_id":                    chat.GetId(),
-		"api_key":                    apiKey,
-		"resource_env_id":            targetProjectData.ResourceEnvId,
-		"main_resource_env_id":       mainResourceEnvID,
-		"microfrontend_id":           published.Data.ID,
-		"microfrontend_repo_id":      published.Data.RepoId,
-		"microfrontend_url":          published.Data.Url,
-		"microfrontend_branch":       published.Data.Branch,
-		"template_preview_url":       tmpl.GetPreviewUrl(),
-		"source_mcp_project_id":      tmpl.GetMcpProjectId(),
-		"source_resource_env_id":     sourceDataResourceEnvID,
-		"source_mcp_resource_env_id": sourceMcpResourceEnvID,
-		"source_repo_id":             tmpl.GetSourceRepoId(),
-		"source_function_id":         tmpl.GetSourceFunctionId(),
-	})
 }
 
 func cloneMcpProjectFiles(files []*pbo.McpProjectFiles) []*pbo.McpProjectFiles {

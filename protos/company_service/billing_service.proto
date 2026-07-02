@@ -70,6 +70,45 @@ service BillingService {
   rpc DeleteTokenPack(PrimaryKey) returns (google.protobuf.Empty);
   rpc PurchaseTokenPack(PurchaseTokenPackRequest) returns (PurchaseTokenPackResponse);
   rpc GetTokenPackBalance(GetTokenPackBalanceRequest) returns (GetTokenPackBalanceResponse);
+
+  // Generic project balance charge/refund (funds paid actions such as using a
+  // paid Ugen template). Charge is atomic and overdraft-checked against
+  // balance + credit_limit; refund is its compensating reverse.
+  rpc ChargeProjectBalance(ChargeProjectBalanceRequest) returns (ChargeProjectBalanceResponse);
+  rpc RefundProjectBalance(RefundProjectBalanceRequest) returns (RefundProjectBalanceResponse);
+}
+
+// ChargeProjectBalanceRequest debits amount (in currency_id) from project_id's
+// balance. external_id makes the charge idempotent: a retry with the same key
+// returns the original transaction instead of double-charging.
+message ChargeProjectBalanceRequest {
+  string project_id = 1;
+  double amount = 2;
+  string currency_id = 3;
+  string creator_id = 4;
+  string comment = 5;
+  string transaction_type = 6;
+  string external_id = 7;
+}
+
+message ChargeProjectBalanceResponse {
+  string transaction_id = 1;
+  double charged_amount = 2;  // amount actually debited, in UZS
+  double project_balance = 3; // remaining balance after the charge, in UZS
+}
+
+// RefundProjectBalanceRequest credits back a previously charged amount,
+// referencing the original charge transaction. Idempotent per transaction_id.
+message RefundProjectBalanceRequest {
+  string project_id = 1;
+  string transaction_id = 2;
+  string comment = 3;
+}
+
+message RefundProjectBalanceResponse {
+  string transaction_id = 1;
+  double refunded_amount = 2;
+  double project_balance = 3;
 }
 
 message GetPricingLimitsRequest {
