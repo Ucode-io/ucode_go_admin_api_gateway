@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -154,19 +155,32 @@ type instagramWebhookEntry struct {
 	ID        string                    `json:"id"`
 	Time      int64                     `json:"time"`
 	Messaging []instagramMessagingEvent `json:"messaging"`
+	Changes   []json.RawMessage         `json:"changes"`
 }
 
 type instagramMessagingEvent struct {
-	Sender    instagramWebhookUser `json:"sender"`
-	Recipient instagramWebhookUser `json:"recipient"`
-	Timestamp int64                `json:"timestamp"`
-	Message   *instagramMessage    `json:"message"`
-	Postback  *instagramPostback   `json:"postback"`
-	Reaction  *instagramReaction   `json:"reaction"`
-	Read      *instagramRead       `json:"read"`
-	Optin     json.RawMessage      `json:"optin"`
-	Referral  json.RawMessage      `json:"referral"`
-	Raw       map[string]any       `json:"-"`
+	Sender      instagramWebhookUser `json:"sender"`
+	Recipient   instagramWebhookUser `json:"recipient"`
+	Timestamp   int64                `json:"timestamp"`
+	Message     *instagramMessage    `json:"message"`
+	MessageEdit json.RawMessage      `json:"message_edit"`
+	Postback    *instagramPostback   `json:"postback"`
+	Reaction    *instagramReaction   `json:"reaction"`
+	Read        *instagramRead       `json:"read"`
+	Optin       json.RawMessage      `json:"optin"`
+	Referral    json.RawMessage      `json:"referral"`
+	Raw         map[string]any       `json:"-"`
+}
+
+func (e *instagramMessagingEvent) UnmarshalJSON(data []byte) error {
+	type alias instagramMessagingEvent
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*e = instagramMessagingEvent(decoded)
+	_ = json.Unmarshal(data, &e.Raw)
+	return nil
 }
 
 type instagramWebhookUser struct {
@@ -490,6 +504,10 @@ func (h *HandlerV1) InstagramWebhookReceive(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 		return
 	}
+	h.log.Info("instagram webhook: accepted",
+		logger.String("object", event.Object),
+		logger.Int("entries", len(event.Entry)),
+	)
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 	go h.processInstagramWebhookEvent(event)
 }
@@ -1113,19 +1131,18 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 	}()
 	ctx := context.Background()
 	for _, entry := range event.Entry {
-		if strings.TrimSpace(entry.ID) == "" {
-			continue
-		}
-		resources, err := h.companyServices.Resource().GetProjectResourcesByExternalId(ctx, &pb.GetByExternalIdRequest{
-			ExternalId: entry.ID,
-			Type:       pb.ResourceType_INSTAGRAM,
-		})
+		h.log.Info("instagram webhook: processing entry",
+			logger.String("entry_id", entry.ID),
+			logger.Int("messaging_count", len(entry.Messaging)),
+			logger.Int("changes_count", len(entry.Changes)),
+		)
+		resources, resolvedIgID, err := h.instagramResourcesForWebhookEntry(ctx, entry)
 		if err != nil {
-			h.log.Error("instagram webhook: resolve resource failed", logger.Error(err), logger.String("ig_id", entry.ID))
+			h.log.Error("instagram webhook: resolve resource failed", logger.Error(err), logger.String("ig_id", resolvedIgID))
 			continue
 		}
 		if len(resources.GetResources()) == 0 {
-			h.log.Warn("instagram webhook: no project mapped for account", logger.String("ig_id", entry.ID))
+			h.log.Warn("instagram webhook: no project mapped for account", logger.String("ig_id", resolvedIgID))
 			continue
 		}
 		for _, resource := range resources.GetResources() {
@@ -1134,21 +1151,124 @@ func (h *HandlerV1) processInstagramWebhookEvent(event instagramWebhookEvent) {
 				h.log.Error("instagram webhook: resolve target failed", logger.Error(err), logger.String("project_id", resource.GetProjectId()))
 				continue
 			}
+			if resource.GetSettings() == nil || resource.GetSettings().GetInstagram() == nil || resource.GetSettings().GetInstagram().GetMapping() == nil {
+				h.log.Error("instagram webhook: resource mapping missing",
+					logger.String("resource_id", resource.GetId()),
+					logger.String("project_id", resource.GetProjectId()),
+				)
+				continue
+			}
 			mapping := resource.GetSettings().GetInstagram().GetMapping()
 			for _, messageEvent := range entry.Messaging {
+				if len(messageEvent.MessageEdit) > 0 {
+					raw, _ := json.Marshal(messageEvent)
+					updated, updateErr := h.persistInstagramMessageEdit(ctx, target, messageEvent, string(raw))
+					if updateErr != nil {
+						h.log.Error("instagram webhook: persist message edit failed",
+							logger.Error(updateErr),
+							logger.String("project_id", resource.GetProjectId()),
+						)
+						continue
+					}
+					if !updated {
+						if instagramSenderID(messageEvent) == "" {
+							h.log.Info("instagram webhook: message edit skipped, original message not found",
+								logger.String("ig_id", resolvedIgID),
+								logger.String("message_id", instagramMessageEditID(messageEvent)),
+								logger.String("project_id", resource.GetProjectId()),
+								logger.Any("message_edit_keys", instagramRawKeys(instagramMessageEditMap(messageEvent))),
+							)
+							continue
+						}
+						if err = h.persistInstagramIncomingEvent(ctx, target, mapping, messageEvent, string(raw)); err != nil {
+							h.log.Error("instagram webhook: persist message edit as message failed",
+								logger.Error(err),
+								logger.String("project_id", resource.GetProjectId()),
+								logger.Any("message_edit_keys", instagramRawKeys(instagramMessageEditMap(messageEvent))),
+							)
+							continue
+						}
+						h.log.Info("instagram webhook: message edit persisted as message",
+							logger.String("ig_id", resolvedIgID),
+							logger.String("message_id", instagramMessageEditID(messageEvent)),
+							logger.String("sender_id", instagramSenderID(messageEvent)),
+							logger.String("project_id", resource.GetProjectId()),
+						)
+						continue
+					}
+					h.log.Info("instagram webhook: message edit persisted",
+						logger.String("ig_id", resolvedIgID),
+						logger.String("message_id", instagramMessageEditID(messageEvent)),
+						logger.String("project_id", resource.GetProjectId()),
+					)
+					continue
+				}
 				if messageEvent.Message != nil && messageEvent.Message.IsEcho {
+					h.log.Info("instagram webhook: echo ignored",
+						logger.String("ig_id", resolvedIgID),
+						logger.String("message_id", messageEvent.Message.Mid),
+					)
 					continue
 				}
 				if !instagramEventIsPersistable(messageEvent) {
+					h.log.Info("instagram webhook: event ignored",
+						logger.String("ig_id", resolvedIgID),
+						logger.String("event_type", instagramEventType(messageEvent)),
+						logger.String("sender_id", instagramSenderID(messageEvent)),
+						logger.String("recipient_id", messageEvent.Recipient.ID),
+						logger.Any("event_keys", instagramRawKeys(messageEvent.Raw)),
+					)
 					continue
 				}
 				raw, _ := json.Marshal(messageEvent)
 				if err = h.persistInstagramIncomingEvent(ctx, target, mapping, messageEvent, string(raw)); err != nil {
 					h.log.Error("instagram webhook: persist event failed", logger.Error(err), logger.String("project_id", resource.GetProjectId()))
+					continue
 				}
+				h.log.Info("instagram webhook: event persisted",
+					logger.String("ig_id", resolvedIgID),
+					logger.String("event_id", instagramEventKey(messageEvent)),
+					logger.String("event_type", instagramEventType(messageEvent)),
+					logger.String("sender_id", instagramSenderID(messageEvent)),
+					logger.String("project_id", resource.GetProjectId()),
+				)
 			}
 		}
 	}
+}
+
+func (h *HandlerV1) instagramResourcesForWebhookEntry(ctx context.Context, entry instagramWebhookEntry) (*pb.ListProjectResource, string, error) {
+	candidates := make([]string, 0, 1+len(entry.Messaging))
+	addCandidate := func(value string) {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			return
+		}
+		for _, existing := range candidates {
+			if existing == value {
+				return
+			}
+		}
+		candidates = append(candidates, value)
+	}
+	addCandidate(entry.ID)
+	for _, event := range entry.Messaging {
+		addCandidate(event.Recipient.ID)
+		addCandidate(instagramRecipientID(event))
+	}
+	for _, candidate := range candidates {
+		resources, err := h.companyServices.Resource().GetProjectResourcesByExternalId(ctx, &pb.GetByExternalIdRequest{
+			ExternalId: candidate,
+			Type:       pb.ResourceType_INSTAGRAM,
+		})
+		if err != nil {
+			return nil, candidate, err
+		}
+		if len(resources.GetResources()) > 0 {
+			return resources, candidate, nil
+		}
+	}
+	return &pb.ListProjectResource{}, strings.Join(candidates, ","), nil
 }
 
 func (h *HandlerV1) persistInstagramIncomingEvent(ctx context.Context, target *instagramProjectTarget, mapping *pb.InstagramChatMapping, event instagramMessagingEvent, raw string) error {
@@ -1361,6 +1481,29 @@ func (h *HandlerV1) persistInstagramAttachments(ctx context.Context, target *ins
 		}
 	}
 	return nil
+}
+
+func (h *HandlerV1) persistInstagramMessageEdit(ctx context.Context, target *instagramProjectTarget, event instagramMessagingEvent, raw string) (bool, error) {
+	messageID := instagramMessageEditID(event)
+	if strings.TrimSpace(messageID) == "" {
+		return false, errors.New("instagram message edit id is missing")
+	}
+	text := instagramMessageEditText(event)
+	setClauses := []string{"raw_payload = $1"}
+	params := []string{raw}
+	if strings.TrimSpace(text) != "" {
+		setClauses = append(setClauses, fmt.Sprintf("text = $%d", len(params)+1))
+		params = append(params, text)
+	}
+	params = append(params, messageID)
+	rows, err := h.executeInstagramSQL(ctx, target,
+		fmt.Sprintf(`UPDATE "%s" SET %s WHERE instagram_message_id = $%d AND deleted_at IS NULL RETURNING guid`, instagramMessagesTable, strings.Join(setClauses, ", "), len(params)),
+		params,
+	)
+	if err != nil {
+		return false, err
+	}
+	return len(rows) > 0, nil
 }
 
 func (h *HandlerV1) persistInstagramOutboundMessage(ctx context.Context, target *instagramProjectTarget, chatRecordID, messageID, text, deliveryStatus, raw string) error {
@@ -1827,9 +1970,48 @@ func instagramEventIsPersistable(event instagramMessagingEvent) bool {
 	return event.Message != nil || event.Postback != nil || event.Reaction != nil
 }
 
+func instagramEventType(event instagramMessagingEvent) string {
+	switch {
+	case event.Message != nil:
+		if event.Message.IsEcho {
+			return "message_echo"
+		}
+		return "message"
+	case len(event.MessageEdit) > 0:
+		return "message_edit"
+	case event.Postback != nil:
+		return "postback"
+	case event.Reaction != nil:
+		return "reaction"
+	case event.Read != nil:
+		return "read"
+	case len(event.Optin) > 0:
+		return "optin"
+	case len(event.Referral) > 0:
+		return "referral"
+	default:
+		return "unknown"
+	}
+}
+
+func instagramRawKeys(raw map[string]any) []string {
+	if len(raw) == 0 {
+		return nil
+	}
+	keys := make([]string, 0, len(raw))
+	for key := range raw {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 func instagramEventKey(event instagramMessagingEvent) string {
 	if event.Message != nil && event.Message.Mid != "" {
 		return "message:" + event.Message.Mid
+	}
+	if id := instagramMessageEditID(event); id != "" {
+		return "message_edit:" + id
 	}
 	if event.Postback != nil && event.Postback.Mid != "" {
 		return "postback:" + event.Postback.Mid
@@ -1844,6 +2026,9 @@ func instagramMessageID(event instagramMessagingEvent) string {
 	if event.Message != nil && event.Message.Mid != "" {
 		return event.Message.Mid
 	}
+	if id := instagramMessageEditID(event); id != "" {
+		return id
+	}
 	if event.Postback != nil && event.Postback.Mid != "" {
 		return event.Postback.Mid
 	}
@@ -1853,8 +2038,105 @@ func instagramMessageID(event instagramMessagingEvent) string {
 	return instagramEventKey(event)
 }
 
+func instagramMessageEditID(event instagramMessagingEvent) string {
+	if len(event.MessageEdit) == 0 {
+		return ""
+	}
+	payload := instagramMessageEditMap(event)
+	if value := instagramStringFromMap(payload, "mid", "message_id", "id"); value != "" {
+		return value
+	}
+	if nested, ok := payload["message"].(map[string]any); ok {
+		return instagramStringFromMap(nested, "mid", "message_id", "id")
+	}
+	return ""
+}
+
+func instagramMessageEditText(event instagramMessagingEvent) string {
+	if len(event.MessageEdit) == 0 {
+		return ""
+	}
+	payload := instagramMessageEditMap(event)
+	if value := instagramStringFromMap(payload, "text"); value != "" {
+		return value
+	}
+	if nested, ok := payload["message"].(map[string]any); ok {
+		return instagramStringFromMap(nested, "text")
+	}
+	return ""
+}
+
+func instagramMessageEditMap(event instagramMessagingEvent) map[string]any {
+	payload := map[string]any{}
+	_ = json.Unmarshal(event.MessageEdit, &payload)
+	return payload
+}
+
+func instagramStringFromMap(payload map[string]any, keys ...string) string {
+	for _, key := range keys {
+		if value, ok := payload[key]; ok && value != nil {
+			text := strings.TrimSpace(fmt.Sprint(value))
+			if text != "" && text != "<nil>" {
+				return text
+			}
+		}
+	}
+	return ""
+}
+
+func instagramNestedInstagramID(payload map[string]any, keys ...string) string {
+	for _, key := range keys {
+		value, ok := payload[key]
+		if !ok || value == nil {
+			continue
+		}
+		switch typed := value.(type) {
+		case map[string]any:
+			if id := instagramStringFromMap(typed, "id", "igsid", "user_id"); id != "" {
+				return id
+			}
+		default:
+			text := strings.TrimSpace(fmt.Sprint(typed))
+			if text != "" && text != "<nil>" {
+				return text
+			}
+		}
+	}
+	return ""
+}
+
 func instagramSenderID(event instagramMessagingEvent) string {
-	return strings.TrimSpace(event.Sender.ID)
+	if value := strings.TrimSpace(event.Sender.ID); value != "" {
+		return value
+	}
+	if len(event.MessageEdit) == 0 {
+		return ""
+	}
+	payload := instagramMessageEditMap(event)
+	if value := instagramNestedInstagramID(payload, "sender", "from", "user"); value != "" {
+		return value
+	}
+	if nested, ok := payload["message"].(map[string]any); ok {
+		return instagramNestedInstagramID(nested, "sender", "from", "user")
+	}
+	return ""
+}
+
+func instagramRecipientID(event instagramMessagingEvent) string {
+	if value := strings.TrimSpace(event.Recipient.ID); value != "" {
+		return value
+	}
+	if len(event.MessageEdit) == 0 {
+		return ""
+	}
+	payload := instagramMessageEditMap(event)
+	if value := instagramNestedInstagramID(payload, "recipient", "to"); value != "" {
+		return value
+	}
+	if nested, ok := payload["message"].(map[string]any); ok {
+		return instagramNestedInstagramID(nested, "recipient", "to")
+	}
+	return ""
 }
 
 func instagramDisplayName(event instagramMessagingEvent) string {
@@ -1882,10 +2164,16 @@ func instagramMessageText(event instagramMessagingEvent) string {
 	if event.Reaction != nil {
 		return strings.TrimSpace(event.Reaction.Action + " " + event.Reaction.Reaction)
 	}
+	if text := instagramMessageEditText(event); text != "" {
+		return text
+	}
 	return ""
 }
 
 func instagramMessageType(event instagramMessagingEvent) string {
+	if len(event.MessageEdit) > 0 {
+		return "message_edit"
+	}
 	if event.Postback != nil {
 		return "postback"
 	}
