@@ -427,6 +427,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			ugenTemplate.GET("", h.V1.GetUgenTemplateList)
 			ugenTemplate.GET("/:id", h.V1.GetUgenTemplateById)
 			ugenTemplate.PUT("/:id", h.V1.UpdateUgenTemplate)
+			ugenTemplate.PATCH("/:id/price", h.V1.SetUgenTemplatePrice)
 			ugenTemplate.DELETE("/:id", h.V1.DeleteUgenTemplate)
 			ugenTemplate.POST("/:id/reaction", h.V1.SetUgenTemplateReaction)
 			ugenTemplate.DELETE("/:id/reaction", h.V1.DeleteUgenTemplateReaction)

@@ -31,6 +31,10 @@ type UgenTemplateServiceClient interface {
 	SetReaction(ctx context.Context, in *SetUgenTemplateReactionReq, opts ...grpc.CallOption) (*UgenTemplateReaction, error)
 	DeleteReaction(ctx context.Context, in *DeleteUgenTemplateReactionReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListReactions(ctx context.Context, in *GetUgenTemplateReactionListReq, opts ...grpc.CallOption) (*GetUgenTemplateReactionListResponse, error)
+	// SetPrice is the admin-only price control: users create templates for free
+	// (price defaults to 0) and cannot set a price via Create/Update; only this
+	// endpoint assigns/updates a template's price and currency.
+	SetPrice(ctx context.Context, in *SetUgenTemplatePriceReq, opts ...grpc.CallOption) (*UgenTemplate, error)
 }
 
 type ugenTemplateServiceClient struct {
@@ -113,6 +117,15 @@ func (c *ugenTemplateServiceClient) ListReactions(ctx context.Context, in *GetUg
 	return out, nil
 }
 
+func (c *ugenTemplateServiceClient) SetPrice(ctx context.Context, in *SetUgenTemplatePriceReq, opts ...grpc.CallOption) (*UgenTemplate, error) {
+	out := new(UgenTemplate)
+	err := c.cc.Invoke(ctx, "/company_service.UgenTemplateService/SetPrice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UgenTemplateServiceServer is the server API for UgenTemplateService service.
 // All implementations must embed UnimplementedUgenTemplateServiceServer
 // for forward compatibility
@@ -125,6 +138,10 @@ type UgenTemplateServiceServer interface {
 	SetReaction(context.Context, *SetUgenTemplateReactionReq) (*UgenTemplateReaction, error)
 	DeleteReaction(context.Context, *DeleteUgenTemplateReactionReq) (*emptypb.Empty, error)
 	ListReactions(context.Context, *GetUgenTemplateReactionListReq) (*GetUgenTemplateReactionListResponse, error)
+	// SetPrice is the admin-only price control: users create templates for free
+	// (price defaults to 0) and cannot set a price via Create/Update; only this
+	// endpoint assigns/updates a template's price and currency.
+	SetPrice(context.Context, *SetUgenTemplatePriceReq) (*UgenTemplate, error)
 	mustEmbedUnimplementedUgenTemplateServiceServer()
 }
 
@@ -155,6 +172,9 @@ func (UnimplementedUgenTemplateServiceServer) DeleteReaction(context.Context, *D
 }
 func (UnimplementedUgenTemplateServiceServer) ListReactions(context.Context, *GetUgenTemplateReactionListReq) (*GetUgenTemplateReactionListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListReactions not implemented")
+}
+func (UnimplementedUgenTemplateServiceServer) SetPrice(context.Context, *SetUgenTemplatePriceReq) (*UgenTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetPrice not implemented")
 }
 func (UnimplementedUgenTemplateServiceServer) mustEmbedUnimplementedUgenTemplateServiceServer() {}
 
@@ -313,6 +333,24 @@ func _UgenTemplateService_ListReactions_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UgenTemplateService_SetPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetUgenTemplatePriceReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UgenTemplateServiceServer).SetPrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.UgenTemplateService/SetPrice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UgenTemplateServiceServer).SetPrice(ctx, req.(*SetUgenTemplatePriceReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UgenTemplateService_ServiceDesc is the grpc.ServiceDesc for UgenTemplateService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -351,6 +389,10 @@ var UgenTemplateService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListReactions",
 			Handler:    _UgenTemplateService_ListReactions_Handler,
+		},
+		{
+			MethodName: "SetPrice",
+			Handler:    _UgenTemplateService_SetPrice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

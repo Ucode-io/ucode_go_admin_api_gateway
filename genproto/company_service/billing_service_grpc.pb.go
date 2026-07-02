@@ -74,6 +74,11 @@ type BillingServiceClient interface {
 	DeleteTokenPack(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	PurchaseTokenPack(ctx context.Context, in *PurchaseTokenPackRequest, opts ...grpc.CallOption) (*PurchaseTokenPackResponse, error)
 	GetTokenPackBalance(ctx context.Context, in *GetTokenPackBalanceRequest, opts ...grpc.CallOption) (*GetTokenPackBalanceResponse, error)
+	// Generic project balance charge/refund (funds paid actions such as using a
+	// paid Ugen template). Charge is atomic and overdraft-checked against
+	// balance + credit_limit; refund is its compensating reverse.
+	ChargeProjectBalance(ctx context.Context, in *ChargeProjectBalanceRequest, opts ...grpc.CallOption) (*ChargeProjectBalanceResponse, error)
+	RefundProjectBalance(ctx context.Context, in *RefundProjectBalanceRequest, opts ...grpc.CallOption) (*RefundProjectBalanceResponse, error)
 }
 
 type billingServiceClient struct {
@@ -471,6 +476,24 @@ func (c *billingServiceClient) GetTokenPackBalance(ctx context.Context, in *GetT
 	return out, nil
 }
 
+func (c *billingServiceClient) ChargeProjectBalance(ctx context.Context, in *ChargeProjectBalanceRequest, opts ...grpc.CallOption) (*ChargeProjectBalanceResponse, error) {
+	out := new(ChargeProjectBalanceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/ChargeProjectBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) RefundProjectBalance(ctx context.Context, in *RefundProjectBalanceRequest, opts ...grpc.CallOption) (*RefundProjectBalanceResponse, error) {
+	out := new(RefundProjectBalanceResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/RefundProjectBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility
@@ -526,6 +549,11 @@ type BillingServiceServer interface {
 	DeleteTokenPack(context.Context, *PrimaryKey) (*emptypb.Empty, error)
 	PurchaseTokenPack(context.Context, *PurchaseTokenPackRequest) (*PurchaseTokenPackResponse, error)
 	GetTokenPackBalance(context.Context, *GetTokenPackBalanceRequest) (*GetTokenPackBalanceResponse, error)
+	// Generic project balance charge/refund (funds paid actions such as using a
+	// paid Ugen template). Charge is atomic and overdraft-checked against
+	// balance + credit_limit; refund is its compensating reverse.
+	ChargeProjectBalance(context.Context, *ChargeProjectBalanceRequest) (*ChargeProjectBalanceResponse, error)
+	RefundProjectBalance(context.Context, *RefundProjectBalanceRequest) (*RefundProjectBalanceResponse, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -661,6 +689,12 @@ func (UnimplementedBillingServiceServer) PurchaseTokenPack(context.Context, *Pur
 }
 func (UnimplementedBillingServiceServer) GetTokenPackBalance(context.Context, *GetTokenPackBalanceRequest) (*GetTokenPackBalanceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenPackBalance not implemented")
+}
+func (UnimplementedBillingServiceServer) ChargeProjectBalance(context.Context, *ChargeProjectBalanceRequest) (*ChargeProjectBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChargeProjectBalance not implemented")
+}
+func (UnimplementedBillingServiceServer) RefundProjectBalance(context.Context, *RefundProjectBalanceRequest) (*RefundProjectBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefundProjectBalance not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 
@@ -1449,6 +1483,42 @@ func _BillingService_GetTokenPackBalance_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_ChargeProjectBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChargeProjectBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).ChargeProjectBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/ChargeProjectBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).ChargeProjectBalance(ctx, req.(*ChargeProjectBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_RefundProjectBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefundProjectBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).RefundProjectBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/RefundProjectBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).RefundProjectBalance(ctx, req.(*RefundProjectBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1627,6 +1697,14 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTokenPackBalance",
 			Handler:    _BillingService_GetTokenPackBalance_Handler,
+		},
+		{
+			MethodName: "ChargeProjectBalance",
+			Handler:    _BillingService_ChargeProjectBalance_Handler,
+		},
+		{
+			MethodName: "RefundProjectBalance",
+			Handler:    _BillingService_RefundProjectBalance_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
