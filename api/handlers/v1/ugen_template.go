@@ -56,6 +56,7 @@ type ugenTemplateResponse struct {
 	CurrentUserReaction    string   `json:"current_user_reaction"`
 	Price                  float64  `json:"price"`
 	CurrencyId             string   `json:"currency_id"`
+	PerUserPrice           float64  `json:"per_user_price"`
 }
 
 type ugenTemplateListResponse struct {
@@ -378,8 +379,9 @@ func (h *HandlerV1) UpdateUgenTemplate(c *gin.Context) {
 }
 
 type setUgenTemplatePriceRequest struct {
-	Price      float64 `json:"price"`
-	CurrencyId string  `json:"currency_id"`
+	Price        float64 `json:"price"`
+	CurrencyId   string  `json:"currency_id"`
+	PerUserPrice float64 `json:"per_user_price"`
 }
 
 // SetUgenTemplatePrice is the admin-only price control. Templates are created for
@@ -398,7 +400,7 @@ func (h *HandlerV1) SetUgenTemplatePrice(c *gin.Context) {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
 	}
-	if req.Price < 0 {
+	if req.Price < 0 || req.PerUserPrice < 0 {
 		h.HandleResponse(c, status_http.BadRequest, "price cannot be negative")
 		return
 	}
@@ -406,9 +408,10 @@ func (h *HandlerV1) SetUgenTemplatePrice(c *gin.Context) {
 	resp, err := h.companyServices.UgenTemplate().SetPrice(
 		c.Request.Context(),
 		&pb.SetUgenTemplatePriceReq{
-			Id:         id,
-			Price:      req.Price,
-			CurrencyId: req.CurrencyId,
+			Id:           id,
+			Price:        req.Price,
+			CurrencyId:   req.CurrencyId,
+			PerUserPrice: req.PerUserPrice,
 		},
 	)
 	if err != nil {
@@ -583,6 +586,7 @@ func newUgenTemplateResponse(t *pb.UgenTemplate) *ugenTemplateResponse {
 		CurrentUserReaction:    ugenTemplateReactionTypeToResponse(t.GetCurrentUserReaction()),
 		Price:                  t.GetPrice(),
 		CurrencyId:             t.GetCurrencyId(),
+		PerUserPrice:           t.GetPerUserPrice(),
 	}
 }
 
@@ -686,8 +690,7 @@ type CreateProjectFromTemplateReq struct {
 }
 
 // CreateProjectFromTemplate provisions a new isolated ucode project from a
-// Ugen template: creates a generated backend project, copies template schema,
-// data and MCP files, then publishes the copied microfrontend to u-gen.
+
 func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 	var req CreateProjectFromTemplateReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -843,6 +846,11 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 				Title:        sanitizeProjectNameForBackend(projectName),
 				CompanyId:    headProject.GetCompanyId(),
 				K8SNamespace: headProject.GetK8SNamespace(),
+				// Carry the template's per-user price onto the new project so that
+				// adding users later charges the head balance (in the template's
+				// currency) instead of enforcing the fare user limit. 0 = free.
+				PerUserPrice:      tmpl.GetPerUserPrice(),
+				PerUserCurrencyId: tmpl.GetCurrencyId(),
 			},
 		)
 		if err != nil {

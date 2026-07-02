@@ -39,6 +39,13 @@ service ProjectService {
   rpc AutoAssignUgenIfSingle(AutoAssignUgenIfSingleRequest) returns (AutoAssignUgenIfSingleResponse) {};
   rpc ListUgenProjects(ListUgenProjectsRequest) returns (ListUgenProjectsResponse) {};
   rpc ExportUgenProjects(ExportUgenProjectsRequest) returns (ExportUgenProjectsResponse) {};
+  // GetUgenProjectByCompanyId returns the company's single head (is_ugen) project,
+  // which holds the balance charged for paid template imports and paid user seats.
+  rpc GetUgenProjectByCompanyId(GetUgenProjectByCompanyIdReq) returns (Project) {};
+}
+
+message GetUgenProjectByCompanyIdReq {
+  string company_id = 1;
 }
 
 message GetPorjectConfigByProjectIdRequest {
@@ -253,6 +260,11 @@ message Project {
   repeated string icon_categories = 23;
   string customer_id = 24;
   bool is_ugen = 25;
+  // per_user_price (in per_user_currency_id) is charged to the head project's
+  // balance for every user added to this project. Copied from the source template
+  // on import; 0 for ordinary projects, which keep the fare-based user limit.
+  double per_user_price = 26;
+  string per_user_currency_id = 27;
 }
 
 message CreateProjectRequest {
@@ -262,6 +274,8 @@ message CreateProjectRequest {
   repeated Resource resources = 4;
   string fare_id = 5;
   bool is_ugen = 6;
+  double per_user_price = 7;
+  string per_user_currency_id = 8;
 }
 
 message CreateProjectResponse {

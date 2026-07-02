@@ -85,6 +85,9 @@ message SetUgenTemplatePriceReq {
     string id = 1;
     double price = 2;
     string currency_id = 3;
+    // per_user_price is charged (in currency_id) to the head project's balance for
+    // every user later added to a project created from this template. 0 = free.
+    double per_user_price = 4;
 }
 
 message SetUgenTemplateReactionReq {
@@ -144,4 +147,7 @@ message UgenTemplate {
     UgenTemplateReactionType current_user_reaction = 21;
     double price = 22;
     string currency_id = 23;
+    // per_user_price (in currency_id) is charged per user added to a project
+    // provisioned from this template; copied to project.per_user_price on import.
+    double per_user_price = 24;
 }
