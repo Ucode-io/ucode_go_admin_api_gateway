@@ -137,11 +137,10 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 		return fmt.Errorf("source_function_id is required")
 	}
 
-	sourceMcpResourceEnvID, sourceMcpProjectID, sourceMcpNodeType, err := h.resolveTemplateSourceMcpResource(ctx, c, req.GetSourceMcpResourceEnvId())
+	_, sourceMcpProjectID, sourceMcpNodeType, err := h.resolveTemplateSourceMcpResource(ctx, c, req.GetSourceMcpResourceEnvId())
 	if err != nil {
 		return err
 	}
-	req.SourceMcpResourceEnvId = sourceMcpResourceEnvID
 
 	sourceMcpService, err := h.GetProjectSrvc(ctx, sourceMcpProjectID, sourceMcpNodeType)
 	if err != nil {
@@ -199,6 +198,18 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 		return fmt.Errorf("source_node_type could not be resolved")
 	}
 
+	resourceUgen, err := h.companyServices.ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     req.GetSourceProjectId(),
+			EnvironmentId: req.GetSourceEnvironmentId(),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("get source builder resource from context: %w", err)
+	}
+
 	req.SourceProjectId = sourceDataResourceEnv.GetProjectId()
 	req.SourceEnvironmentId = sourceDataResourceEnv.GetEnvironmentId()
 	req.SourceNodeType = sourceNodeType
@@ -212,7 +223,7 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 		ctx,
 		&pbo.FunctionPrimaryKey{
 			Id:        req.GetSourceFunctionId(),
-			ProjectId: req.GetSourceMcpResourceEnvId(),
+			ProjectId: resourceUgen.GetResourceEnvironmentId(),
 		},
 	)
 	if err != nil {
