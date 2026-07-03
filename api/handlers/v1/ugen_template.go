@@ -947,7 +947,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			ResourceType:   int32(targetResource.GetResourceType()),
 		}
 
-		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId); err != nil {
+		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId, targetProjectData.UcodeProjectId); err != nil {
 			return nil, fmt.Errorf("copy template data: %v", err)
 		}
 
@@ -1115,7 +1115,7 @@ func (h *HandlerV1) getTemplateMicrofrontendFiles(ctx context.Context, sourceSer
 	return files, nil
 }
 
-func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string) error {
+func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID, targetUcodeProjectID string) error {
 	tablesResp, err := sourceService.GoObjectBuilderService().Table().GetAll(ctx, &pbo.GetAllTablesRequest{
 		ProjectId: sourceResourceEnvID,
 		Limit:     1000,
@@ -1135,6 +1135,11 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 		}
 		createTable.ProjectId = targetResourceEnvID
 		createTable.EnvId = targetResourceEnvID
+		// UcodeProjectId is the company-service project id of the NEW project; the
+		// object-builder needs it to resolve fare/table-limit info. Without it (or
+		// with the source project's id copied by convert) CreateTable fails with
+		// "error getting project info".
+		createTable.UcodeProjectId = targetUcodeProjectID
 		if createTable.Id == "" {
 			createTable.Id = table.GetId()
 		}
