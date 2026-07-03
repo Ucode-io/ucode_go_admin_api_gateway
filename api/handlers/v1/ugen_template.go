@@ -947,7 +947,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			ResourceType:   int32(targetResource.GetResourceType()),
 		}
 
-		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId, targetProjectData.UcodeProjectId, headProject.GetCompanyId()); err != nil {
+		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId, targetProjectData.UcodeProjectId); err != nil {
 			return nil, fmt.Errorf("copy template data: %v", err)
 		}
 
@@ -1115,7 +1115,7 @@ func (h *HandlerV1) getTemplateMicrofrontendFiles(ctx context.Context, sourceSer
 	return files, nil
 }
 
-func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID, targetUcodeProjectID, targetCompanyID string) error {
+func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID, targetUcodeProjectID string) error {
 	tablesResp, err := sourceService.GoObjectBuilderService().Table().GetAll(ctx, &pbo.GetAllTablesRequest{
 		ProjectId: sourceResourceEnvID,
 		Limit:     1000,
@@ -1156,15 +1156,61 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 		if skipUgenTemplateTable(table.GetSlug()) {
 			continue
 		}
-		if err = h.copyTemplateTableDetails(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, targetCompanyID, table); err != nil {
+		if err = h.copyTemplateTableDetails(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); err != nil {
 			return err
 		}
+	}
+
+	// Copy rows last and FK-tolerantly. Template tables can reference each other
+	// (e.g. approval_actions -> companies) and GetAll returns them unordered, so a
+	// straight per-table copy may insert a child row before its parent and hit a
+	// foreign-key violation. Retry the tables that fail on an FK error after the
+	// others are inserted, repeating until a pass makes no progress; non-FK errors
+	// fail immediately.
+	pending := make([]*pbo.Table, 0, len(tablesResp.GetTables()))
+	for _, table := range tablesResp.GetTables() {
+		if skipUgenTemplateTable(table.GetSlug()) {
+			continue
+		}
+		pending = append(pending, table)
+	}
+	for len(pending) > 0 {
+		var (
+			failed  []*pbo.Table
+			lastErr error
+		)
+		for _, table := range pending {
+			if err = h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); err != nil {
+				if isForeignKeyViolation(err) {
+					failed = append(failed, table)
+					lastErr = err
+					continue
+				}
+				return err
+			}
+		}
+		if len(failed) == len(pending) {
+			// No table advanced this pass — the remaining FK failures are a genuine
+			// missing/circular reference, not just ordering. Surface the error.
+			return lastErr
+		}
+		pending = failed
 	}
 
 	return nil
 }
 
-func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID, targetCompanyID string, table *pbo.Table) error {
+// isForeignKeyViolation reports whether err is a PostgreSQL foreign-key violation
+// (SQLSTATE 23503), as surfaced through the object-builder gRPC error string.
+func isForeignKeyViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
+}
+
+func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
 	fieldsResp, err := sourceService.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{
 		Limit:     1000,
 		Offset:    0,
@@ -1282,10 +1328,10 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		}
 	}
 
-	return h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, targetCompanyID, table)
+	return nil
 }
 
-func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID, targetCompanyID string, table *pbo.Table) error {
+func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
 	if table.GetIsLoginTable() {
 		return nil
 	}
@@ -1317,13 +1363,6 @@ func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetS
 	objects := make([]map[string]any, 0, len(rowList))
 	for _, row := range rowList {
 		if rowMap, ok := row.(map[string]any); ok {
-			// Rows carry the source tenant's company_id. Some system tables (e.g.
-			// approval_actions) enforce a FK to companies, so the source id — absent
-			// in the target project's DB — fails with a FK violation. Re-point every
-			// copied row to the new project's owner company.
-			if _, ok := rowMap["company_id"]; ok && targetCompanyID != "" {
-				rowMap["company_id"] = targetCompanyID
-			}
 			objects = append(objects, rowMap)
 		}
 	}
