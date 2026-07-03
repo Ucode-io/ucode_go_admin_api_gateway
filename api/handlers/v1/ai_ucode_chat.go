@@ -106,6 +106,10 @@ type ucodeChatSession struct {
 	nodeType     string
 	resourceType int32
 
+	// systemPrompt overrides the default builder prompt when set (e.g. the embedded
+	// admin-panel assistant uses a narrow-chat-formatted variant). Empty = default.
+	systemPrompt string
+
 	tablesLoaded bool
 	tableIDs     map[string]string
 	fieldSets    map[string]map[string]bool
@@ -153,7 +157,10 @@ func (s *ucodeChatSession) run(ctx context.Context, userText string, history []a
 	messages = append(messages, history...)
 	messages = append(messages, ai.ConversationMessage{Role: "user", Text: userText})
 
-	system := chat_prompts.UcodeBuilderSystemPrompt()
+	system := s.systemPrompt
+	if system == "" {
+		system = chat_prompts.UcodeBuilderSystemPrompt()
+	}
 	tools := ucodeToolDefs()
 
 	var (

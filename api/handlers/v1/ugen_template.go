@@ -1100,8 +1100,11 @@ func (h *HandlerV1) getTemplateMicrofrontendFiles(ctx context.Context, sourceSer
 			continue
 		}
 		files = append(files, &pbo.McpProjectFiles{
-			Path:    filePath,
-			Content: file.Content,
+			Path: filePath,
+			// Strip NUL/control bytes here: these files are mirrored into the new
+			// project's mcp project_files (Postgres text), which rejects 0x00 with
+			// SQLSTATE 22021. Same sanitizer as the microfrontend publish path.
+			Content: sanitizeFileContent(file.Content),
 		})
 	}
 	if len(files) == 0 {

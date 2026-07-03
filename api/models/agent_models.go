@@ -97,6 +97,15 @@ type (
 		FilesContext  string
 	}
 
+	// BuilderAgentIntegrationView is what the builder-assistant integration prompt
+	// needs to mount its chat widget: the injected template files plus enough of the
+	// project (file graph + shell files) to place and style the widget correctly.
+	BuilderAgentIntegrationView struct {
+		TemplateFiles []string
+		FileGraphJSON string
+		FilesContext  string
+	}
+
 	// RepairFileInput carries the file to repair and the pre-built user prompt
 	// (errors + available exports + rules). The agent applies the repair tool.
 	RepairFileInput struct {
