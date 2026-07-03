@@ -2,12 +2,13 @@ package v1
 
 import "ucode/ucode_go_api_gateway/api/models"
 
-// The builder assistant's networking layer, injected verbatim so the model only
-// builds the UI that consumes it: an SSE streaming client over the app's shared axios
-// instance, and a useBuilderAgent() hook that surfaces the live build steps.
+// The whole builder assistant is injected verbatim — client, hook AND the widget —
+// so response parsing, conversation memory and the look are correct and consistent
+// on every generated app. The model's only job is to mount <BuilderAssistantWidget/>.
 const (
 	builderAgentClientFilePath = "src/lib/builderAgentClient.ts"
 	useBuilderAgentFilePath    = "src/hooks/useBuilderAgent.ts"
+	builderAgentWidgetFilePath = "src/components/BuilderAssistantWidget.tsx"
 )
 
 // builderAgentTemplateFiles returns the authoritative template files: when merged
@@ -16,13 +17,14 @@ func builderAgentTemplateFiles() []models.ProjectFile {
 	return []models.ProjectFile{
 		{Path: builderAgentClientFilePath, Content: builderAgentClientTemplate},
 		{Path: useBuilderAgentFilePath, Content: useBuilderAgentTemplate},
+		{Path: builderAgentWidgetFilePath, Content: builderAgentWidgetTemplate},
 	}
 }
 
 // builderAgentTemplatePaths lists the injected paths so the model knows not to
 // re-emit them.
 func builderAgentTemplatePaths() []string {
-	return []string{builderAgentClientFilePath, useBuilderAgentFilePath}
+	return []string{builderAgentClientFilePath, useBuilderAgentFilePath, builderAgentWidgetFilePath}
 }
 
 const builderAgentClientTemplate = `import apiClient from '@/config/axios';
@@ -239,4 +241,258 @@ export function useBuilderAgent(): UseBuilderAgentResult {
 }
 
 export default useBuilderAgent;
+`
+
+const builderAgentWidgetTemplate = `import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
+import { useBuilderAgent } from '@/hooks/useBuilderAgent';
+import type { BuilderMessage } from '@/hooks/useBuilderAgent';
+import type { BuilderEvent, BuilderSummary } from '@/lib/builderAgentClient';
+
+export interface BuilderAssistantWidgetProps {
+  /** Header title. Defaults to "AI-ассистент". */
+  title?: string;
+  /** Accent color used for the launcher, header and user bubbles. */
+  accentColor?: string;
+  /** First-line greeting shown in the empty state. */
+  greeting?: string;
+}
+
+const ACCENT = '#4f46e5';
+
+// Russian plural picker: forms = [one, few, many].
+function ruPlural(n: number, forms: [string, string, string]): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
+  return forms[2];
+}
+
+const SUMMARY_FORMS: Array<[keyof BuilderSummary, [string, string, string]]> = [
+  ['tables', ['таблица', 'таблицы', 'таблиц']],
+  ['login_tables', ['таблица входа', 'таблицы входа', 'таблиц входа']],
+  ['fields', ['поле', 'поля', 'полей']],
+  ['relations', ['связь', 'связи', 'связей']],
+  ['menus', ['раздел', 'раздела', 'разделов']],
+  ['items', ['запись', 'записи', 'записей']],
+  ['client_types', ['тип клиента', 'типа клиента', 'типов клиента']],
+  ['roles', ['роль', 'роли', 'ролей']],
+];
+
+function summaryChips(summary?: BuilderSummary): string[] {
+  if (!summary) return [];
+  const chips: string[] = [];
+  for (const [key, forms] of SUMMARY_FORMS) {
+    const n = summary[key] || 0;
+    if (n > 0) chips.push(n + ' ' + ruPlural(n, forms));
+  }
+  return chips;
+}
+
+// Render the assistant text safely: preserve line breaks and render **bold** without
+// dangerouslySetInnerHTML.
+function renderRich(text: string) {
+  return text.split('\n').map((line, li) => (
+    <div key={li} style={line ? undefined : { height: '0.5em' }}>
+      {line.split('**').map((seg, si) => (si % 2 === 1 ? <strong key={si}>{seg}</strong> : <span key={si}>{seg}</span>))}
+    </div>
+  ));
+}
+
+function stepText(event: BuilderEvent): string {
+  return [event.message, event.value].filter(Boolean).join(': ');
+}
+
+export function BuilderAssistantWidget({ title = 'AI-ассистент', accentColor = ACCENT, greeting }: BuilderAssistantWidgetProps) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const { messages, steps, isLoading, error, send } = useBuilderAgent();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, steps, isLoading, open]);
+
+  const emptyGreeting = greeting ||
+    'Опишите, что нужно построить — я создам таблицы, поля, связи и разделы, добавлю записи и отвечу на вопросы о данных.';
+
+  const submit = () => {
+    const text = input.trim();
+    if (!text || isLoading) return;
+    setInput('');
+    void send(text);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  const styles = useMemo(() => makeStyles(accentColor), [accentColor]);
+
+  return (
+    <>
+      <style>{WIDGET_CSS}</style>
+
+      {!open && (
+        <button type="button" style={styles.launcher} className="bldr-launcher" onClick={() => setOpen(true)} aria-label={title}>
+          <span style={styles.launcherDot} />
+          {title}
+        </button>
+      )}
+
+      {open && (
+        <div style={styles.panel} className="bldr-panel" role="dialog" aria-label={title}>
+          <div style={styles.header}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600 }}>
+              <span style={styles.headerDot} />
+              {title}
+            </div>
+            <button type="button" style={styles.iconBtn} className="bldr-icon" onClick={() => setOpen(false)} aria-label="Закрыть">×</button>
+          </div>
+
+          <div ref={scrollRef} style={styles.body} className="bldr-scroll">
+            {messages.length === 0 && !isLoading && (
+              <div style={styles.empty}>{emptyGreeting}</div>
+            )}
+
+            {messages.map((m: BuilderMessage) => (
+              <div key={m.id} style={m.role === 'user' ? styles.rowUser : styles.rowAssistant}>
+                <div style={m.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant}>
+                  {renderRich(m.content)}
+                  {m.summary && summaryChips(m.summary).length > 0 && (
+                    <div style={styles.chips}>
+                      {summaryChips(m.summary).map((c, i) => (
+                        <span key={i} style={styles.chip}>{c}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div style={styles.rowAssistant}>
+                <div style={styles.steps}>
+                  <div style={styles.stepsHead}>
+                    <span className="bldr-pulse" style={styles.pulse} />
+                    Работаю…
+                  </div>
+                  {steps.slice(-6).map((s, i) => (
+                    <div key={i} style={styles.step}>{stepText(s)}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {error && <div style={styles.error}>{error}</div>}
+          </div>
+
+          <div style={styles.footer}>
+            <textarea
+              rows={1}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="Например: создай таблицу клиентов с именем и телефоном"
+              style={styles.input}
+              disabled={isLoading}
+            />
+            <button type="button" onClick={submit} disabled={isLoading || !input.trim()} style={styles.send} className="bldr-send">
+              →
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+const WIDGET_CSS =
+  '.bldr-launcher,.bldr-panel,.bldr-panel *{box-sizing:border-box}' +
+  '.bldr-launcher{transition:transform .15s ease,box-shadow .15s ease}' +
+  '.bldr-launcher:hover{transform:translateY(-2px)}' +
+  '.bldr-send:disabled{opacity:.45;cursor:default}' +
+  '.bldr-icon:hover{opacity:.75}' +
+  '.bldr-scroll::-webkit-scrollbar{width:8px}' +
+  '.bldr-scroll::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:8px}' +
+  '@keyframes bldrPulse{0%,100%{opacity:1}50%{opacity:.35}}' +
+  '.bldr-pulse{animation:bldrPulse 1s ease-in-out infinite}' +
+  '@media (max-width:480px){.bldr-panel{inset:0 !important;width:100% !important;height:100% !important;max-width:none !important;max-height:none !important;border-radius:0 !important}}';
+
+function makeStyles(accent: string): Record<string, CSSProperties> {
+  return {
+    launcher: {
+      position: 'fixed', bottom: 24, right: 24, zIndex: 2147483000,
+      display: 'flex', alignItems: 'center', gap: 8,
+      height: 52, padding: '0 20px', border: 'none', borderRadius: 999,
+      background: accent, color: '#fff', fontWeight: 600, fontSize: 15,
+      fontFamily: 'inherit', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,.18)',
+    },
+    launcherDot: { width: 8, height: 8, borderRadius: 999, background: '#fff' },
+    panel: {
+      position: 'fixed', bottom: 24, right: 24, zIndex: 2147483000,
+      width: 384, maxWidth: 'calc(100vw - 32px)', height: 600, maxHeight: 'calc(100vh - 48px)',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      background: '#fff', color: '#111827', borderRadius: 16,
+      boxShadow: '0 16px 48px rgba(0,0,0,.24)', fontFamily: 'inherit',
+    },
+    header: {
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '14px 16px', background: accent, color: '#fff', fontSize: 15,
+    },
+    headerDot: { width: 8, height: 8, borderRadius: 999, background: '#fff' },
+    iconBtn: {
+      border: 'none', background: 'transparent', color: '#fff',
+      fontSize: 22, lineHeight: 1, cursor: 'pointer', padding: 0,
+    },
+    body: {
+      flex: 1, overflowY: 'auto', padding: 16, background: '#f9fafb',
+      display: 'flex', flexDirection: 'column', gap: 10,
+    },
+    empty: { color: '#6b7280', fontSize: 14, lineHeight: 1.5, padding: '8px 4px' },
+    rowUser: { display: 'flex', justifyContent: 'flex-end' },
+    rowAssistant: { display: 'flex', justifyContent: 'flex-start' },
+    bubbleUser: {
+      maxWidth: '85%', padding: '10px 13px', borderRadius: '14px 14px 4px 14px',
+      background: accent, color: '#fff', fontSize: 14, lineHeight: 1.45, wordBreak: 'break-word',
+    },
+    bubbleAssistant: {
+      maxWidth: '90%', padding: '10px 13px', borderRadius: '14px 14px 14px 4px',
+      background: '#fff', color: '#111827', border: '1px solid #e5e7eb',
+      fontSize: 14, lineHeight: 1.45, wordBreak: 'break-word',
+    },
+    chips: { display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+    chip: {
+      fontSize: 12, padding: '2px 8px', borderRadius: 999,
+      background: '#eef2ff', color: '#4338ca', fontWeight: 500,
+    },
+    steps: {
+      maxWidth: '90%', padding: '10px 13px', borderRadius: 12,
+      background: '#fff', border: '1px solid #e5e7eb', fontSize: 13, color: '#374151',
+    },
+    stepsHead: { display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, marginBottom: 6, color: '#111827' },
+    pulse: { width: 8, height: 8, borderRadius: 999, background: accent },
+    step: { padding: '2px 0', color: '#4b5563' },
+    error: {
+      fontSize: 13, color: '#b91c1c', background: '#fef2f2',
+      border: '1px solid #fecaca', borderRadius: 10, padding: '8px 10px',
+    },
+    footer: { display: 'flex', gap: 8, padding: 12, borderTop: '1px solid #eee', background: '#fff' },
+    input: {
+      flex: 1, resize: 'none', maxHeight: 120, border: '1px solid #d1d5db', borderRadius: 10,
+      padding: '10px 12px', fontFamily: 'inherit', fontSize: 14, color: '#111827', outline: 'none',
+    },
+    send: {
+      width: 44, border: 'none', borderRadius: 10, background: accent,
+      color: '#fff', fontSize: 18, cursor: 'pointer',
+    },
+  };
+}
+
+export default BuilderAssistantWidget;
 `
