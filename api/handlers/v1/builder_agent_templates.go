@@ -290,14 +290,92 @@ function summaryChips(summary?: BuilderSummary): string[] {
   return chips;
 }
 
-// Render the assistant text safely: preserve line breaks and render **bold** without
-// dangerouslySetInnerHTML.
-function renderRich(text: string) {
-  return text.split('\n').map((line, li) => (
-    <div key={li} style={line ? undefined : { height: '0.5em' }}>
-      {line.split('**').map((seg, si) => (si % 2 === 1 ? <strong key={si}>{seg}</strong> : <span key={si}>{seg}</span>))}
-    </div>
-  ));
+// Three backticks — built at runtime so this stays inside the Go raw string.
+const FENCE = String.fromCharCode(96, 96, 96);
+
+const mdTableWrap: CSSProperties = { overflowX: 'auto', margin: '6px 0', border: '1px solid #e5e7eb', borderRadius: 8 };
+const mdTable: CSSProperties = { borderCollapse: 'collapse', width: '100%', fontSize: 12 };
+const mdTh: CSSProperties = { textAlign: 'left', padding: '6px 8px', background: '#f3f4f6', borderBottom: '1px solid #e5e7eb', whiteSpace: 'nowrap', fontWeight: 600 };
+const mdTd: CSSProperties = { padding: '6px 8px', borderBottom: '1px solid #f0f0f0', whiteSpace: 'nowrap' };
+const mdList: CSSProperties = { margin: '4px 0', paddingLeft: 18 };
+const mdHeading: CSSProperties = { fontWeight: 700, margin: '6px 0 2px' };
+const mdParagraph: CSSProperties = { margin: '4px 0' };
+
+// inlineBold renders **bold** spans without dangerouslySetInnerHTML.
+function inlineBold(text: string) {
+  return text.split('**').map((seg, i) => (i % 2 === 1 ? <strong key={i}>{seg}</strong> : <span key={i}>{seg}</span>));
+}
+
+function splitRow(line: string): string[] {
+  return line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+}
+
+function isTableSeparator(line: string): boolean {
+  return line.includes('|') && line.includes('-') && /^[\s|:-]+$/.test(line);
+}
+
+function isBlockStart(line: string): boolean {
+  return line.includes('|') || /^\s*[-*]\s+/.test(line) || /^\s*\d+\.\s+/.test(line) || /^\s*#{1,4}\s+/.test(line);
+}
+
+// renderMarkdown turns the assistant's reply into readable UI: paragraphs, **bold**,
+// bullet/numbered lists, headings and tables (tables scroll horizontally so they never
+// overflow the narrow bubble). Stray code fences are dropped.
+function renderMarkdown(text: string) {
+  const lines = text.replace(/\r/g, '').split('\n').filter((l) => !l.trim().startsWith(FENCE));
+  const out: JSX.Element[] = [];
+  let i = 0;
+  let key = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (line.trim() === '') { i++; continue; }
+
+    if (line.includes('|') && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+      const header = splitRow(line);
+      i += 2;
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim() !== '') { rows.push(splitRow(lines[i])); i++; }
+      out.push(
+        <div key={key++} style={mdTableWrap}>
+          <table style={mdTable}>
+            <thead><tr>{header.map((h, hi) => <th key={hi} style={mdTh}>{inlineBold(h)}</th>)}</tr></thead>
+            <tbody>{rows.map((r, ri) => <tr key={ri}>{r.map((c, ci) => <td key={ci} style={mdTd}>{inlineBold(c)}</td>)}</tr>)}</tbody>
+          </table>
+        </div>,
+      );
+      continue;
+    }
+
+    if (/^\s*[-*]\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) { items.push(lines[i].replace(/^\s*[-*]\s+/, '')); i++; }
+      out.push(<ul key={key++} style={mdList}>{items.map((it, ii) => <li key={ii}>{inlineBold(it)}</li>)}</ul>);
+      continue;
+    }
+
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { items.push(lines[i].replace(/^\s*\d+\.\s+/, '')); i++; }
+      out.push(<ol key={key++} style={mdList}>{items.map((it, ii) => <li key={ii}>{inlineBold(it)}</li>)}</ol>);
+      continue;
+    }
+
+    const heading = line.match(/^\s*#{1,4}\s+(.*)$/);
+    if (heading) { out.push(<div key={key++} style={mdHeading}>{inlineBold(heading[1])}</div>); i++; continue; }
+
+    const para: string[] = [line];
+    i++;
+    while (i < lines.length && lines[i].trim() !== '' && !isBlockStart(lines[i])) { para.push(lines[i]); i++; }
+    out.push(
+      <p key={key++} style={mdParagraph}>
+        {para.map((pl, pi) => <span key={pi}>{pi > 0 ? <br /> : null}{inlineBold(pl)}</span>)}
+      </p>,
+    );
+  }
+
+  return out;
 }
 
 function stepText(event: BuilderEvent): string {
@@ -363,7 +441,7 @@ export function BuilderAssistantWidget({ title = 'AI-ассистент', accent
             {messages.map((m: BuilderMessage) => (
               <div key={m.id} style={m.role === 'user' ? styles.rowUser : styles.rowAssistant}>
                 <div style={m.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant}>
-                  {renderRich(m.content)}
+                  {renderMarkdown(m.content)}
                   {m.summary && summaryChips(m.summary).length > 0 && (
                     <div style={styles.chips}>
                       {summaryChips(m.summary).map((c, i) => (

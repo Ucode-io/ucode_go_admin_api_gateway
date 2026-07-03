@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"ucode/ucode_go_api_gateway/api/handlers/ai"
+	"ucode/ucode_go_api_gateway/api/handlers/ai/chat_prompts"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pbcs "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -67,6 +68,9 @@ func (h *HandlerV1) CreateEmbeddedBuilderMessage(c *gin.Context) {
 		service, resourceEnvId, environmentId, projectId, companyId, "",
 		resource.GetNodeType(), int32(resource.GetResourceType()), config.AIProviderClaude,
 	)
+	// End-user replies render in a narrow chat bubble — use the widget-formatted prompt.
+	session.systemPrompt = chat_prompts.EmbeddedBuilderSystemPrompt()
+
 	history := embeddedHistoryToConversation(req.History)
 
 	if streaming {
