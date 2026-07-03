@@ -585,6 +585,13 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v2Agents.POST("/:agent-id/run", h.V1.RunAgentPublic)
 	}
 
+	// End-user surface for the built-in u-code builder assistant embedded in
+	// generated admin panels (stateless; SSE with ?stream=true).
+	v2AiBuilder := clientV2.Group("/ai-builder")
+	{
+		v2AiBuilder.POST("/messages", h.V1.CreateEmbeddedBuilderMessage)
+	}
+
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V1.AuthMiddleware(cfg))
 	v2Version.Use(tracker.ApiCallCountMiddleware())

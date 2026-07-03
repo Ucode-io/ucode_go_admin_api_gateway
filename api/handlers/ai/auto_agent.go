@@ -78,3 +78,7 @@ func (a *AutoAgent) BuildAgentSpec(ctx context.Context, in models.AgentSpecInput
 func (a *AutoAgent) IntegrateAgent(ctx context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
 	return a.claude.IntegrateAgent(ctx, in)
 }
+
+func (a *AutoAgent) IntegrateBuilderAgent(ctx context.Context, in models.AgentIntegrationInput) ([]models.ProjectFile, string, error) {
+	return a.claude.IntegrateBuilderAgent(ctx, in)
+}

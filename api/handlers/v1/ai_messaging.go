@@ -384,6 +384,14 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	//	log.Println("save project failed:", err)
 	//}
 
+	// Only admin panels ship the embedded u-code builder assistant. Best-effort: the
+	// app is already published, so a failed integration must not fail the generation.
+	if plan.ProjectType == "admin_panel" {
+		if _, intErr := p.integrateBuilderAgentIntoFrontend(ctx, chatHistory); intErr != nil {
+			log.Printf("[new-project] builder assistant integration failed (non-fatal): %v", intErr)
+		}
+	}
+
 	log.Printf("[new-project] done — mfe_id=%s", p.microFrontendId)
 	return &models.ParsedClaudeResponse{Description: buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds()))}, nil
 }
@@ -589,6 +597,14 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 			MobileProject: mobileProject,
 			Description:   buildProjectSummary(plan, generated.Project.Files, int(time.Since(startedAt).Seconds())),
 		}, nil
+	}
+
+	// Admin panels built inside an existing project also ship the embedded builder
+	// assistant. Best-effort, same as the new-project path.
+	if plan.ProjectType == "admin_panel" {
+		if _, intErr := p.integrateBuilderAgentIntoFrontend(ctx, chatHistory); intErr != nil {
+			log.Printf("[mfe-current] builder assistant integration failed (non-fatal): %v", intErr)
+		}
 	}
 
 	log.Printf("[mfe-current] done — mfe_id=%s", p.microFrontendId)
