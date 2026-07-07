@@ -33,9 +33,16 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return p.runVisualEdit(ctx, req.Content, req.Context, chatHistory, req.Images)
 	}
 
-	if p.newProject && isReferenceClonePrompt(req.Content) {
-		log.Printf("[ROUTER] reference clone prompt detected — bypassing questionnaire")
-		return p.buildNewProject(ctx, req.Content, chatHistory, req.Images, "")
+	// The frontend sends new_project=false both for "New frontend" in the
+	// current project and when a microfrontend is auto-selected on page load,
+	// so the clone bypass must not depend on new_project alone.
+	isClonePrompt := isReferenceClonePrompt(req.Content)
+	if isClonePrompt && p.microFrontendId == "" {
+		log.Printf("[ROUTER] reference clone prompt detected — bypassing questionnaire (new_project=%v)", p.newProject)
+		if p.newProject {
+			return p.buildNewProject(ctx, req.Content, chatHistory, req.Images, "")
+		}
+		return p.buildMicrofrontendForCurrentProject(ctx, req.Content, chatHistory, req.Images, "")
 	}
 
 	var (
@@ -69,6 +76,12 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	log.Printf("[ROUTER] intent=%s next_step=%v files_needed=%d", routeResult.Intent, routeResult.NextStep, len(routeResult.FilesNeeded))
 
 	if routeResult.Intent == intentAskQuestion {
+		// A clone prompt already names its source of truth — never answer it
+		// with a questionnaire, even in microfrontend edit mode.
+		if isClonePrompt {
+			log.Printf("[ROUTER] router asked questions for a clone prompt — overriding to code change")
+			return p.runCodeChange(ctx, req.Content, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, microFrontFiles)
+		}
 		return &models.ParsedClaudeResponse{
 			Description: routeResult.Reply,
 			Questions:   routeResult.Questions,

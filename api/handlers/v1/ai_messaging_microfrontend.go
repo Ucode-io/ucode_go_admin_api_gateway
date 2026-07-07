@@ -63,6 +63,24 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 		return nil, err
 	}
 
+	var (
+		reference        *models.ReferenceSiteContext
+		referenceMessage string
+	)
+	clarified, imageURLs, reference, referenceMessage = prepareReferencePrompt(ctx, p.baseConf, clarified, imageURLs)
+	if referenceMessage != "" {
+		return &models.ParsedClaudeResponse{Description: referenceMessage}, nil
+	}
+	if reference != nil {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "scan-eye",
+			Percent: 8,
+			Message: "Захватил референс сайта для точного клонирования",
+			Value:   reference.URL,
+		})
+	}
+
 	// Phase 1: plan which files to change or create.
 	var plan *models.SonnetPlanResult
 	if err := withHeartbeat(ctx, emit,
