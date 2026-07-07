@@ -76,7 +76,7 @@ func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fil
 			Type:    EvProgress,
 			Icon:    "scan-eye",
 			Percent: 8,
-			Message: "Захватил референс сайта для точного клонирования",
+			Message: referenceCaptureProgressMessage(reference),
 			Value:   reference.URL,
 		})
 	}

@@ -275,6 +275,7 @@ type (
 		Fonts       []string              `json:"fonts,omitempty"`
 		Sections    []ReferenceSection    `json:"sections,omitempty"`
 		Assets      []ReferenceAsset      `json:"assets,omitempty"`
+		Navigation  []string              `json:"navigation,omitempty"`
 		Warnings    []string              `json:"warnings,omitempty"`
 	}
 

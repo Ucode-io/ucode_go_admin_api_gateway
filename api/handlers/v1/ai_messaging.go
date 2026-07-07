@@ -223,7 +223,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 			Type:    EvProgress,
 			Icon:    "scan-eye",
 			Percent: 8,
-			Message: "Захватил референс сайта для точного клонирования",
+			Message: referenceCaptureProgressMessage(reference),
 			Value:   reference.URL,
 		})
 	}
@@ -455,7 +455,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 			Type:    EvProgress,
 			Icon:    "scan-eye",
 			Percent: 8,
-			Message: "Захватил референс сайта для точного клонирования",
+			Message: referenceCaptureProgressMessage(reference),
 			Value:   reference.URL,
 		})
 	}
@@ -1290,6 +1290,10 @@ DO NOT use Many2Many, array values, or numeric IDs — only single guid string p
 	d := plan.Design
 	if d.PrimaryColor != "" {
 		sb.WriteString("\n====================================\nDESIGN TOKENS\n====================================\n")
+		if plan.CloneMode {
+			sb.WriteString("⚠ CLONE MODE: the REFERENCE SITE CONTEXT block is the single design authority.\n")
+			sb.WriteString("The tokens below are a FALLBACK only — wherever they conflict with the captured reference colors/fonts/screenshots, follow the reference.\n")
+		}
 		sb.WriteString(fmt.Sprintf("design_inspiration: %s\n", d.DesignInspiration))
 		sb.WriteString(fmt.Sprintf("font_family (heading): %s\n", d.FontFamily))
 		sb.WriteString(fmt.Sprintf("body_font: %s\n", d.BodyFont))

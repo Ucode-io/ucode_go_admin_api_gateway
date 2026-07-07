@@ -13,6 +13,7 @@ import (
 	"net/netip"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -46,6 +47,9 @@ type referenceCaptureRequest struct {
 	URL       string                     `json:"url"`
 	Viewports []referenceCaptureViewport `json:"viewports"`
 	Extract   []string                   `json:"extract"`
+	// FullPage asks the render service for full-page screenshots instead of a
+	// viewport-height clip — a clone needs the below-the-fold sections too.
+	FullPage bool `json:"full_page"`
 }
 
 func prepareReferencePrompt(ctx context.Context, conf config.BaseConfig, prompt string, imageURLs []string) (string, []string, *models.ReferenceSiteContext, string) {
@@ -57,6 +61,7 @@ func prepareReferencePrompt(ctx context.Context, conf config.BaseConfig, prompt 
 	if len(rawURLs) == 0 || !hasReferenceCloneIntent(prompt) {
 		return prompt, imageURLs, nil, ""
 	}
+	rawURLs = reduceSameHostReferenceURLs(rawURLs)
 	if len(rawURLs) > 1 {
 		return prompt, imageURLs, nil, "I found multiple website links in your prompt. Please send one exact public URL to clone so I can reproduce the right design."
 	}
@@ -141,10 +146,65 @@ func extractReferenceURLs(prompt string) []string {
 		if loc[0] >= 3 && strings.EqualFold(prompt[loc[0]-3:loc[0]], "://") {
 			continue
 		}
+		if isLikelyAssetFilename(prompt[loc[0]:loc[1]]) {
+			continue
+		}
 		add(prompt[loc[0]:loc[1]])
 	}
 
 	return out
+}
+
+// assetFilenameSuffixes are "TLDs" that are really file extensions. The bare-domain
+// regex accepts any alphabetic TLD, so words like "hero.png" or "index.tsx" in a
+// prompt would otherwise count as extra reference URLs and trigger the
+// one-URL-only refusal.
+var assetFilenameSuffixes = map[string]bool{
+	"png": true, "jpg": true, "jpeg": true, "gif": true, "svg": true, "webp": true,
+	"ico": true, "css": true, "js": true, "ts": true, "tsx": true, "jsx": true,
+	"json": true, "html": true, "htm": true, "pdf": true, "txt": true, "md": true,
+	"woff": true, "ttf": true, "otf": true, "mp4": true, "webm": true, "zip": true,
+	"csv": true, "xml": true, "yml": true, "yaml": true, "env": true,
+}
+
+func isLikelyAssetFilename(candidate string) bool {
+	candidate = cleanReferenceURLCandidate(candidate)
+	host := candidate
+	if idx := strings.IndexAny(host, "/?#"); idx != -1 {
+		host = host[:idx]
+	}
+	dot := strings.LastIndex(host, ".")
+	if dot == -1 {
+		return false
+	}
+	return assetFilenameSuffixes[strings.ToLower(host[dot+1:])]
+}
+
+// reduceSameHostReferenceURLs collapses multiple URLs that point at the same
+// site (e.g. "site.de" and "site.de/about") to the shortest one, so a prompt
+// mentioning two paths of one site is not rejected as "multiple websites".
+func reduceSameHostReferenceURLs(urls []string) []string {
+	if len(urls) < 2 {
+		return urls
+	}
+	host := ""
+	shortest := ""
+	for _, raw := range urls {
+		parsed, err := url.Parse(raw)
+		if err != nil || parsed.Hostname() == "" {
+			return urls
+		}
+		h := strings.TrimPrefix(strings.ToLower(parsed.Hostname()), "www.")
+		if host == "" {
+			host = h
+		} else if h != host {
+			return urls
+		}
+		if shortest == "" || len(raw) < len(shortest) {
+			shortest = raw
+		}
+	}
+	return []string{shortest}
 }
 
 func hasReferenceCloneIntent(prompt string) bool {
@@ -155,6 +215,14 @@ func hasReferenceCloneIntent(prompt string) bool {
 		"same design", "same logic", "same layout", "same style",
 		"according to", "based on this", "based on the", "reference",
 		"like this website", "like this site", "make like",
+		// Russian — most Ugen users write prompts in Russian.
+		"1 в 1", "один в один", "точь-в-точь", "точно как", "точно такой",
+		"клон", "клониру", "скопиру", "скопир", "копию", "копия сайта",
+		"такой же дизайн", "такой же сайт", "так же как", "также как",
+		"как на сайте", "как у сайта", "как этот сайт", "по образцу", "по примеру",
+		"повтори дизайн", "повтори сайт", "срисуй", "референс",
+		// Uzbek (latin).
+		"xuddi shu", "bir xil", "nusxa", "shu saytdek", "saytga o'xshash", "o‘xshash qilib",
 	}
 	for _, signal := range signals {
 		if strings.Contains(lower, signal) {
@@ -260,7 +328,8 @@ func captureReferenceSite(ctx context.Context, conf config.BaseConfig, targetURL
 			{Name: "desktop", Width: 1440, Height: 1200},
 			{Name: "mobile", Width: 390, Height: 1200},
 		},
-		Extract: []string{"screenshots", "text", "colors", "fonts", "assets", "sections"},
+		Extract:  []string{"screenshots", "text", "colors", "fonts", "assets", "sections"},
+		FullPage: true,
 	}
 
 	body, err := json.Marshal(payload)
@@ -431,7 +500,7 @@ func extractReferenceSiteFromHTML(sourceURL, finalURL, htmlText, cssText string)
 	doc, err := html.Parse(strings.NewReader(htmlText))
 	if err != nil {
 		ref.Warnings = append(ref.Warnings, "Could not parse HTML; using regex fallback.")
-		ref.Colors = limitStrings(cssColorRe.FindAllString(htmlText+"\n"+cssText, -1), 12)
+		ref.Colors = rankColorsByFrequency(htmlText+"\n"+cssText, 12)
 		ref.Fonts = extractFontsFromCSS(htmlText+"\n"+cssText, 8)
 		return ref
 	}
@@ -492,14 +561,92 @@ func extractReferenceSiteFromHTML(sourceURL, finalURL, htmlText, cssText string)
 	}
 
 	allStyles := htmlText + "\n" + cssText + "\n" + inlineCSS.String()
-	ref.Colors = limitStrings(cssColorRe.FindAllString(allStyles, -1), 12)
+	ref.Colors = rankColorsByFrequency(allStyles, 12)
 	ref.Fonts = extractFontsFromCSS(allStyles, 8)
-	ref.Sections = limitReferenceSections(sections, 12)
+	ref.Sections = limitReferenceSections(sections, 16)
 	ref.Assets = limitReferenceAssets(assets, 16)
+	ref.Navigation = extractNavigationLabels(doc, 14)
 	if ref.FinalURL == "" {
 		ref.FinalURL = sourceURL
 	}
 	return ref
+}
+
+// rankColorsByFrequency returns the most-used color literals first. Taking the
+// first N literals in source order surfaces reset/utility colors instead of the
+// brand palette, so occurrence count is the better dominance signal available
+// without rendering.
+func rankColorsByFrequency(styles string, max int) []string {
+	counts := make(map[string]int)
+	firstSeen := make(map[string]int)
+	for i, match := range cssColorRe.FindAllString(styles, -1) {
+		key := strings.ToLower(strings.TrimSpace(match))
+		if key == "" {
+			continue
+		}
+		if _, ok := firstSeen[key]; !ok {
+			firstSeen[key] = i
+		}
+		counts[key]++
+	}
+
+	ranked := make([]string, 0, len(counts))
+	for key := range counts {
+		ranked = append(ranked, key)
+	}
+	sort.Slice(ranked, func(i, j int) bool {
+		if counts[ranked[i]] != counts[ranked[j]] {
+			return counts[ranked[i]] > counts[ranked[j]]
+		}
+		return firstSeen[ranked[i]] < firstSeen[ranked[j]]
+	})
+	return limitStrings(ranked, max)
+}
+
+// extractNavigationLabels collects the site's top-level navigation link labels
+// so multi-page clones know the real page inventory instead of inventing
+// Home/About/Contact defaults.
+func extractNavigationLabels(doc *html.Node, max int) []string {
+	var labels []string
+	seen := make(map[string]bool)
+
+	var collectAnchors func(*html.Node)
+	collectAnchors = func(n *html.Node) {
+		if n == nil || len(labels) >= max {
+			return
+		}
+		if n.Type == html.ElementNode && strings.EqualFold(n.Data, "a") {
+			label := normalizeReferenceText(nodeText(n), 60)
+			key := strings.ToLower(label)
+			if label != "" && !seen[key] {
+				seen[key] = true
+				labels = append(labels, label)
+			}
+		}
+		for child := n.FirstChild; child != nil; child = child.NextSibling {
+			collectAnchors(child)
+		}
+	}
+
+	var findNav func(*html.Node)
+	findNav = func(n *html.Node) {
+		if n == nil || len(labels) >= max {
+			return
+		}
+		if n.Type == html.ElementNode {
+			tag := strings.ToLower(n.Data)
+			role := strings.ToLower(attr(n, "role"))
+			if tag == "nav" || role == "navigation" {
+				collectAnchors(n)
+				return
+			}
+		}
+		for child := n.FirstChild; child != nil; child = child.NextSibling {
+			findNav(child)
+		}
+	}
+	findNav(doc)
+	return labels
 }
 
 func extractStylesheetLinks(htmlText, baseURL string, max int) []string {
@@ -601,7 +748,10 @@ func absolutePublicURL(raw, baseURL string) string {
 }
 
 func extractReferenceSection(n *html.Node) models.ReferenceSection {
-	var section models.ReferenceSection
+	var (
+		section    models.ReferenceSection
+		paragraphs []string
+	)
 	var walk func(*html.Node)
 	walk = func(cur *html.Node) {
 		if cur == nil {
@@ -615,8 +765,11 @@ func extractReferenceSection(n *html.Node) models.ReferenceSection {
 					section.Heading = normalizeReferenceText(nodeText(cur), 140)
 				}
 			case "p":
-				if section.Copy == "" {
-					section.Copy = normalizeReferenceText(nodeText(cur), 220)
+				// Keep up to three paragraphs — one is too thin for "1 to 1" copy.
+				if len(paragraphs) < 3 {
+					if text := normalizeReferenceText(nodeText(cur), 300); text != "" {
+						paragraphs = append(paragraphs, text)
+					}
 				}
 			case "a", "button":
 				if section.CTA == "" {
@@ -629,6 +782,7 @@ func extractReferenceSection(n *html.Node) models.ReferenceSection {
 		}
 	}
 	walk(n)
+	section.Copy = normalizeReferenceText(strings.Join(paragraphs, " ¶ "), 600)
 
 	layoutParts := []string{strings.ToLower(n.Data)}
 	if id := attr(n, "id"); id != "" {
@@ -716,7 +870,7 @@ func limitReferenceSections(values []models.ReferenceSection, max int) []models.
 	seen := make(map[string]bool)
 	for _, section := range values {
 		section.Heading = normalizeReferenceText(section.Heading, 140)
-		section.Copy = normalizeReferenceText(section.Copy, 220)
+		section.Copy = normalizeReferenceText(section.Copy, 600)
 		section.CTA = normalizeReferenceText(section.CTA, 90)
 		section.Layout = normalizeReferenceText(section.Layout, 140)
 		key := strings.ToLower(section.Heading + "|" + section.Copy + "|" + section.CTA)
@@ -749,6 +903,16 @@ func limitReferenceAssets(values []models.ReferenceAsset, max int) []models.Refe
 		}
 	}
 	return out
+}
+
+// referenceCaptureProgressMessage tells the user HOW the reference was captured.
+// Screenshot capture and the HTML/CSS fallback produce very different clone
+// fidelity; reporting them identically makes design drift undiagnosable.
+func referenceCaptureProgressMessage(ref *models.ReferenceSiteContext) string {
+	if ref != nil && len(ref.Screenshots) > 0 {
+		return "Захватил референс сайта (скриншоты + структура) для точного клонирования"
+	}
+	return "Референс захвачен только по HTML/CSS — скриншоты недоступны, точность клонирования будет ниже"
 }
 
 func referenceScreenshotURLs(ref *models.ReferenceSiteContext) []string {
@@ -870,16 +1034,20 @@ func buildReferenceSitePromptBlock(ref *models.ReferenceSiteContext) string {
 	}
 
 	if len(ref.Colors) > 0 {
-		fmt.Fprintf(&sb, "\nExtracted colors: %s\n", strings.Join(limitStrings(ref.Colors, 12), ", "))
+		fmt.Fprintf(&sb, "\nExtracted colors (ranked by how often they appear — most-used first): %s\n", strings.Join(limitStrings(ref.Colors, 12), ", "))
 	}
 	if len(ref.Fonts) > 0 {
 		fmt.Fprintf(&sb, "Extracted fonts: %s\n", strings.Join(limitStrings(ref.Fonts, 8), ", "))
 	}
 
+	if len(ref.Navigation) > 0 {
+		fmt.Fprintf(&sb, "\nSite navigation links (the REAL page inventory — do not invent other pages): %s\n", strings.Join(limitStrings(ref.Navigation, 14), " · "))
+	}
+
 	if len(ref.Sections) > 0 {
-		sb.WriteString("\nDetected sections in order:\n")
+		sb.WriteString("\nDetected sections in order (copy text is authoritative — reuse it verbatim):\n")
 		for i, section := range ref.Sections {
-			if i >= 10 {
+			if i >= 16 {
 				break
 			}
 			parts := []string{}
@@ -887,7 +1055,7 @@ func buildReferenceSitePromptBlock(ref *models.ReferenceSiteContext) string {
 				parts = append(parts, "heading="+truncateReferenceText(section.Heading, 120))
 			}
 			if section.Copy != "" {
-				parts = append(parts, "copy="+truncateReferenceText(section.Copy, 180))
+				parts = append(parts, "copy="+truncateReferenceText(section.Copy, 500))
 			}
 			if section.CTA != "" {
 				parts = append(parts, "cta="+truncateReferenceText(section.CTA, 80))

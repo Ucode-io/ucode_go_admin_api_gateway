@@ -1529,7 +1529,7 @@ func (p *ChatProcessor) generateCodeChunkedWebsite(ctx context.Context, clarifie
 				time.Sleep(startDelay)
 			}
 			emit.Emit(SSEEvent{Type: EvChunkStart, Icon: "file-text", Message: "Генерирую страницу", Value: group.Name, Data: map[string]any{"feature": group.Name}})
-			proj, chunkErr := p.generateWebsitePage(ctx, group, foundationCtx, manifestSummary, apiConfig)
+			proj, chunkErr := p.generateWebsitePage(ctx, group, foundationCtx, manifestSummary, apiConfig, imageURLs)
 			pageResults <- chunkResult{group: group, project: proj, err: chunkErr}
 		}()
 	}
@@ -1663,7 +1663,7 @@ func (p *ChatProcessor) generateWebsiteFoundation(ctx context.Context, clarified
 	return project, nil
 }
 
-func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.ManifestGroup, foundationCtx string, manifestSummary string, apiConfig string) (*models.GeneratedProject, error) {
+func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.ManifestGroup, foundationCtx string, manifestSummary string, apiConfig string, imageURLs []string) (*models.GeneratedProject, error) {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "CHUNKED GENERATION — Website Page: %s\n\n", group.Name)
 
@@ -1685,6 +1685,24 @@ func (p *ChatProcessor) generateWebsitePage(ctx context.Context, group models.Ma
 	sb.WriteString("PROJECT MANIFEST (for import reference)\n")
 	sb.WriteString("====================================\n")
 	sb.WriteString(manifestSummary)
+
+	// Reference-clone screenshots (and user-attached design images) must reach
+	// every page chunk — the pages carry the visual fidelity, not the foundation.
+	if len(imageURLs) > 0 {
+		project, err := p.agent.GenerateCode(
+			ctx,
+			p.agentCfgs().LandingCoder,
+			chat_prompts2.PromptWebsitePageCoder,
+			sb.String(),
+			imageURLs,
+			nil,
+			fmt.Sprintf("Generating website page: %s", group.Name),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("website page %s: %w", group.Name, err)
+		}
+		return project, nil
+	}
 
 	project, err := p.agent.GenerateCodeNoHistory(
 		ctx,

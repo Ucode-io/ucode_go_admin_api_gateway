@@ -24,6 +24,18 @@ var marketingSignals = []string{
 	"marketing site", "marketing website", "website for",
 	"one-page", "one page site", "single page site", "single-page site",
 	"coming soon",
+	"лендинг", "одностраничн",
+}
+
+// landingSignals are the subset of marketing wording that explicitly names a
+// SINGLE-PAGE landing. When present, an architect "web" guess is corrected to
+// "landing": the architect prompt biases toward "web" whenever a real
+// multi-page site is referenced ("landing page like <site>.com"), but an
+// explicit landing request must win.
+var landingSignals = []string{
+	"landing page", "landing-page",
+	"one-page", "one page site", "single page site", "single-page site",
+	"лендинг", "одностраничн",
 }
 
 // adminSignals indicate the user EXPLICITLY wants an internal back-office / admin tool.
@@ -67,9 +79,19 @@ func ApplyProjectTypeKeywordOverride(plan *ArchitectPlan, userPrompt string) {
 
 	lower := strings.ToLower(userPrompt)
 
-	// Respect explicit marketing/promo intent — do not override these.
+	// Respect explicit marketing/promo intent — do not override these to
+	// webapp/mobile. An explicit single-page landing request additionally
+	// corrects an architect "web" guess back to "landing".
 	for _, s := range marketingSignals {
 		if strings.Contains(lower, s) {
+			if plan.ProjectType == "web" {
+				for _, ls := range landingSignals {
+					if strings.Contains(lower, ls) {
+						plan.ProjectType = "landing"
+						break
+					}
+				}
+			}
 			return
 		}
 	}

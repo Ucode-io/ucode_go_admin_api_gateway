@@ -23,6 +23,53 @@ func TestExtractReferenceURLsNormalizesBareDomain(t *testing.T) {
 	}
 }
 
+func TestExtractReferenceURLsSkipsAssetFilenames(t *testing.T) {
+	urls := extractReferenceURLs("Clone thesecrettrading.de 1 to 1, keep hero.png and styles.css as-is")
+
+	if len(urls) != 1 {
+		t.Fatalf("expected asset filenames to be filtered, got %#v", urls)
+	}
+	if urls[0] != "https://thesecrettrading.de" {
+		t.Fatalf("unexpected URL: %s", urls[0])
+	}
+}
+
+func TestReduceSameHostReferenceURLs(t *testing.T) {
+	reduced := reduceSameHostReferenceURLs([]string{
+		"https://thesecrettrading.de/about",
+		"https://thesecrettrading.de",
+	})
+	if len(reduced) != 1 || reduced[0] != "https://thesecrettrading.de" {
+		t.Fatalf("expected same-host URLs collapsed to root, got %#v", reduced)
+	}
+
+	distinct := reduceSameHostReferenceURLs([]string{
+		"https://site-one.com",
+		"https://site-two.com",
+	})
+	if len(distinct) != 2 {
+		t.Fatalf("expected distinct hosts preserved, got %#v", distinct)
+	}
+}
+
+func TestRankColorsByFrequencyPrefersDominantColors(t *testing.T) {
+	styles := `
+		.reset { color: #333333; }
+		.brand { color: #f4c542; background: #f4c542; border-color: #f4c542; }
+		.hero { background: #050505; color: #050505; }
+	`
+	colors := rankColorsByFrequency(styles, 2)
+	if len(colors) != 2 {
+		t.Fatalf("expected 2 colors, got %#v", colors)
+	}
+	if colors[0] != "#f4c542" {
+		t.Fatalf("expected most-used color first, got %#v", colors)
+	}
+	if colors[1] != "#050505" {
+		t.Fatalf("expected second most-used color, got %#v", colors)
+	}
+}
+
 func TestNormalizeReferenceURLBlocksPrivateHosts(t *testing.T) {
 	tests := []string{
 		"http://localhost:3000",
@@ -62,6 +109,21 @@ func TestIsReferenceClonePromptRequiresURLAndCloneIntent(t *testing.T) {
 		{
 			name:   "clone intent without url",
 			prompt: "Make this 1 to 1 design",
+			want:   false,
+		},
+		{
+			name:   "russian clone intent with bare domain",
+			prompt: "Сделай лендинг 1 в 1 как на сайте thesecrettrading.de",
+			want:   true,
+		},
+		{
+			name:   "russian copy intent",
+			prompt: "Скопируй дизайн с https://example.com пожалуйста",
+			want:   true,
+		},
+		{
+			name:   "asset filename is not a reference url",
+			prompt: "Clone the design and use hero.png as the header image",
 			want:   false,
 		},
 	}
@@ -180,6 +242,7 @@ func TestExtractReferenceSiteFromHTMLPullsStyleAndContent(t *testing.T) {
 				</style>
 			</head>
 			<body>
+				<nav><a href="/">Home</a><a href="/courses">Courses</a><a href="/contact">Contact</a></nav>
 				<header class="hero"><h1>Master the Markets</h1><p>Learn private trading logic.</p><a href="/start">Join now</a></header>
 				<img src="/hero.png" alt="Trading dashboard">
 			</body>
@@ -202,6 +265,9 @@ func TestExtractReferenceSiteFromHTMLPullsStyleAndContent(t *testing.T) {
 	}
 	if !containsString(ref.Fonts, "Inter") || !containsString(ref.Fonts, "Space Grotesk") {
 		t.Fatalf("expected extracted fonts, got %#v", ref.Fonts)
+	}
+	if !containsString(ref.Navigation, "Courses") || !containsString(ref.Navigation, "Contact") {
+		t.Fatalf("expected navigation labels, got %#v", ref.Navigation)
 	}
 }
 

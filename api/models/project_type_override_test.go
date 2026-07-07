@@ -63,6 +63,24 @@ func TestApplyProjectTypeKeywordOverride(t *testing.T) {
 			prompt:      "Build a web app admin panel to manage inventory",
 			want:        "admin_panel",
 		},
+		{
+			name:        "explicit landing page corrects web guess",
+			projectType: "web",
+			prompt:      "Make landing page according to this thesecrettrading.de website. Make 1 to 1 logic and design.",
+			want:        "landing",
+		},
+		{
+			name:        "russian landing request corrects web guess",
+			projectType: "web",
+			prompt:      "Сделай лендинг 1 в 1 как на сайте example.com",
+			want:        "landing",
+		},
+		{
+			name:        "landing signal does not downgrade webapp",
+			projectType: "webapp",
+			prompt:      "Build a landing page for our product",
+			want:        "webapp",
+		},
 	}
 
 	for _, tt := range tests {

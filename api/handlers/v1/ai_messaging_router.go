@@ -93,6 +93,10 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		if clarified == "" {
 			clarified = req.Content
 		}
+		// The router's clarified text is a short rewrite; if the original build
+		// request was a reference clone, the URL/clone phrasing may have been
+		// dropped — and with it the whole reference-capture pipeline.
+		clarified = restoreCloneReference(clarified, chatHistory)
 		return p.runCodeChange(ctx, clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, microFrontFiles)
 	}
 
@@ -134,6 +138,34 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	}
 
 	return &models.ParsedClaudeResponse{Description: routeResult.Reply}, nil
+}
+
+// restoreCloneReference re-attaches the user's original clone request when a
+// rewritten prompt no longer triggers reference-clone detection. Only used on
+// the plan_request (questionnaire-completion) path, where the build is starting
+// fresh from the conversation — never on later edits, so an old clone prompt in
+// history cannot hijack unrelated changes.
+func restoreCloneReference(clarified string, history []models.ChatMessage) string {
+	if isReferenceClonePrompt(clarified) {
+		return clarified
+	}
+	for i := len(history) - 1; i >= 0; i-- {
+		if history[i].Role != "user" {
+			continue
+		}
+		var text strings.Builder
+		for _, block := range history[i].Content {
+			if block.Type == "text" {
+				text.WriteString(block.Text)
+			}
+		}
+		original := text.String()
+		if isReferenceClonePrompt(original) {
+			log.Printf("[ROUTER] plan_request lost clone reference — restoring original request from history")
+			return clarified + "\n\nOriginal user request (authoritative for the reference website URL and clone intent):\n" + original
+		}
+	}
+	return clarified
 }
 
 func (p *ChatProcessor) runCodeChange(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, projectName string, microFrontFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {

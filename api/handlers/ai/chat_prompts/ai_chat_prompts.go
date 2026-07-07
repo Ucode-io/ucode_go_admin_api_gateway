@@ -449,7 +449,10 @@ Always respond in the same language the user wrote in.`
 REFERENCE WEBSITE CLONE MODE:
 If the user message contains "REFERENCE SITE CONTEXT - AUTHORITATIVE", the attached screenshots when present and the extracted site data are the source of truth.
 For landing/web clone requests, reproduce the referenced site instead of choosing a new archetype, new palette, stock imagery, or extra marketing sections.
-Use the captured colors/fonts/section order/assets in ui_structure and design tokens.
+Use the captured colors/fonts/section order/assets in ui_structure and design tokens: the design tokens MUST be filled from the extracted reference colors (most-used first) and fonts — never from an archetype.
+ui_structure MUST restate the captured sections in their captured order with their captured copy — it is a reproduction spec, not a creative brief.
+If the reference context lists "Site navigation links", that is the complete page inventory for a "web" clone — do not add or omit pages.
+CLONE + EXPLICIT PLATFORM RULE: when the user explicitly names the platform ("landing page", "admin panel", ...), keep that project_type even if the referenced site is a multi-page website — e.g. "make a landing page like <multi-page-site>" stays "landing" and clones the referenced page as one scrollable page.
 Do NOT create backend tables for a pure landing/website clone unless the user explicitly asks for admin/database/API/product functionality.
 
 PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FIVE):
@@ -570,6 +573,8 @@ CLEAR web signals:
 ALWAYS "web" (never landing) when user references a real multi-page website:
   "like Uzum", "like Amazon", "like Apple.com", "like Stripe.com",
   "like university site", "like hospital site", "like a corporate website"
+  EXCEPTION: an explicit "landing page" / "лендинг" / "one-page" request ALWAYS wins —
+  "make a landing page like Apple.com" is "landing" (clone the referenced page as one scrollable page).
 
 ────────────────────────────────────────────────────────────────
 TYPE "landing" — single-page promotional / portfolio
