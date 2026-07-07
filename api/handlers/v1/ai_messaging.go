@@ -46,6 +46,7 @@ type ChatProcessor struct {
 	mcpProjectId      string
 	resourceEnvId     string
 	ucodeProjectId    string
+	billingProjectId  string
 	mcpUcodeProjectId string
 	companyId         string
 	fareId            string
@@ -157,18 +158,19 @@ func (p *ChatProcessor) emitter() ProgressEmitter {
 
 func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId, ucodeProjectId string, userId, clientTypeId, roleId, authToken string) *ChatProcessor {
 	p := &ChatProcessor{
-		h:               h,
-		service:         service,
-		companyServices: h.companyServices,
-		baseConf:        baseConf,
-		chatId:          chatId,
-		mcpProjectId:    mcpProjectId,
-		resourceEnvId:   resourceEnvId,
-		ucodeProjectId:  ucodeProjectId,
-		userId:          userId,
-		clientTypeId:    clientTypeId,
-		roleId:          roleId,
-		authToken:       authToken,
+		h:                h,
+		service:          service,
+		companyServices:  h.companyServices,
+		baseConf:         baseConf,
+		chatId:           chatId,
+		mcpProjectId:     mcpProjectId,
+		resourceEnvId:    resourceEnvId,
+		ucodeProjectId:   ucodeProjectId,
+		billingProjectId: ucodeProjectId,
+		userId:           userId,
+		clientTypeId:     clientTypeId,
+		roleId:           roleId,
+		authToken:        authToken,
 	}
 	return p
 }

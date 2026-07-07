@@ -34,8 +34,19 @@ func (e *TokenLimitError) Error() string {
 }
 
 func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
-	if p.mcpUcodeProjectId == "" {
-		log.Printf("[TOKEN BUDGET] skipped: no project_id")
+	billingProjectID := p.billingProjectId
+	if billingProjectID == "" {
+		billingProjectID = p.ucodeProjectId
+	}
+
+	if billingProjectID == "" {
+		log.Printf("[TOKEN BUDGET] skipped: no billing project id (ucode_project_id=%s mcp_ucode_project_id=%s company_id=%s)",
+			p.ucodeProjectId, p.mcpUcodeProjectId, p.companyId)
+		return
+	}
+	if p.companyId == "" {
+		log.Printf("[TOKEN BUDGET] skipped: no company id (billing_project_id=%s ucode_project_id=%s mcp_ucode_project_id=%s)",
+			billingProjectID, p.ucodeProjectId, p.mcpUcodeProjectId)
 		return
 	}
 
@@ -48,7 +59,7 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		limitsResp, err = p.h.companyServices.Billing().GetPricingLimits(gCtx, &pb.GetPricingLimitsRequest{ProjectId: p.ucodeProjectId})
+		limitsResp, err = p.h.companyServices.Billing().GetPricingLimits(gCtx, &pb.GetPricingLimitsRequest{ProjectId: billingProjectID})
 		return err
 	})
 	g.Go(func() error {
@@ -78,7 +89,8 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	}
 
 	if snap.DayLimit == 0 && snap.MonthLimit == 0 {
-		log.Printf("[TOKEN BUDGET] skipped: no token limits configured for project_id=%s", p.mcpUcodeProjectId)
+		log.Printf("[TOKEN BUDGET] skipped: no token limits configured for billing_project_id=%s ucode_project_id=%s mcp_ucode_project_id=%s",
+			billingProjectID, p.ucodeProjectId, p.mcpUcodeProjectId)
 		return
 	}
 
@@ -107,8 +119,8 @@ func (p *ChatProcessor) initTokenBudget(ctx context.Context) {
 	atomic.StoreInt64(&p.tokenBudgetRemain, remain)
 	atomic.StoreInt64(&p.tokenPackRemain, snap.PackRemain)
 
-	log.Printf("[TOKEN BUDGET] initialized: plan_remain=%d pack_remain=%d (day %d/%d, month %d/%d)",
-		remain, snap.PackRemain, snap.DayUsed, snap.DayLimit, snap.MonthUsed, snap.MonthLimit)
+	log.Printf("[TOKEN BUDGET] initialized: billing_project_id=%s usage_project_id=%s plan_remain=%d pack_remain=%d (day %d/%d, month %d/%d)",
+		billingProjectID, p.mcpUcodeProjectId, remain, snap.PackRemain, snap.DayUsed, snap.DayLimit, snap.MonthUsed, snap.MonthLimit)
 }
 
 func (p *ChatProcessor) Check() error {
