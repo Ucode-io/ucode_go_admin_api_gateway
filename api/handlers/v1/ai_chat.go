@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -248,6 +249,8 @@ func newAiChatMessageReactionResponse(reaction *pbo.MessageReaction) *aiChatMess
 // ==================== Chat Endpoints ====================
 
 func (h *HandlerV1) CreateAiChat(c *gin.Context) {
+	log.Println("[BUILD-CHECK] CreateAiChat — reference-clone-fix build (2026-07-07)")
+
 	var request pbo.CreateChatRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {

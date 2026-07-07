@@ -20,6 +20,8 @@ import (
 )
 
 func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
+	log.Println("[BUILD-CHECK] CreateAiChatMessage — reference-clone-fix build (2026-07-07)")
+
 	var (
 		userMessage models.NewMessageReq
 		chatId      = c.Param("chat-id")
