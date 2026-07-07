@@ -164,6 +164,10 @@ func hasReferenceCloneIntent(prompt string) bool {
 	return false
 }
 
+func isReferenceClonePrompt(prompt string) bool {
+	return hasReferenceCloneIntent(prompt) && len(extractReferenceURLs(prompt)) > 0
+}
+
 func cleanReferenceURLCandidate(raw string) string {
 	raw = strings.TrimSpace(raw)
 	raw = strings.TrimLeft(raw, "\"'(<[{")

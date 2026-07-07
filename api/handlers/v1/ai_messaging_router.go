@@ -33,6 +33,11 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		return p.runVisualEdit(ctx, req.Content, req.Context, chatHistory, req.Images)
 	}
 
+	if p.newProject && isReferenceClonePrompt(req.Content) {
+		log.Printf("[ROUTER] reference clone prompt detected — bypassing questionnaire")
+		return p.buildNewProject(ctx, req.Content, chatHistory, req.Images, "")
+	}
+
 	var (
 		hasImages = len(req.Images) > 0
 

@@ -43,6 +43,38 @@ func TestNormalizeReferenceURLBlocksPrivateHosts(t *testing.T) {
 	}
 }
 
+func TestIsReferenceClonePromptRequiresURLAndCloneIntent(t *testing.T) {
+	tests := []struct {
+		name   string
+		prompt string
+		want   bool
+	}{
+		{
+			name:   "clone domain",
+			prompt: "Make landing page according to this thesecrettrading.de website. Make 1 to 1 logic and design.",
+			want:   true,
+		},
+		{
+			name:   "url without clone intent",
+			prompt: "Tell me what https://example.com is",
+			want:   false,
+		},
+		{
+			name:   "clone intent without url",
+			prompt: "Make this 1 to 1 design",
+			want:   false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := isReferenceClonePrompt(tc.prompt); got != tc.want {
+				t.Fatalf("isReferenceClonePrompt() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestPrepareReferencePromptCapturesAndAppendsScreenshots(t *testing.T) {
 	var gotRequest referenceCaptureRequest
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
