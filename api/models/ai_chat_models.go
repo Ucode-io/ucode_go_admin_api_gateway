@@ -245,16 +245,51 @@ type (
 		DesignInspiration    string `json:"design_inspiration"`
 	}
 
+	ReferenceScreenshot struct {
+		Viewport string `json:"viewport"`
+		URL      string `json:"url"`
+		Width    int    `json:"width,omitempty"`
+		Height   int    `json:"height,omitempty"`
+	}
+
+	ReferenceSection struct {
+		Heading string `json:"heading,omitempty"`
+		Copy    string `json:"copy,omitempty"`
+		CTA     string `json:"cta,omitempty"`
+		Layout  string `json:"layout,omitempty"`
+	}
+
+	ReferenceAsset struct {
+		Type string `json:"type,omitempty"`
+		URL  string `json:"url,omitempty"`
+		Alt  string `json:"alt,omitempty"`
+	}
+
+	ReferenceSiteContext struct {
+		URL         string                `json:"url"`
+		FinalURL    string                `json:"final_url,omitempty"`
+		Title       string                `json:"title,omitempty"`
+		Description string                `json:"description,omitempty"`
+		Screenshots []ReferenceScreenshot `json:"screenshots,omitempty"`
+		Colors      []string              `json:"colors,omitempty"`
+		Fonts       []string              `json:"fonts,omitempty"`
+		Sections    []ReferenceSection    `json:"sections,omitempty"`
+		Assets      []ReferenceAsset      `json:"assets,omitempty"`
+		Warnings    []string              `json:"warnings,omitempty"`
+	}
+
 	ArchitectPlan struct {
-		ProjectName        string              `json:"project_name"`
-		ProjectType        string              `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp" | "mobile"
-		Tables             []TablePlan         `json:"tables"`
-		Relations          []TableRelationPlan `json:"relations,omitempty"`
-		UIStructure        string              `json:"ui_structure"`
-		Design             DesignSpec          `json:"design"`
-		ImageKeywords      []string            `json:"image_keywords,omitempty"`
-		ClientTypes        []string            `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
-		MobileCapabilities []MobileCapability  `json:"mobile_capabilities,omitempty"`
+		ProjectName        string                `json:"project_name"`
+		ProjectType        string                `json:"project_type"` // "admin_panel" | "landing" | "web" | "webapp" | "mobile"
+		Tables             []TablePlan           `json:"tables"`
+		Relations          []TableRelationPlan   `json:"relations,omitempty"`
+		UIStructure        string                `json:"ui_structure"`
+		Design             DesignSpec            `json:"design"`
+		ImageKeywords      []string              `json:"image_keywords,omitempty"`
+		ClientTypes        []string              `json:"client_types,omitempty"` // silently inferred access personas → each becomes client_type + role record
+		MobileCapabilities []MobileCapability    `json:"mobile_capabilities,omitempty"`
+		CloneMode          bool                  `json:"clone_mode,omitempty"`
+		Reference          *ReferenceSiteContext `json:"reference,omitempty"`
 	}
 
 	ProjectData struct {

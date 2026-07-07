@@ -101,27 +101,38 @@ func (h *HandlerV1) McpGenerateProject(c *gin.Context) {
 		return
 	}
 
-	go func() {
-		bgContent, _, bgErr := mcp_prompts.BuildBackendPrompt(
-			models.GeneratePromptRequest{
-				ProjectId:     scope.ProjectId,
-				EnvironmentId: scope.EnvironmentId,
-				Method:        "project",
-				APIKey:        scope.APIKey,
-				UserPrompt:    request.Prompt,
-			},
-		)
-		if bgErr != nil {
-			log.Printf("Background BuildBackendPrompt Error: %v", bgErr)
-			return
-		}
+	originalPrompt := request.Prompt
+	var reference *models.ReferenceSiteContext
+	var referenceMessage string
+	request.Prompt, request.ImageURLs, reference, referenceMessage = prepareReferencePrompt(c.Request.Context(), h.baseConf, request.Prompt, request.ImageURLs)
+	if referenceMessage != "" {
+		h.HandleResponse(c, status_http.BadRequest, referenceMessage)
+		return
+	}
 
-		_, bgErr = h.sendAnthropicBackend(bgContent)
-		if bgErr != nil {
-			log.Printf("Background sendAnthropicBackend Error: %v", bgErr)
-			return
-		}
-	}()
+	if !shouldSkipBackendForReferencePrompt(originalPrompt, reference) {
+		go func() {
+			bgContent, _, bgErr := mcp_prompts.BuildBackendPrompt(
+				models.GeneratePromptRequest{
+					ProjectId:     scope.ProjectId,
+					EnvironmentId: scope.EnvironmentId,
+					Method:        "project",
+					APIKey:        scope.APIKey,
+					UserPrompt:    request.Prompt,
+				},
+			)
+			if bgErr != nil {
+				log.Printf("Background BuildBackendPrompt Error: %v", bgErr)
+				return
+			}
+
+			_, bgErr = h.sendAnthropicBackend(bgContent)
+			if bgErr != nil {
+				log.Printf("Background sendAnthropicBackend Error: %v", bgErr)
+				return
+			}
+		}()
+	}
 
 	userPrompt := mcp_prompts.BuildFrontendGeneratePrompt(
 		models.GeneratePromptRequest{
@@ -419,10 +430,23 @@ func (h *HandlerV1) McpGeneratePlan(c *gin.Context) {
 		return
 	}
 
-	backendPlan, err := h.generateBackendPlan(req.Prompt)
-	if err != nil {
-		h.HandleResponse(c, status_http.InternalServerError, "Backend plan generation failed: "+err.Error())
+	originalPrompt := req.Prompt
+	var reference *models.ReferenceSiteContext
+	var referenceMessage string
+	req.Prompt, req.ImageURLs, reference, referenceMessage = prepareReferencePrompt(c.Request.Context(), h.baseConf, req.Prompt, req.ImageURLs)
+	if referenceMessage != "" {
+		h.HandleResponse(c, status_http.BadRequest, referenceMessage)
 		return
+	}
+
+	backendPlan := "NO_BACKEND_REQUIRED: Pure reference-site landing/website clone. Do not create database tables unless the user explicitly asks for dynamic data."
+	if !shouldSkipBackendForReferencePrompt(originalPrompt, reference) {
+		var err error
+		backendPlan, err = h.generateBackendPlan(req.Prompt)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, "Backend plan generation failed: "+err.Error())
+			return
+		}
 	}
 
 	frontendPlan, err := h.generateFrontendPlan(req.Prompt, req.ImageURLs)
@@ -491,6 +515,17 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 		Method:        "project",
 	}
 
+	originalPrompt := req.Prompt
+	var reference *models.ReferenceSiteContext
+	var referenceMessage string
+	req.Prompt, req.ImageURLs, reference, referenceMessage = prepareReferencePrompt(c.Request.Context(), h.baseConf, req.Prompt, req.ImageURLs)
+	if referenceMessage != "" {
+		h.HandleResponse(c, status_http.BadRequest, referenceMessage)
+		return
+	}
+	generatePromptReq.UserPrompt = req.Prompt
+	skipBackend := shouldSkipBackendForReferencePrompt(originalPrompt, reference)
+
 	if withPlanning {
 		if req.BackendPlan == "" || req.FrontendPlan == "" {
 			h.HandleResponse(c, status_http.BadRequest, "backend_plan and frontend_plan are required when with_planning=true")
@@ -502,11 +537,13 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 			frontendPrompt = mcp_prompts.BuildFrontendPromptWithPlan(generatePromptReq, req.FrontendPlan)
 		)
 
-		go func() {
-			if _, err = h.sendAnthropicBackend(backendPrompt); err != nil {
-				log.Printf("Backend plan execution failed: %v\n", err)
-			}
-		}()
+		if !skipBackend {
+			go func() {
+				if _, backendErr := h.sendAnthropicBackend(backendPrompt); backendErr != nil {
+					log.Printf("Backend plan execution failed: %v\n", backendErr)
+				}
+			}()
+		}
 
 		generatedProject, err = h.generateFrontendProject(frontendPrompt, req.ImageURLs)
 		if err != nil {
@@ -520,17 +557,19 @@ func (h *HandlerV1) McpGenerateProjectV2(c *gin.Context) {
 			return
 		}
 
-		go func() {
-			content, _, err := mcp_prompts.BuildBackendPrompt(generatePromptReq)
-			if err != nil {
-				log.Printf("Backend generation failed: %v\n", err)
-				return
-			}
-			if _, err = h.sendAnthropicBackend(content); err != nil {
-				log.Printf("Backend execution failed: %v\n", err)
-				return
-			}
-		}()
+		if !skipBackend {
+			go func() {
+				content, _, err := mcp_prompts.BuildBackendPrompt(generatePromptReq)
+				if err != nil {
+					log.Printf("Backend generation failed: %v\n", err)
+					return
+				}
+				if _, backendErr := h.sendAnthropicBackend(content); backendErr != nil {
+					log.Printf("Backend execution failed: %v\n", backendErr)
+					return
+				}
+			}()
+		}
 
 		userPrompt := mcp_prompts.BuildFrontendGeneratePrompt(generatePromptReq)
 

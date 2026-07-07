@@ -201,14 +201,31 @@ func (p *ChatProcessor) initAgent() {
 
 func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
 	startedAt := time.Now()
+	originalClarified := clarified
 
 	var (
-		emit = p.emitter()
-		plan *models.ArchitectPlan
+		emit      = p.emitter()
+		plan      *models.ArchitectPlan
+		reference *models.ReferenceSiteContext
 	)
 
 	if err := p.Check(); err != nil {
 		return nil, err
+	}
+
+	var referenceMessage string
+	clarified, imageURLs, reference, referenceMessage = prepareReferencePrompt(ctx, p.baseConf, clarified, imageURLs)
+	if referenceMessage != "" {
+		return &models.ParsedClaudeResponse{Description: referenceMessage}, nil
+	}
+	if reference != nil {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "scan-eye",
+			Percent: 8,
+			Message: "Захватил референс сайта для точного клонирования",
+			Value:   reference.URL,
+		})
 	}
 
 	err := withHeartbeat(
@@ -227,9 +244,10 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		func() error {
 			var err error
 			plan, err = p.agent.ArchitectProject(ctx, models.ArchitectInput{
-				Clarified: clarified,
-				Images:    imageURLs,
-				History:   chatHistory,
+				Clarified:      clarified,
+				OriginalPrompt: originalClarified,
+				Images:         imageURLs,
+				History:        chatHistory,
 			})
 			return err
 		},
@@ -238,6 +256,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 	if err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
+	applyReferenceContextToPlan(plan, reference, originalClarified)
 
 	if plan.ProjectName == "" {
 		plan.ProjectName = "AI Project"
@@ -310,7 +329,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		}()
 	}
 
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.baseConf.UnsplashAccessKey != "" && !plan.CloneMode {
 		provWg.Add(1)
 		go func() {
 			defer provWg.Done()
@@ -334,21 +353,23 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 		p.prebuiltManifest = eagerManifest
 	}
 
-	emit.Emit(
-		SSEEvent{
-			Type:    EvProgress,
-			Icon:    "database",
-			Percent: 15,
-			Message: "Создаю таблицы в базе данных",
-			Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
-		},
-	)
+	if !(plan.CloneMode && len(plan.Tables) == 0) {
+		emit.Emit(
+			SSEEvent{
+				Type:    EvProgress,
+				Icon:    "database",
+				Percent: 15,
+				Message: "Создаю таблицы в базе данных",
+				Value:   fmt.Sprintf("%d таблиц", len(plan.Tables)),
+			},
+		)
 
-	go func(bPlan *models.ArchitectPlan, pd models.ProjectData) {
-		if backendErr := createBackendFromPlan(context.Background(), bPlan, pd, p.service, emit); backendErr != nil {
-			log.Printf("[new-project] async table creation failed: %v", backendErr)
-		}
-	}(plan, *projectData)
+		go func(bPlan *models.ArchitectPlan, pd models.ProjectData) {
+			if backendErr := createBackendFromPlan(context.Background(), bPlan, pd, p.service, emit); backendErr != nil {
+				log.Printf("[new-project] async table creation failed: %v", backendErr)
+			}
+		}(plan, *projectData)
+	}
 
 	generated, err := p.generateCode(ctx, clarified, imageURLs, chatHistory, plan, projectData)
 	if err != nil {
@@ -398,6 +419,7 @@ func (p *ChatProcessor) buildNewProject(ctx context.Context, clarified string, c
 
 func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context, clarified string, chatHistory []models.ChatMessage, imageURLs []string, estimatedName string) (*models.ParsedClaudeResponse, error) {
 	startedAt := time.Now()
+	originalClarified := clarified
 	emit := p.emitter()
 
 	// Fetch existing project schema so the architect knows which tables/APIs are already available.
@@ -420,6 +442,24 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		return nil, err
 	}
 
+	var (
+		reference        *models.ReferenceSiteContext
+		referenceMessage string
+	)
+	clarified, imageURLs, reference, referenceMessage = prepareReferencePrompt(ctx, p.baseConf, clarified, imageURLs)
+	if referenceMessage != "" {
+		return &models.ParsedClaudeResponse{Description: referenceMessage}, nil
+	}
+	if reference != nil {
+		emit.Emit(SSEEvent{
+			Type:    EvProgress,
+			Icon:    "scan-eye",
+			Percent: 8,
+			Message: "Захватил референс сайта для точного клонирования",
+			Value:   reference.URL,
+		})
+	}
+
 	var plan *models.ArchitectPlan
 	if err := withHeartbeat(ctx, emit,
 		p.agentCfgs().Architect.Model,
@@ -437,6 +477,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 			var e error
 			plan, e = p.agent.ArchitectProject(ctx, models.ArchitectInput{
 				Clarified:         clarified,
+				OriginalPrompt:    originalClarified,
 				ExistingSchemaCtx: schemaCtx,
 				Images:            imageURLs,
 				History:           chatHistory,
@@ -446,6 +487,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 	); err != nil {
 		return nil, fmt.Errorf("architect phase failed: %w", err)
 	}
+	applyReferenceContextToPlan(plan, reference, originalClarified)
 
 	if plan.ProjectName == "" {
 		plan.ProjectName = "AI Project"
@@ -480,7 +522,7 @@ func (p *ChatProcessor) buildMicrofrontendForCurrentProject(ctx context.Context,
 		mfePool   helper.ImagePoolResult
 		mfePoolWg sync.WaitGroup
 	)
-	if p.baseConf.UnsplashAccessKey != "" {
+	if p.baseConf.UnsplashAccessKey != "" && !plan.CloneMode {
 		mfePoolWg.Add(1)
 		go func() {
 			defer mfePoolWg.Done()
@@ -1240,6 +1282,9 @@ DO NOT use Many2Many, array values, or numeric IDs — only single guid string p
 	}
 
 	sb.WriteString("\nUse this UI Structure provided by the Architect:\n" + plan.UIStructure + "\n")
+	if plan.Reference != nil && !strings.Contains(plan.UIStructure, referenceContextMarker) {
+		sb.WriteString("\n" + buildReferenceSitePromptBlock(plan.Reference) + "\n")
+	}
 
 	// Inject design tokens so the coder doesn't have to invent a design system.
 	d := plan.Design

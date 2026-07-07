@@ -446,6 +446,12 @@ Always respond in the same language the user wrote in.`
 2. Frontend UI structure (detailed specification)
 3. Complete design system tokens (colors, fonts, radius — the code generator uses them directly)
 
+REFERENCE WEBSITE CLONE MODE:
+If the user message contains "REFERENCE SITE CONTEXT - AUTHORITATIVE", the attached screenshots when present and the extracted site data are the source of truth.
+For landing/web clone requests, reproduce the referenced site instead of choosing a new archetype, new palette, stock imagery, or extra marketing sections.
+Use the captured colors/fonts/section order/assets in ui_structure and design tokens.
+Do NOT create backend tables for a pure landing/website clone unless the user explicitly asks for admin/database/API/product functionality.
+
 PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FIVE):
 
 STEP 0 — Keyword override (CHECK FIRST):
@@ -774,7 +780,8 @@ TYPE B / TYPE C (landing, web) — select ONE archetype based on domain:
     font_family "Fraunces" · body_font "DM Sans" · border_radius "20px" · sidebar_style "light"
     design_inspiration "Soft Minimal"
 
-  If images are attached: extract the dominant colors from the images and use them instead of archetype defaults.
+  If REFERENCE SITE CONTEXT is present: exact clone mode wins over every archetype above. Use captured colors/fonts/layout language from the reference and set design_inspiration to "Reference site clone".
+  If images are attached without REFERENCE SITE CONTEXT: extract the dominant colors from the images and use them instead of archetype defaults.
   WEBAPP ONLY — if a webapp user NAMES a reference app / brand / style (e.g. "like Revolut", "Spotify", "Notion", "Linear", "iOS", "Material You", "dark"/"minimal"/"glassy"): adopt THAT reference's aesthetic for the webapp tokens — its palette MOOD (light vs DARK background+text), its primary/accent color family, and its border_radius / density — and let it OVERRIDE the webapp domain default. Guides: Spotify / Apple Music → dark background, vivid accent; Revolut / Cash App → bold tinted hero on clean light surfaces; Notion / Linear → calm neutral, light, crisp, smaller radius; Material You → light, tonal, large radius. A named reference is text-only — still output real hex values, chosen to match it. (admin_panel, web, and landing keep their domain/archetype palettes — do NOT apply this override to them.)
   sidebar_background for TYPE B/C: same as background_color (no sidebar in landing/web).
 `

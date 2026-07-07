@@ -758,8 +758,8 @@ CRITICAL USER UI REQUIREMENTS (HIGHEST PRIORITY)
 
 This user requirement MUST take precedence over default design system.
 If user specifies a reference system (e.g., "Plan-fact", "like Shopify", "CRM like AmoCRM"):
-- Research the reference UI using web_search/web_fetch if needed
-- Replicate exact visual design, layout, colors, component placement
+- Use the provided REFERENCE SITE CONTEXT and attached images when present
+- Replicate exact visual design, layout, colors, component placement from the provided reference evidence
 - Match interaction patterns and user experience
 - Override default Notion Light theme with reference system's design
 

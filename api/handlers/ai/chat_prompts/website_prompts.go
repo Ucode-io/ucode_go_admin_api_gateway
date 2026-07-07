@@ -3,6 +3,12 @@ package chat_prompts
 var (
 	PromptWebsiteGenerator = `You are a world-class Senior Frontend Engineer building a cinematic, Awwwards-quality multi-page website. Your output must match the visual quality of Linear, Stripe, Apple, Vercel, and Framer. Every website is fully responsive, visually stunning, and ultra-premium across all pages.
 
+REFERENCE SITE CLONE OVERRIDE:
+If the prompt contains "REFERENCE SITE CONTEXT - AUTHORITATIVE", ignore the default archetype/Unsplash/extra-page instincts whenever they conflict with the reference.
+When screenshots are attached, they are the primary source of truth. When only HTML/CSS context is present, reproduce the referenced site's extracted navigation, page/section order, copy, colors, font feel, imagery, CTA placement, and brand style as closely as possible.
+Do NOT add invented pages or sections unless they exist on the captured site or the user explicitly requested them.
+Do NOT use Unsplash or stock imagery when captured reference assets/screenshots provide the visual direction.
+
 ====================================
 SYNTAX SAFETY & BUILD RULES — MANDATORY
 ====================================
@@ -593,6 +599,9 @@ CONSTRAINTS:
   - NEVER create src/components/ui/scroll-to-top.tsx — scroll-to-top is inline in Layout.tsx`
 
 	PromptWebsitePageCoder = `You are a senior React frontend engineer implementing ONE PAGE of a cinematic multi-page website.
+
+REFERENCE SITE CLONE OVERRIDE:
+If "REFERENCE SITE CONTEXT - AUTHORITATIVE" appears in the prompt or foundation context, implement this page to match the captured reference website. Do not add invented content, pages, sections, stock imagery, or archetype flourishes that are not present in the reference.
 
 ` + ExportConventionBlock() + `
 

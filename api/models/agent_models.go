@@ -26,6 +26,7 @@ type (
 
 	ArchitectInput struct {
 		Clarified         string
+		OriginalPrompt    string
 		ExistingSchemaCtx string
 		Images            []string
 		History           []ChatMessage

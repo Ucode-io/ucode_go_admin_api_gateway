@@ -157,6 +157,11 @@ type BaseConfig struct {
 
 	UnsplashAccessKey string
 
+	ReferenceCaptureEnabled        bool
+	ReferenceCaptureURL            string
+	ReferenceCaptureAPIKey         string
+	ReferenceCaptureTimeoutSeconds int
+
 	GoogleDriveClientID           string
 	GoogleDriveClientSecret       string
 	GoogleDriveRedirectURI        string
@@ -290,6 +295,10 @@ func BaseLoad() BaseConfig {
 	config.GithubFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("GITHUB_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/github-error"))
 
 	config.UnsplashAccessKey = cast.ToString(GetOrReturnDefaultValue("UNSPLASH_ACCESS_KEY", ""))
+	config.ReferenceCaptureEnabled = cast.ToBool(GetOrReturnDefaultValue("REFERENCE_CAPTURE_ENABLED", false))
+	config.ReferenceCaptureURL = cast.ToString(GetOrReturnDefaultValue("REFERENCE_CAPTURE_URL", ""))
+	config.ReferenceCaptureAPIKey = cast.ToString(GetOrReturnDefaultValue("REFERENCE_CAPTURE_API_KEY", ""))
+	config.ReferenceCaptureTimeoutSeconds = cast.ToInt(GetOrReturnDefaultValue("REFERENCE_CAPTURE_TIMEOUT_SECONDS", 20))
 
 	config.GoogleDriveClientID = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_CLIENT_ID", ""))
 	config.GoogleDriveClientSecret = cast.ToString(GetOrReturnDefaultValue("GOOGLE_DRIVE_CLIENT_SECRET", ""))

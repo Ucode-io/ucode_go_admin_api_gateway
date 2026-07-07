@@ -67,8 +67,12 @@ func (a *AnthropicAgent) ArchitectProject(ctx context.Context, in models.Archite
 	if err = json.Unmarshal(raw, &plan); err != nil {
 		return nil, fmt.Errorf("architect: decode: %w", err)
 	}
-	models.ApplyProjectTypeKeywordOverride(&plan, in.Clarified)
-	models.ApplyMobileCapabilityKeywordOverride(&plan, in.Clarified)
+	overridePrompt := in.OriginalPrompt
+	if overridePrompt == "" {
+		overridePrompt = in.Clarified
+	}
+	models.ApplyProjectTypeKeywordOverride(&plan, overridePrompt)
+	models.ApplyMobileCapabilityKeywordOverride(&plan, overridePrompt)
 	return &plan, nil
 }
 
