@@ -136,20 +136,40 @@ func (p *ChatProcessor) Check() error {
 }
 
 // splitBudget decides how a usage of `total` tokens is funded: fare first, then
-// the pack pool for whatever the fare cannot cover. It is read-only so RecordUsage
-// (which reports the pack portion) and Deduct (which applies it) agree on the split.
+// the available pack pool. Any usage beyond both pools remains plan usage so it
+// is visible as over-limit spend instead of being incorrectly hidden as pack use.
+// It is read-only so RecordUsage (which reports the pack portion) and Deduct
+// (which applies it) agree on the split.
 func (p *ChatProcessor) splitBudget(total int64) (planPortion, packPortion int64) {
 	if total <= 0 {
 		return 0, 0
 	}
+
 	planRemain := atomic.LoadInt64(&p.tokenBudgetRemain)
-	if planRemain <= 0 {
-		return 0, total
+	packRemain := atomic.LoadInt64(&p.tokenPackRemain)
+
+	if planRemain < 0 {
+		planRemain = 0
 	}
+	if packRemain < 0 {
+		packRemain = 0
+	}
+
 	if total <= planRemain {
 		return total, 0
 	}
-	return planRemain, total - planRemain
+
+	overPlan := total - planRemain
+	if packRemain > 0 {
+		if overPlan <= packRemain {
+			packPortion = overPlan
+		} else {
+			packPortion = packRemain
+		}
+	}
+
+	planPortion = total - packPortion
+	return planPortion, packPortion
 }
 
 func (p *ChatProcessor) Deduct(tokens int64) {
