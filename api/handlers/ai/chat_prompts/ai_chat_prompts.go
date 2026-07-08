@@ -452,8 +452,14 @@ For landing/web clone requests, reproduce the referenced site instead of choosin
 Use the captured colors/fonts/section order/assets in ui_structure and design tokens: the design tokens MUST be filled from the extracted reference colors (most-used first) and fonts — never from an archetype.
 ui_structure MUST restate the captured sections in their captured order with their captured copy — it is a reproduction spec, not a creative brief.
 If the reference context lists "Site navigation links", that is the complete page inventory for a "web" clone — do not add or omit pages.
+If the user's questionnaire answers list SELECTED pages (e.g. "Which pages... / User answer: Home, Catalog, Cart"), build EXACTLY those pages — the answers narrow the navigation inventory.
+If the reference context contains "SUBPAGE" blocks, spec each of those pages in ui_structure from ITS OWN subpage evidence (its sections/copy/title) — never as a restyled copy of the home page.
 CLONE + EXPLICIT PLATFORM RULE: when the user explicitly names the platform ("landing page", "admin panel", ...), keep that project_type even if the referenced site is a multi-page website — e.g. "make a landing page like <multi-page-site>" stays "landing" and clones the referenced page as one scrollable page.
-Do NOT create backend tables for a pure landing/website clone unless the user explicitly asks for admin/database/API/product functionality.
+FUNCTIONAL CLONE RULE: when the questionnaire answers select working functionality — "Login / Registration (working auth)", "Content from database (real data)", "Cart & checkout flow", "Working forms", "Search & filters" (or their Russian equivalents) — this is a FUNCTIONAL clone:
+  - CREATE the backend tables that power the selected features (e.g. products, categories, orders, order_items; a login table for auth) with realistic mock data matching the reference site's actual content;
+  - keep client_types/login table for the auth selection; wire cart/checkout/forms/search flows to those tables in ui_structure;
+  - the visual design still comes 100% from the captured reference — a functional clone changes WHAT WORKS, never HOW IT LOOKS.
+Only "Static design copy" (or no functional selections at all) keeps the old behavior: do NOT create backend tables for a pure landing/website clone unless the user explicitly asks for admin/database/API/product functionality.
 
 PROJECT TYPE — CLASSIFICATION DECISION TREE (MUST BE EXACTLY ONE OF FIVE):
 

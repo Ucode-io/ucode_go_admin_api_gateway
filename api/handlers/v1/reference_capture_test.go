@@ -192,7 +192,11 @@ func TestPrepareReferencePromptCapturesAndAppendsScreenshots(t *testing.T) {
 
 func TestPrepareReferencePromptFallsBackToHTMLExtraction(t *testing.T) {
 	oldFetch := fetchReferenceSiteHTMLForPrompt
-	defer func() { fetchReferenceSiteHTMLForPrompt = oldFetch }()
+	oldCrawl := fetchReferencePageForCrawl
+	defer func() {
+		fetchReferenceSiteHTMLForPrompt = oldFetch
+		fetchReferencePageForCrawl = oldCrawl
+	}()
 
 	fetchReferenceSiteHTMLForPrompt = func(_ context.Context, targetURL string) (*models.ReferenceSiteContext, error) {
 		return &models.ReferenceSiteContext{
@@ -203,6 +207,10 @@ func TestPrepareReferencePromptFallsBackToHTMLExtraction(t *testing.T) {
 			Fonts:       []string{"Inter"},
 			Sections:    []models.ReferenceSection{{Heading: "Hero", Copy: "Welcome", CTA: "Start"}},
 		}, nil
+	}
+	// The multi-page crawl's home-nav fallback must not hit the real network in tests.
+	fetchReferencePageForCrawl = func(_ context.Context, pageURL string) (*models.ReferenceSiteContext, error) {
+		return &models.ReferenceSiteContext{URL: pageURL}, nil
 	}
 
 	prompt, images, ref, msg := prepareReferencePrompt(

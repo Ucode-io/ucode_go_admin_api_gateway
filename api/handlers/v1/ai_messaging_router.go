@@ -38,6 +38,18 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 	// so the clone bypass must not depend on new_project alone.
 	isClonePrompt := isReferenceClonePrompt(req.Content)
 	if isClonePrompt && p.microFrontendId == "" {
+		// Multi-page website clones get a short capture-driven questionnaire
+		// first (which real pages, what working functionality). Landing clones
+		// and questionnaire failures keep the instant direct-build flow.
+		if shouldAskCloneQuestions(req.Content, chatHistory) {
+			if intro, questions := p.buildCloneQuestionnaire(ctx, req.Content); len(questions) > 0 {
+				log.Printf("[ROUTER] clone questionnaire: asking %d question(s) before build", len(questions))
+				return &models.ParsedClaudeResponse{
+					Description: intro,
+					Questions:   questions,
+				}, nil
+			}
+		}
 		log.Printf("[ROUTER] reference clone prompt detected — bypassing questionnaire (new_project=%v)", p.newProject)
 		if p.newProject {
 			return p.buildNewProject(ctx, req.Content, chatHistory, req.Images, "")
@@ -97,6 +109,12 @@ func (p *ChatProcessor) routeAndProcess(ctx context.Context, req models.NewMessa
 		// request was a reference clone, the URL/clone phrasing may have been
 		// dropped — and with it the whole reference-capture pipeline.
 		clarified = restoreCloneReference(clarified, chatHistory)
+		// Keep the raw questionnaire answers verbatim: the selected option
+		// labels drive deterministic static-vs-functional clone detection and
+		// page selection, and the router's rewrite may paraphrase them away.
+		if clarified != req.Content && !strings.Contains(clarified, req.Content) {
+			clarified += "\n\nUser questionnaire answers (verbatim):\n" + req.Content
+		}
 		return p.runCodeChange(ctx, clarified, fileGraphJSON, chatHistory, req.Images, routeResult.ProjectName, microFrontFiles)
 	}
 

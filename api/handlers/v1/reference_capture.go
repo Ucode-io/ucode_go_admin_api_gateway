@@ -82,8 +82,11 @@ func prepareReferencePrompt(ctx context.Context, conf config.BaseConfig, prompt 
 	if ref.URL == "" {
 		ref.URL = targetURL
 	}
-	log.Printf("[reference] captured url=%s final=%s screenshots=%d colors=%d fonts=%d sections=%d assets=%d warnings=%d",
-		targetURL, ref.FinalURL, len(ref.Screenshots), len(ref.Colors), len(ref.Fonts), len(ref.Sections), len(ref.Assets), len(ref.Warnings))
+	if !promptWantsSingleLanding(prompt) {
+		crawlReferenceSubpages(ctx, ref, prompt)
+	}
+	log.Printf("[reference] captured url=%s final=%s screenshots=%d colors=%d fonts=%d sections=%d assets=%d subpages=%d warnings=%d",
+		targetURL, ref.FinalURL, len(ref.Screenshots), len(ref.Colors), len(ref.Fonts), len(ref.Sections), len(ref.Assets), len(ref.Pages), len(ref.Warnings))
 
 	enrichedPrompt := prompt + "\n\n" + buildReferenceSitePromptBlock(ref)
 	return enrichedPrompt, appendUniqueStrings(imageURLs, screenshotURLs...), ref, ""
@@ -565,7 +568,10 @@ func extractReferenceSiteFromHTML(sourceURL, finalURL, htmlText, cssText string)
 	ref.Fonts = extractFontsFromCSS(allStyles, 8)
 	ref.Sections = limitReferenceSections(sections, 16)
 	ref.Assets = limitReferenceAssets(assets, 16)
-	ref.Navigation = extractNavigationLabels(doc, 14)
+	ref.NavLinks = extractNavLinks(doc, finalURL, 14)
+	for _, link := range ref.NavLinks {
+		ref.Navigation = append(ref.Navigation, link.Label)
+	}
 	if ref.FinalURL == "" {
 		ref.FinalURL = sourceURL
 	}
@@ -603,16 +609,16 @@ func rankColorsByFrequency(styles string, max int) []string {
 	return limitStrings(ranked, max)
 }
 
-// extractNavigationLabels collects the site's top-level navigation link labels
-// so multi-page clones know the real page inventory instead of inventing
-// Home/About/Contact defaults.
-func extractNavigationLabels(doc *html.Node, max int) []string {
-	var labels []string
+// extractNavLinks collects the site's top-level navigation links (label +
+// resolved same-host URL) — the real page inventory for multi-page clones, the
+// clone questionnaire's page options, and the crawl targets for subpages.
+func extractNavLinks(doc *html.Node, baseURL string, max int) []models.ReferenceNavLink {
+	var links []models.ReferenceNavLink
 	seen := make(map[string]bool)
 
 	var collectAnchors func(*html.Node)
 	collectAnchors = func(n *html.Node) {
-		if n == nil || len(labels) >= max {
+		if n == nil || len(links) >= max {
 			return
 		}
 		if n.Type == html.ElementNode && strings.EqualFold(n.Data, "a") {
@@ -620,7 +626,10 @@ func extractNavigationLabels(doc *html.Node, max int) []string {
 			key := strings.ToLower(label)
 			if label != "" && !seen[key] {
 				seen[key] = true
-				labels = append(labels, label)
+				links = append(links, models.ReferenceNavLink{
+					Label: label,
+					URL:   absolutePublicURL(attr(n, "href"), baseURL),
+				})
 			}
 		}
 		for child := n.FirstChild; child != nil; child = child.NextSibling {
@@ -630,7 +639,7 @@ func extractNavigationLabels(doc *html.Node, max int) []string {
 
 	var findNav func(*html.Node)
 	findNav = func(n *html.Node) {
-		if n == nil || len(labels) >= max {
+		if n == nil || len(links) >= max {
 			return
 		}
 		if n.Type == html.ElementNode {
@@ -646,7 +655,132 @@ func extractNavigationLabels(doc *html.Node, max int) []string {
 		}
 	}
 	findNav(doc)
-	return labels
+	return links
+}
+
+// promptWantsSingleLanding reports an explicit single-page landing request —
+// those clone only the referenced page, so subpage crawling and the clone
+// questionnaire are skipped.
+func promptWantsSingleLanding(prompt string) bool {
+	lower := strings.ToLower(prompt)
+	for _, s := range []string{"landing", "лендинг", "одностраничн", "one-page", "one page", "single page", "single-page"} {
+		if strings.Contains(lower, s) {
+			return true
+		}
+	}
+	return false
+}
+
+const maxReferenceSubpages = 5
+
+// fetchReferencePageForCrawl fetches one page of the reference site and
+// extracts its structure (no stylesheet follow-up — structure and copy only).
+// Overridable in tests.
+var fetchReferencePageForCrawl = func(ctx context.Context, pageURL string) (*models.ReferenceSiteContext, error) {
+	client := newReferenceHTTPClient(10 * time.Second)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, pageURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "UgenReferenceExtractor/1.0 (+https://u-code.io)")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("subpage %d", resp.StatusCode)
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 1024*1024))
+	if err != nil {
+		return nil, err
+	}
+	return extractReferenceSiteFromHTML(pageURL, resp.Request.URL.String(), string(body), ""), nil
+}
+
+// crawlReferenceSubpages fetches the reference site's own subpages (same host,
+// taken from its navigation) so every cloned page gets its own captured
+// evidence instead of being invented in home-page style. Nav links whose label
+// appears in the prompt (i.e. pages the user selected in the questionnaire)
+// are crawled first. Best-effort: failures become warnings, never errors.
+func crawlReferenceSubpages(ctx context.Context, ref *models.ReferenceSiteContext, prompt string) {
+	if ref == nil || len(ref.Pages) > 0 {
+		return
+	}
+
+	navLinks := ref.NavLinks
+	if len(navLinks) == 0 {
+		// Render-service captures carry no nav hrefs — fetch the home page
+		// HTML just for its navigation.
+		if home, err := fetchReferencePageForCrawl(ctx, referenceHomeURL(ref)); err == nil {
+			navLinks = home.NavLinks
+		}
+	}
+	if len(navLinks) == 0 {
+		return
+	}
+
+	base, err := url.Parse(referenceHomeURL(ref))
+	if err != nil {
+		return
+	}
+	host := strings.TrimPrefix(strings.ToLower(base.Hostname()), "www.")
+
+	promptLower := strings.ToLower(prompt)
+	sort.SliceStable(navLinks, func(i, j int) bool {
+		iSelected := navLinks[i].Label != "" && strings.Contains(promptLower, strings.ToLower(navLinks[i].Label))
+		jSelected := navLinks[j].Label != "" && strings.Contains(promptLower, strings.ToLower(navLinks[j].Label))
+		return iSelected && !jSelected
+	})
+
+	crawlCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	seenPaths := map[string]bool{"": true}
+	for _, link := range navLinks {
+		if len(ref.Pages) >= maxReferenceSubpages {
+			break
+		}
+		if link.URL == "" {
+			continue
+		}
+		parsed, err := url.Parse(link.URL)
+		if err != nil {
+			continue
+		}
+		if strings.TrimPrefix(strings.ToLower(parsed.Hostname()), "www.") != host {
+			continue
+		}
+		pathKey := strings.TrimSuffix(parsed.Path, "/")
+		if seenPaths[pathKey] {
+			continue
+		}
+		seenPaths[pathKey] = true
+
+		page, err := fetchReferencePageForCrawl(crawlCtx, link.URL)
+		if err != nil {
+			ref.Warnings = appendUniqueStrings(ref.Warnings, "Could not crawl subpage: "+link.URL)
+			continue
+		}
+		ref.Pages = append(ref.Pages, models.ReferencePage{
+			Label:    link.Label,
+			URL:      link.URL,
+			Title:    page.Title,
+			Sections: limitReferenceSections(page.Sections, 8),
+		})
+	}
+	if len(ref.Pages) > 0 {
+		log.Printf("[reference] crawled %d subpage(s) for multi-page clone", len(ref.Pages))
+	}
+}
+
+func referenceHomeURL(ref *models.ReferenceSiteContext) string {
+	if ref.FinalURL != "" {
+		return ref.FinalURL
+	}
+	return ref.URL
 }
 
 func extractStylesheetLinks(htmlText, baseURL string, max int) []string {
@@ -956,6 +1090,27 @@ func applyReferenceContextToPlan(plan *models.ArchitectPlan, ref *models.Referen
 	}
 }
 
+// functionalCloneStems match the clone questionnaire's functionality option
+// labels (the frontend sends selected option LABELS back as text) plus generic
+// wording — any hit means the user wants a working product, so backend tables
+// must be kept.
+var functionalCloneStems = []string{
+	// English questionnaire labels + generic terms.
+	"working auth", "login / registration", "content from database",
+	"cart & checkout", "checkout flow", "working forms", "search & filters",
+	"cart", "checkout", "registration", "real data",
+	// Russian questionnaire labels + generic terms.
+	"рабочая авторизац", "логин / регистрац", "контент из базы",
+	"корзина и оформление", "рабочие формы", "поиск и фильтры",
+	"корзин", "оформление заказа", "авторизац", "регистрац", "логин",
+	"база данных", "базы данных",
+}
+
+// staticCloneStems match the questionnaire's explicit "static copy" choice.
+var staticCloneStems = []string{
+	"static design copy", "статичная копия", "только дизайн", "no backend", "без бэкенда",
+}
+
 func shouldForceStaticReferenceClone(prompt string, plan *models.ArchitectPlan) bool {
 	if plan == nil {
 		return false
@@ -966,6 +1121,20 @@ func shouldForceStaticReferenceClone(prompt string, plan *models.ArchitectPlan) 
 	}
 
 	lower := " " + strings.ToLower(prompt) + " "
+
+	// Questionnaire answers are deterministic: selected functionality keeps the
+	// backend even when "static copy" was also (contradictorily) ticked.
+	for _, stem := range functionalCloneStems {
+		if strings.Contains(lower, stem) {
+			return false
+		}
+	}
+	for _, stem := range staticCloneStems {
+		if strings.Contains(lower, stem) {
+			return true
+		}
+	}
+
 	dynamicSignals := []string{
 		" admin ", " admin panel ", " dashboard ", " database ", " db ",
 		" crud ", " login ", " sign in ", " signup ", " register ",
@@ -1006,7 +1175,7 @@ func buildReferenceSitePromptBlock(ref *models.ReferenceSiteContext) string {
 	}
 	sb.WriteString("Do NOT invent a new design direction, archetype, palette, stock-image mood, page structure, or extra sections.\n")
 	sb.WriteString("Reproduce the captured site's section order, copy, typography feel, colors, imagery, CTA placement, and visible brand style as closely as possible from the evidence.\n")
-	sb.WriteString("For a pure landing/website clone, do NOT add database CRUD pages, dashboards, login screens, or API-driven sections unless the user explicitly requested those product features.\n\n")
+	sb.WriteString("For a pure landing/website clone, do NOT add database CRUD pages, dashboards, login screens, or API-driven sections unless the user explicitly requested those product features — e.g. selected working login/registration, cart & checkout, database content, forms, or search in the questionnaire answers. When such features ARE selected, build them as working functionality wired to the generated backend while still cloning the reference design.\n\n")
 
 	fmt.Fprintf(&sb, "Source URL: %s\n", ref.URL)
 	if ref.FinalURL != "" && ref.FinalURL != ref.URL {
@@ -1065,6 +1234,37 @@ func buildReferenceSitePromptBlock(ref *models.ReferenceSiteContext) string {
 			}
 			if len(parts) > 0 {
 				fmt.Fprintf(&sb, "%d. %s\n", i+1, strings.Join(parts, " | "))
+			}
+		}
+	}
+
+	if len(ref.Pages) > 0 {
+		sb.WriteString("\nCrawled SUBPAGES — clone every page from ITS OWN evidence below (do not restyle subpages as copies of the home page):\n")
+		for i, page := range ref.Pages {
+			if i >= 6 {
+				break
+			}
+			fmt.Fprintf(&sb, "\nSUBPAGE %d: %s — %s\n", i+1, fallbackString(page.Label, "page"), page.URL)
+			if page.Title != "" {
+				fmt.Fprintf(&sb, "Title: %s\n", truncateReferenceText(page.Title, 140))
+			}
+			for j, section := range page.Sections {
+				if j >= 8 {
+					break
+				}
+				parts := []string{}
+				if section.Heading != "" {
+					parts = append(parts, "heading="+truncateReferenceText(section.Heading, 120))
+				}
+				if section.Copy != "" {
+					parts = append(parts, "copy="+truncateReferenceText(section.Copy, 300))
+				}
+				if section.CTA != "" {
+					parts = append(parts, "cta="+truncateReferenceText(section.CTA, 80))
+				}
+				if len(parts) > 0 {
+					fmt.Fprintf(&sb, "  %d.%d %s\n", i+1, j+1, strings.Join(parts, " | "))
+				}
 			}
 		}
 	}

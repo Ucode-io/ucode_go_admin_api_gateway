@@ -265,6 +265,24 @@ type (
 		Alt  string `json:"alt,omitempty"`
 	}
 
+	// ReferenceNavLink is one top-navigation link of the captured site — the
+	// real page inventory for multi-page clones and the option source for the
+	// clone questionnaire.
+	ReferenceNavLink struct {
+		Label string `json:"label"`
+		URL   string `json:"url"`
+	}
+
+	// ReferencePage is a crawled subpage of the reference site so non-home
+	// pages are cloned from their own captured evidence instead of invented in
+	// home-page style.
+	ReferencePage struct {
+		Label    string             `json:"label,omitempty"`
+		URL      string             `json:"url"`
+		Title    string             `json:"title,omitempty"`
+		Sections []ReferenceSection `json:"sections,omitempty"`
+	}
+
 	ReferenceSiteContext struct {
 		URL         string                `json:"url"`
 		FinalURL    string                `json:"final_url,omitempty"`
@@ -276,6 +294,8 @@ type (
 		Sections    []ReferenceSection    `json:"sections,omitempty"`
 		Assets      []ReferenceAsset      `json:"assets,omitempty"`
 		Navigation  []string              `json:"navigation,omitempty"`
+		NavLinks    []ReferenceNavLink    `json:"nav_links,omitempty"`
+		Pages       []ReferencePage       `json:"pages,omitempty"`
 		Warnings    []string              `json:"warnings,omitempty"`
 	}
 

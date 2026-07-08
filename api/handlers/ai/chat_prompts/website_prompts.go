@@ -10,11 +10,13 @@ If the prompt contains "REFERENCE SITE CONTEXT - AUTHORITATIVE", CLONE MODE is a
 
 1. SOURCE OF TRUTH: attached screenshots first, then the extracted navigation/sections/copy/colors/fonts/assets. Your job is REPRODUCTION, not creation.
 2. ARCHETYPES ARE DISABLED: skip archetype section sequences, motion signatures, card/button/hero styles, textures, and gradient rules. Reproduce the reference site's own layout, spacing, colors, typography, and motion — even if it looks plain.
-3. PAGES COME FROM THE REFERENCE: build the pages listed in the captured "Site navigation links" — do NOT default to Home/About/Contact and do NOT invent pages the reference doesn't have.
+3. PAGES COME FROM THE REFERENCE: build the pages listed in the captured "Site navigation links" — do NOT default to Home/About/Contact and do NOT invent pages the reference doesn't have. If the user's questionnaire answers list selected pages, build exactly those.
 4. SECTIONS AND COPY COME FROM THE REFERENCE: same sections, same order, captured text verbatim where provided. No invented pricing/testimonials/FAQ.
-5. COLORS/FONTS COME FROM THE REFERENCE: build the CSS variables from the extracted colors (most-used first) and fonts; ignore conflicting DESIGN TOKENS and archetype palette bans.
-6. IMAGES COME FROM THE REFERENCE: use captured asset URLs, never Unsplash; missing assets → neutral CSS-gradient placeholder in the reference palette.
-7. Build-safety rules still apply: syntax, import completeness, CSS-variable styling, responsiveness, banned config files, tool output format.
+5. SUBPAGES HAVE THEIR OWN EVIDENCE: when the reference context contains "SUBPAGE" blocks, implement each page from ITS OWN subpage sections/copy — never as a restyled copy of the home page.
+6. COLORS/FONTS COME FROM THE REFERENCE: build the CSS variables from the extracted colors (most-used first) and fonts; ignore conflicting DESIGN TOKENS and archetype palette bans.
+7. IMAGES COME FROM THE REFERENCE: use captured asset URLs, never Unsplash; missing assets → neutral CSS-gradient placeholder in the reference palette.
+8. FUNCTIONAL CLONE: when the questionnaire answers select working functionality (login/registration, database content, cart & checkout, forms, search), wire those flows to the provided API tables per the API CONFIGURATION block — working features, reference design.
+9. Build-safety rules still apply: syntax, import completeness, CSS-variable styling, responsiveness, banned config files, tool output format.
 
 ====================================
 SYNTAX SAFETY & BUILD RULES — MANDATORY
@@ -571,8 +573,9 @@ GROUPS 2..N — PAGES (parallel with each other, depend on Groups 0 and 1):
   Each group contains exactly 1 page file.
   Derive page list from the UI structure description.
   REFERENCE CLONE RULE: if the UI structure contains "REFERENCE SITE CONTEXT - AUTHORITATIVE",
-  derive the page list ONLY from its "Site navigation links" / detected pages — do NOT add
-  default About/Services/Contact pages the reference site does not have.
+  derive the page list ONLY from its "Site navigation links" / "SUBPAGE" blocks / detected pages —
+  do NOT add default About/Services/Contact pages the reference site does not have.
+  If the user's questionnaire answers list selected pages, the manifest contains exactly those pages.
   id=2 → src/pages/HomePage.tsx   (always first — full landing-style home page)
   id=3 → src/pages/AboutPage.tsx  (if present in UI structure)
   id=4 → src/pages/ServicesPage.tsx
@@ -614,8 +617,10 @@ CONSTRAINTS:
 REFERENCE SITE CLONE OVERRIDE (HIGHEST PRIORITY):
 If "REFERENCE SITE CONTEXT - AUTHORITATIVE" appears in the prompt or foundation context, CLONE MODE is active — implement this page to match the captured reference website:
 - Attached screenshots (when present) are the primary source of truth; extracted sections/copy/colors are secondary.
+- FIND YOUR PAGE'S OWN EVIDENCE FIRST: if the reference context contains a "SUBPAGE" block matching this page (by label/route/name), implement the page from THAT block's sections and copy — not from the home page's sections.
 - Reproduce the reference's section order, copy text (verbatim where captured), palette, and typography for this page.
 - Do NOT add invented content, sections, stock/Unsplash imagery, or archetype flourishes that are not present in the reference; use captured asset URLs for images.
+- FUNCTIONAL CLONE: when the questionnaire answers select working functionality (login, database content, cart & checkout, forms, search) and this page carries that feature, wire it to the API tables from the API CONFIGURATION block — working feature, reference design.
 
 ` + ExportConventionBlock() + `
 
