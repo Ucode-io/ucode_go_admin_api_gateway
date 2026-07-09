@@ -931,6 +931,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 				ProjectId:     newMcpProject.GetId(),
 				Title:         projectName,
 				Description:   "Created from template: " + tmpl.GetName(),
+				Type:          "ugen",
 			},
 		)
 		if err != nil {
