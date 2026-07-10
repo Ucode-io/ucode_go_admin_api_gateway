@@ -136,6 +136,35 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+func (h *HandlerV1) BearerOnlyMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		parts := strings.Fields(c.GetHeader("Authorization"))
+		if len(parts) != 2 || parts[0] != "Bearer" || parts[1] == "" {
+			h.HandleResponse(c, status_http.Unauthorized, "Bearer authentication is required")
+			c.Abort()
+			return
+		}
+
+		// AdminAuthMiddleware is responsible for validating the token and sets
+		// Auth_Admin only on its authenticated Bearer path. In particular, its
+		// trusted internal redirect mode deliberately skips token validation, so
+		// checking the header shape alone would let that mode reach these
+		// user-facing prompt settings endpoints.
+		authAdmin, ok := c.Get("Auth_Admin")
+		if !ok {
+			h.HandleResponse(c, status_http.Unauthorized, "validated Bearer authentication is required")
+			c.Abort()
+			return
+		}
+		if _, ok = authAdmin.(*auth.HasAccessSuperAdminRes); !ok {
+			h.HandleResponse(c, status_http.Unauthorized, "validated Bearer authentication is required")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
 func (h *HandlerV1) adminHasAccess(c *gin.Context) (*auth.HasAccessSuperAdminRes, bool) {
 	bearerToken := c.GetHeader("Authorization")
 	strArr := strings.Split(bearerToken, " ")

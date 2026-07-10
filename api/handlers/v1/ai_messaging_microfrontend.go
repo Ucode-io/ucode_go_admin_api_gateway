@@ -55,6 +55,7 @@ type (
 // them, then pushes the result back to u-gen. No McpProject is touched.
 func (p *ChatProcessor) runMicrofrontendEdit(ctx context.Context, clarified, fileGraphJSON string, chatHistory []models.ChatMessage, imageURLs []string, existingFiles []models.GitlabFileChange) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[MICROFE EDIT] planning changes for microfrontend id=%s", p.microFrontendId)
+	p.ensureEditPromptOverrides(ctx)
 
 	emit := p.emitter()
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: IconScanSearch, Message: "Анализирую проект и планирую изменения...", Percent: 5})
@@ -264,13 +265,14 @@ func (p *ChatProcessor) runEditChunk(ctx context.Context, chunk editChunk, clari
 	var lastErr error
 	for attempt := 1; attempt <= editChunkMaxAttempts; attempt++ {
 		project, err := p.agent.EditCode(ctx, models.EditorInput{
-			Clarified:    clarified,
-			Plan:         subPlan,
-			FullPlanJSON: fullPlanJSON,
-			FilesContext: filesContext,
-			Images:       imageURLs,
-			History:      chatHistory,
-			Chunked:      true,
+			Clarified:      clarified,
+			Plan:           subPlan,
+			FullPlanJSON:   fullPlanJSON,
+			FilesContext:   filesContext,
+			Images:         imageURLs,
+			History:        chatHistory,
+			Chunked:        true,
+			PromptOverride: p.editPromptOverrides.CodeEditor,
 		})
 		if err == nil {
 			if project == nil {
@@ -286,6 +288,20 @@ func (p *ChatProcessor) runEditChunk(ctx context.Context, chunk editChunk, clari
 		}
 	}
 	return nil, lastErr
+}
+
+func filterProjectFilesByPath(files []models.ProjectFile, allowed map[string]bool) []models.ProjectFile {
+	if len(files) == 0 || len(allowed) == 0 {
+		return nil
+	}
+
+	filtered := make([]models.ProjectFile, 0, len(files))
+	for _, file := range files {
+		if allowed[file.Path] {
+			filtered = append(filtered, file)
+		}
+	}
+	return filtered
 }
 
 func planEditChunks(plan *models.SonnetPlanResult) []editChunk {

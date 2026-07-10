@@ -161,12 +161,12 @@ func (a *AnthropicAgent) EditCode(ctx context.Context, in models.EditorInput) (*
 	)
 
 	if in.Chunked {
-		systemPrompt = chat_prompts.PromptCodeEditorChunk
+		systemPrompt = chat_prompts.CodeEditorSystemPrompt(in.PromptOverride, true)
 		assignedJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorChunkMessage(in.Clarified, string(assignedJSON), in.FullPlanJSON, in.FilesContext, len(in.Images) > 0)
 		contentBlocks = buildContentBlocks(content, in.Images)
 	} else if in.HasMatchingFiles {
-		systemPrompt = chat_prompts.PromptCodeEditor
+		systemPrompt = chat_prompts.CodeEditorSystemPrompt(in.PromptOverride, false)
 		planJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorMessage(in.Clarified, string(planJSON), in.FilesContext, len(in.Images) > 0)
 		contentBlocks = buildContentBlocks(content, in.Images)
@@ -229,7 +229,8 @@ func (a *AnthropicAgent) GenerateCodeNoHistory(ctx context.Context, agentCfg con
 }
 
 func (a *AnthropicAgent) VisualEdit(_ context.Context, in models.VisualEditInput) ([]models.ProjectFile, string, error) {
-	raw, usage, _, err := a.callTool(a.conf.Agents.Coder, chat_prompts.PromptVisualEdit, in.Messages, ToolEmitVisualEdit)
+	systemPrompt := chat_prompts.VisualEditorSystemPrompt(in.PromptOverride)
+	raw, usage, _, err := a.callTool(a.conf.Agents.Coder, systemPrompt, in.Messages, ToolEmitVisualEdit)
 	a.tracker.RecordUsage(usage, a.conf.Agents.Coder.Model, "Visual edit")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {

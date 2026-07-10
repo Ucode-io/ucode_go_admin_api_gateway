@@ -40,6 +40,7 @@ type GoBuilderServiceI interface {
 	ProjectFolders() nb.ProjectFoldersServiceClient
 	CustomEndpoint() nb.CustomEndpointServiceClient
 	MicrofrontendVersions() nb.MicrofrontendVersionsServiceClient
+	AiEditPrompt() nb.AiEditPromptServiceClient
 }
 
 type goBuilderServiceClient struct {
@@ -70,6 +71,7 @@ type goBuilderServiceClient struct {
 	projectFoldersService          nb.ProjectFoldersServiceClient
 	customEndpointService          nb.CustomEndpointServiceClient
 	microfrontendVersionsService   nb.MicrofrontendVersionsServiceClient
+	aiEditPromptService            nb.AiEditPromptServiceClient
 }
 
 func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilderServiceI, error) {
@@ -117,6 +119,7 @@ func NewGoBuilderServiceClient(ctx context.Context, cfg config.Config) (GoBuilde
 		projectFoldersService:        nb.NewProjectFoldersServiceClient(connGoBuilderService),
 		customEndpointService:        nb.NewCustomEndpointServiceClient(connGoBuilderService),
 		microfrontendVersionsService: nb.NewMicrofrontendVersionsServiceClient(connGoBuilderService),
+		aiEditPromptService:          nb.NewAiEditPromptServiceClient(connGoBuilderService),
 	}, nil
 }
 
@@ -226,4 +229,8 @@ func (g *goBuilderServiceClient) CustomEndpoint() nb.CustomEndpointServiceClient
 
 func (g *goBuilderServiceClient) MicrofrontendVersions() nb.MicrofrontendVersionsServiceClient {
 	return g.microfrontendVersionsService
+}
+
+func (g *goBuilderServiceClient) AiEditPrompt() nb.AiEditPromptServiceClient {
+	return g.aiEditPromptService
 }

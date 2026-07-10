@@ -48,6 +48,7 @@ type ChatProcessor struct {
 	ucodeProjectId    string
 	billingProjectId  string
 	mcpUcodeProjectId string
+	mcpEnvironmentId  string
 	companyId         string
 	fareId            string
 
@@ -77,6 +78,11 @@ type ChatProcessor struct {
 	navRoutes []models.ManifestRoute
 
 	cachedImagePool *helper.ImagePoolResult
+
+	// editPromptOverrides is resolved from the generated child project for this
+	// request. It must never be copied into or mutate the package-level defaults.
+	editPromptOverrides models.EditPromptOverrides
+	editPromptsLoaded   bool
 
 	tokenBudgetEnabled bool
 	tokenBudgetRemain  int64 // remaining fare (day/month) budget; drained first
@@ -154,6 +160,14 @@ func (p *ChatProcessor) emitter() ProgressEmitter {
 	}
 
 	return p.emit
+}
+
+func (p *ChatProcessor) ensureEditPromptOverrides(ctx context.Context) {
+	if p.editPromptsLoaded {
+		return
+	}
+	p.editPromptsLoaded = true
+	p.editPromptOverrides = p.h.loadAIEditPromptOverrides(ctx, p.mcpUcodeProjectId, p.mcpEnvironmentId)
 }
 
 func newChatProcessor(h *HandlerV1, service services.ServiceManagerI, baseConf config.BaseConfig, chatId, mcpProjectId, resourceEnvId, ucodeProjectId string, userId, clientTypeId, roleId, authToken string) *ChatProcessor {
@@ -889,6 +903,7 @@ func (p *ChatProcessor) provisionBackend(ctx context.Context, projectName string
 
 func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, contexts []models.VisualContext, chatHistory []models.ChatMessage, imageURLs []string) (*models.ParsedClaudeResponse, error) {
 	log.Printf("[VISUAL EDIT] starting: count=%d", len(contexts))
+	p.ensureEditPromptOverrides(ctx)
 
 	emit := p.emitter()
 	emit.Emit(SSEEvent{Type: EvProgress, Icon: "scan-search", Message: "Загружаю файлы проекта...", Percent: 5})
@@ -966,7 +981,10 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 		},
 		func() error {
 			var errIn error
-			editedFiles, editedSummary, errIn = p.agent.VisualEdit(ctx, models.VisualEditInput{Messages: messages})
+			editedFiles, editedSummary, errIn = p.agent.VisualEdit(ctx, models.VisualEditInput{
+				Messages:       messages,
+				PromptOverride: p.editPromptOverrides.VisualEditor,
+			})
 			return errIn
 		},
 	)
@@ -974,6 +992,15 @@ func (p *ChatProcessor) runVisualEdit(ctx context.Context, instruction string, c
 		return nil, fmt.Errorf("visual edit: claude call failed: %w", err)
 	}
 	_ = editedSummary
+
+	if len(editedFiles) > 0 {
+		// A custom prompt is user-controlled, so enforce visual-selection scope in
+		// code instead of relying on the model to follow prompt instructions. Keep
+		// the default path byte-for-byte compatible when no override is present.
+		if strings.TrimSpace(p.editPromptOverrides.VisualEditor) != "" {
+			editedFiles = filterProjectFilesByPath(editedFiles, targetPaths)
+		}
+	}
 
 	if len(editedFiles) > 0 {
 		// Keep the pre-built auth runtime intact even when a visual edit touches

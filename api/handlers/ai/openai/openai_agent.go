@@ -161,12 +161,12 @@ func (a *OpenAIAgent) EditCode(ctx context.Context, in models.EditorInput) (*mod
 	)
 
 	if in.Chunked {
-		systemPrompt = chat_prompts.PromptCodeEditorChunk
+		systemPrompt = chat_prompts.CodeEditorSystemPrompt(in.PromptOverride, true)
 		assignedJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorChunkMessage(in.Clarified, string(assignedJSON), in.FullPlanJSON, in.FilesContext, len(in.Images) > 0)
 		parts = buildContentParts(content, in.Images)
 	} else if in.HasMatchingFiles {
-		systemPrompt = chat_prompts.PromptCodeEditor
+		systemPrompt = chat_prompts.CodeEditorSystemPrompt(in.PromptOverride, false)
 		planJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorMessage(in.Clarified, string(planJSON), in.FilesContext, len(in.Images) > 0)
 		parts = buildContentParts(content, in.Images)
@@ -233,7 +233,8 @@ func (a *OpenAIAgent) VisualEdit(ctx context.Context, in models.VisualEditInput)
 	messages := convertMessages(in.Messages)
 
 	cfg := a.conf.OpenAIAgents.Coder
-	raw, usage, err := callTool(ctx, a.conf, cfg, chat_prompts.PromptVisualEdit, messages, toolEmitVisualEdit)
+	systemPrompt := chat_prompts.VisualEditorSystemPrompt(in.PromptOverride)
+	raw, usage, err := callTool(ctx, a.conf, cfg, systemPrompt, messages, toolEmitVisualEdit)
 	a.tracker.RecordUsage(usage, cfg.Model, "Visual edit")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {

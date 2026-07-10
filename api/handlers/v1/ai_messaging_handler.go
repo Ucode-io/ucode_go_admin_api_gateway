@@ -95,6 +95,7 @@ func (h *HandlerV1) CreateAiChatMessage(c *gin.Context) {
 	processor.newProject = userMessage.NewProject
 	processor.userMessage = userMessage.Content
 	processor.mcpUcodeProjectId = mcpProject.GetUcodeProjectId()
+	processor.mcpEnvironmentId = mcpProject.GetEnvironmentId()
 	processor.ucodeMcpProjectId = mcpProject.GetId()
 
 	// Lazy self-heal: persist the normalised provider so chats with empty

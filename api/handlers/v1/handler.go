@@ -34,33 +34,35 @@ import (
 )
 
 type HandlerV1 struct {
-	baseConf        config.BaseConfig
-	projectConfs    map[string]config.Config
-	log             logger.LoggerI
-	services        services.ServiceNodesI
-	companyServices services.CompanyServiceI
-	authService     services.AuthServiceManagerI
-	redis           storage.RedisStorageI
-	centralRedis    *go_redis.Client
-	cache           *caching.ExpiringLRUCache
-	rateLimiter     *util.ApiKeyRateLimiter
-	vault           vault.VaultClient
-	geminiKeyPool   *gemini.KeyPool
+	baseConf          config.BaseConfig
+	projectConfs      map[string]config.Config
+	log               logger.LoggerI
+	services          services.ServiceNodesI
+	companyServices   services.CompanyServiceI
+	authService       services.AuthServiceManagerI
+	redis             storage.RedisStorageI
+	centralRedis      *go_redis.Client
+	cache             *caching.ExpiringLRUCache
+	rateLimiter       *util.ApiKeyRateLimiter
+	vault             vault.VaultClient
+	geminiKeyPool     *gemini.KeyPool
+	aiEditPromptStore aiEditPromptStore
 }
 
 func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) HandlerV1 {
 	h := HandlerV1{
-		baseConf:        baseConf,
-		projectConfs:    projectConfs,
-		log:             log,
-		services:        svcs,
-		companyServices: cmpServ,
-		authService:     authService,
-		redis:           redis,
-		centralRedis:    centralRedis,
-		cache:           cache,
-		rateLimiter:     limiter,
-		vault:           vaultClient,
+		baseConf:          baseConf,
+		projectConfs:      projectConfs,
+		log:               log,
+		services:          svcs,
+		companyServices:   cmpServ,
+		authService:       authService,
+		redis:             redis,
+		centralRedis:      centralRedis,
+		cache:             cache,
+		rateLimiter:       limiter,
+		vault:             vaultClient,
+		aiEditPromptStore: grpcAIEditPromptStore{},
 	}
 	if len(baseConf.GeminiAPIKeys) > 0 {
 		pool, err := gemini.NewKeyPool(baseConf.GeminiAPIKeys)

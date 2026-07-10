@@ -163,12 +163,12 @@ func (a *GeminiAgent) EditCode(_ context.Context, in models.EditorInput) (*model
 	)
 
 	if in.Chunked {
-		systemPrompt = chat_prompts.PromptCodeEditorChunk
+		systemPrompt = chat_prompts.CodeEditorSystemPrompt(in.PromptOverride, true)
 		assignedJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorChunkMessage(in.Clarified, string(assignedJSON), in.FullPlanJSON, in.FilesContext, len(in.Images) > 0)
 		parts = buildGeminiParts(content, in.Images)
 	} else if in.HasMatchingFiles {
-		systemPrompt = chat_prompts.PromptCodeEditor
+		systemPrompt = chat_prompts.CodeEditorSystemPrompt(in.PromptOverride, false)
 		planJSON, _ := json.Marshal(in.Plan)
 		content := chat_prompts.BuildCodeEditorMessage(in.Clarified, string(planJSON), in.FilesContext, len(in.Images) > 0)
 		parts = buildGeminiParts(content, in.Images)
@@ -235,7 +235,8 @@ func (a *GeminiAgent) VisualEdit(_ context.Context, in models.VisualEditInput) (
 	contents := convertMessages(in.Messages)
 
 	cfg := a.conf.GeminiAgents.Coder
-	raw, usage, err := callGeminiTool(a.pool, cfg, chat_prompts.PromptVisualEdit, contents, toolEmitVisualEdit)
+	systemPrompt := chat_prompts.VisualEditorSystemPrompt(in.PromptOverride)
+	raw, usage, err := callGeminiTool(a.pool, cfg, systemPrompt, contents, toolEmitVisualEdit)
 	a.tracker.RecordUsage(usage, cfg.Model, "Visual edit")
 	a.tracker.Deduct(int64(usage.InputTokens + usage.OutputTokens))
 	if err != nil {

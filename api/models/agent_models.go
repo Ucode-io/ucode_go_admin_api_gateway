@@ -58,9 +58,17 @@ type (
 		Images           []string
 		History          []ChatMessage
 		HasMatchingFiles bool
+		PromptOverride   string
 
 		Chunked      bool
 		FullPlanJSON string
+	}
+
+	// EditPromptOverrides contains request-scoped custom prompt bodies for the
+	// two active Ugen edit paths. Empty values preserve the built-in prompts.
+	EditPromptOverrides struct {
+		CodeEditor   string
+		VisualEditor string
 	}
 
 	LLMUsage struct {
@@ -71,7 +79,8 @@ type (
 	// VisualEditInput carries pre-built messages for the visual edit tool call.
 	// The caller (v1) is responsible for building prompt and resolving file contexts.
 	VisualEditInput struct {
-		Messages []ChatMessage
+		Messages       []ChatMessage
+		PromptOverride string
 	}
 
 	// AgentIntegrationInput carries pre-built messages for the integrate_agent tool

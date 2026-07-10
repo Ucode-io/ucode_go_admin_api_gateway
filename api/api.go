@@ -419,6 +419,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			mcpProject.DELETE("/:mcp_project_id", h.V1.DeleteMcpProject)
 			mcpProject.GET("/short-link/:function_id", h.V1.GetMfeShortLink)
 			mcpProject.POST("/short-link", h.V1.CreateMfeShortLink)
+
+			editPrompts := mcpProject.Group("/:mcp_project_id/edit-prompts")
+			editPrompts.Use(h.V1.BearerOnlyMiddleware())
+			{
+				editPrompts.GET("", h.V1.GetMcpProjectAIEditPrompts)
+				editPrompts.PUT("/:prompt_kind", h.V1.UpsertMcpProjectAIEditPrompt)
+				editPrompts.DELETE("/:prompt_kind", h.V1.DeleteMcpProjectAIEditPrompt)
+			}
 		}
 
 		ugenTemplate := v1Admin.Group("/ugen-template")
@@ -462,6 +470,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			aiChat.DELETE("/messages/:message_id/reaction", h.V1.DeleteAiChatMessageReaction)
 			aiChat.DELETE("/messages/:message_id", h.V1.DeleteAiChatMessage)
 
+		}
+
+		aiEditPrompts := v1Admin.Group("/ai-edit-prompts")
+		aiEditPrompts.Use(h.V1.BearerOnlyMiddleware())
+		{
+			aiEditPrompts.GET("", h.V1.GetAIEditPrompts)
+			aiEditPrompts.PUT("/:prompt_kind", h.V1.UpsertAIEditPrompt)
+			aiEditPrompts.DELETE("/:prompt_kind", h.V1.DeleteAIEditPrompt)
 		}
 
 		agents := v1Admin.Group("/agents")

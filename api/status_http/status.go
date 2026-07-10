@@ -49,6 +49,11 @@ var (
 		Status:      "FORBIDDEN",
 		Description: "...",
 	}
+	Conflict = Status{
+		Code:        409,
+		Status:      "CONFLICT",
+		Description: "The request conflicts with the current state of the resource",
+	}
 	PaymentRequired = Status{
 		Code:        402,
 		Status:      "PAYMENT_REQUIRED",
@@ -58,6 +63,11 @@ var (
 		Code:        429,
 		Status:      "TOO_MANY_REQUESTS",
 		Description: "The user has sent too many requests in a given amount of time",
+	}
+	ServiceUnavailable = Status{
+		Code:        503,
+		Status:      "SERVICE_UNAVAILABLE",
+		Description: "The service is temporarily unavailable",
 	}
 	InternalServerError = Status{
 		Code:        500,
