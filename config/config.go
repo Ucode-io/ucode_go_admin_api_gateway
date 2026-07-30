@@ -131,6 +131,10 @@ type BaseConfig struct {
 	KnativeBaseUrl  string
 	MCPServerURL    string
 
+	// KP generator agent (standalone HTML KP service, internal ClusterIP).
+	KpAgentURL    string
+	KpAgentAPIKey string
+
 	// MCP handler token limits — used in mcp.go, not tied to a specific agent.
 	MaxTokens                int
 	AnalyseProjectMaxTokens  int
@@ -276,6 +280,8 @@ func BaseLoad() BaseConfig {
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
+	config.KpAgentURL = cast.ToString(GetOrReturnDefaultValue("KP_AGENT_URL", ""))
+	config.KpAgentAPIKey = cast.ToString(GetOrReturnDefaultValue("KP_AGENT_API_KEY", ""))
 	config.UcodeBaseUrl = cast.ToString(GetOrReturnDefaultValue("UCODE_BASE_URL", "https://admin-api.ucode.run"))
 
 	config.VaultAddress = cast.ToString(GetOrReturnDefaultValue("VAULT_ADDR", ""))

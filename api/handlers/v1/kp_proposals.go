@@ -1,0 +1,193 @@
+package v1
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
+	"ucode/ucode_go_api_gateway/api/status_http"
+	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/util"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
+)
+
+// kpAgentTimeout bounds the synchronous KP generation call. It must stay under
+// the ingress proxy timeout in front of the gateway (see deploy notes) and
+// comfortably above a typical HTML-only generation.
+const kpAgentTimeout = 120 * time.Second
+
+// kpProposalRequest is what the Professio frontend sends. The endpoint is a thin
+// pass-through: only prompt/locale/themeTokens reach the agent. Brand/web-research
+// behavior is intentionally left at the agent's defaults.
+type kpProposalRequest struct {
+	Prompt      string          `json:"prompt"`
+	Locale      string          `json:"locale"`
+	ThemeTokens json.RawMessage `json:"themeTokens,omitempty"`
+	DealID      string          `json:"dealId,omitempty"`
+}
+
+type kpAgentRequest struct {
+	Prompt      string          `json:"prompt"`
+	Locale      string          `json:"locale,omitempty"`
+	ThemeTokens json.RawMessage `json:"themeTokens,omitempty"`
+}
+
+type kpAgentError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type kpAgentResponse struct {
+	Ok        bool          `json:"ok"`
+	RequestID string        `json:"requestId"`
+	Title     string        `json:"title"`
+	HTML      string        `json:"html"`
+	PageCount int           `json:"pageCount"`
+	Error     *kpAgentError `json:"error"`
+}
+
+// GenerateKpProposal godoc
+// @Security ApiKeyAuth
+// @ID v1_generate_kp_proposal
+// @Router /v1/kp-proposals [POST]
+// @Summary Generate a commercial proposal (KP) as HTML
+// @Description Synchronously generates a KP via the standalone kp-generator-agent and returns the HTML inline.
+// @Tags KP
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer access token"
+// @Param GenerateKpProposalRequest body kpProposalRequest true "GenerateKpProposalRequest"
+// @Success 200 {object} status_http.Response "KP HTML"
+// @Failure 400 {object} status_http.Response "Bad Request"
+// @Failure 500 {object} status_http.Response "Server Error"
+func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
+	// AuthMiddleware has already validated the JWT and populated the context.
+	// A valid, project-scoped token establishes project-level access.
+	projectID, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(cast.ToString(projectID)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return
+	}
+	environmentID, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(cast.ToString(environmentID)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+		return
+	}
+
+	if strings.TrimSpace(h.baseConf.KpAgentURL) == "" {
+		h.HandleResponse(c, status_http.InternalServerError, kpError("KP_AGENT_UNAVAILABLE", "KP agent is not configured"))
+		return
+	}
+
+	var req kpProposalRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
+		return
+	}
+	if strings.TrimSpace(req.Prompt) == "" {
+		h.HandleResponse(c, status_http.InvalidArgument, "prompt is required")
+		return
+	}
+
+	agentResp, err := h.callKpAgent(c.Request.Context(), kpAgentRequest{
+		Prompt:      req.Prompt,
+		Locale:      mapKpLocale(req.Locale),
+		ThemeTokens: req.ThemeTokens,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, kpError("KP_AGENT_UNAVAILABLE", err.Error()))
+		return
+	}
+	if !agentResp.Ok {
+		code, message := "KP_AGENT_FAILED", "KP generation failed"
+		if agentResp.Error != nil {
+			if agentResp.Error.Code != "" {
+				code = agentResp.Error.Code
+			}
+			if agentResp.Error.Message != "" {
+				message = agentResp.Error.Message
+			}
+		}
+		h.HandleResponse(c, status_http.InvalidArgument, kpError(code, message))
+		return
+	}
+	if strings.TrimSpace(agentResp.HTML) == "" {
+		h.HandleResponse(c, status_http.InternalServerError, kpError("KP_ARTIFACT_HTML_MISSING", "agent returned empty HTML"))
+		return
+	}
+
+	h.HandleResponse(c, status_http.OK, gin.H{
+		"ok":        true,
+		"status":    "completed",
+		"requestId": agentResp.RequestID,
+		"title":     agentResp.Title,
+		"html":      agentResp.HTML,
+		"pageCount": agentResp.PageCount,
+	})
+}
+
+func (h *HandlerV1) callKpAgent(ctx context.Context, body kpAgentRequest) (*kpAgentResponse, error) {
+	data, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	url := strings.TrimRight(h.baseConf.KpAgentURL, "/") + "/v1/proposals"
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	if h.baseConf.KpAgentAPIKey != "" {
+		httpReq.Header.Set("Authorization", "Bearer "+h.baseConf.KpAgentAPIKey)
+	}
+
+	client := &http.Client{Timeout: kpAgentTimeout}
+	res, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	raw, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var parsed kpAgentResponse
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return nil, fmt.Errorf("kp agent returned non-JSON (status %d): %s", res.StatusCode, truncate(string(raw), 300))
+	}
+	return &parsed, nil
+}
+
+// mapKpLocale maps the app locale to the agent's accepted locale set
+// (uz-Latn, ru-RU, en); unknown/empty defaults to ru-RU.
+func mapKpLocale(locale string) string {
+	switch strings.ToLower(strings.TrimSpace(locale)) {
+	case "uz", "uz-latn", "uz_latn":
+		return "uz-Latn"
+	case "en", "en-us":
+		return "en"
+	default:
+		return "ru-RU"
+	}
+}
+
+func kpError(code, message string) gin.H {
+	return gin.H{"ok": false, "error": gin.H{"code": code, "message": message}}
+}
+
+func truncate(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max] + "…"
+}

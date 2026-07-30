@@ -169,6 +169,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
 
+		// KP (commercial proposal) generation — synchronous HTML via kp-generator-agent.
+		v1.POST("/kp-proposals", h.V1.GenerateKpProposal)
+
 		// Excel Reader
 		v1.GET("/excel/:excel_id", h.V1.ExcelReader)
 		v1.POST("/excel/excel_to_db/:excel_id", h.V1.ExcelToDb)
