@@ -34,9 +34,10 @@ type kpProposalRequest struct {
 }
 
 type kpAgentRequest struct {
-	Prompt      string          `json:"prompt"`
-	Locale      string          `json:"locale,omitempty"`
-	ThemeTokens json.RawMessage `json:"themeTokens,omitempty"`
+	Prompt                 string          `json:"prompt"`
+	Locale                 string          `json:"locale,omitempty"`
+	ThemeTokens            json.RawMessage `json:"themeTokens,omitempty"`
+	PrototypePublicBaseURL string          `json:"prototypePublicBaseUrl,omitempty"`
 }
 
 type kpAgentError struct {
@@ -45,12 +46,21 @@ type kpAgentError struct {
 }
 
 type kpAgentResponse struct {
-	Ok        bool          `json:"ok"`
-	RequestID string        `json:"requestId"`
-	Title     string        `json:"title"`
-	HTML      string        `json:"html"`
-	PageCount int           `json:"pageCount"`
-	Error     *kpAgentError `json:"error"`
+	Ok           bool              `json:"ok"`
+	RequestID    string            `json:"requestId"`
+	Title        string            `json:"title"`
+	HTML         string            `json:"html"`
+	PageCount    int               `json:"pageCount"`
+	PrototypeURL string            `json:"prototypeUrl"`
+	Prototype    *kpAgentPrototype `json:"prototype"`
+	Error        *kpAgentError     `json:"error"`
+}
+
+type kpAgentPrototype struct {
+	URL             string `json:"url"`
+	QAStatus        string `json:"qaStatus,omitempty"`
+	ScreenCount     int    `json:"screenCount,omitempty"`
+	RendererVersion string `json:"rendererVersion,omitempty"`
 }
 
 // GenerateKpProposal godoc
@@ -97,9 +107,10 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 	}
 
 	agentResp, err := h.callKpAgent(c.Request.Context(), kpAgentRequest{
-		Prompt:      req.Prompt,
-		Locale:      mapKpLocale(req.Locale),
-		ThemeTokens: req.ThemeTokens,
+		Prompt:                 req.Prompt,
+		Locale:                 mapKpLocale(req.Locale),
+		ThemeTokens:            req.ThemeTokens,
+		PrototypePublicBaseURL: kpPrototypePublicBaseURL(c),
 	})
 	if err != nil {
 		h.HandleResponse(c, status_http.InternalServerError, kpError("KP_AGENT_UNAVAILABLE", err.Error()))
@@ -122,15 +133,79 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 		h.HandleResponse(c, status_http.InternalServerError, kpError("KP_ARTIFACT_HTML_MISSING", "agent returned empty HTML"))
 		return
 	}
+	prototypeURL := strings.TrimSpace(agentResp.PrototypeURL)
+	if prototypeURL == "" && agentResp.Prototype != nil {
+		prototypeURL = strings.TrimSpace(agentResp.Prototype.URL)
+	}
+	if prototypeURL == "" {
+		h.HandleResponse(c, status_http.InternalServerError, kpError("KP_ARTIFACT_PROTOTYPE_MISSING", "agent returned no prototype URL"))
+		return
+	}
+	prototype := gin.H{"url": prototypeURL}
+	if agentResp.Prototype != nil {
+		prototype["qaStatus"] = agentResp.Prototype.QAStatus
+		prototype["screenCount"] = agentResp.Prototype.ScreenCount
+		prototype["rendererVersion"] = agentResp.Prototype.RendererVersion
+	}
 
 	h.HandleResponse(c, status_http.OK, gin.H{
-		"ok":        true,
-		"status":    "completed",
-		"requestId": agentResp.RequestID,
-		"title":     agentResp.Title,
-		"html":      agentResp.HTML,
-		"pageCount": agentResp.PageCount,
+		"ok":           true,
+		"status":       "completed",
+		"requestId":    agentResp.RequestID,
+		"title":        agentResp.Title,
+		"html":         agentResp.HTML,
+		"pageCount":    agentResp.PageCount,
+		"prototypeUrl": prototypeURL,
+		"prototype":    prototype,
 	})
+}
+
+// GetKpPrototype proxies a published prototype from the internal agent. The
+// route is public so links embedded in downloaded PDFs work without an app JWT.
+func (h *HandlerV1) GetKpPrototype(c *gin.Context) {
+	publicID := strings.TrimSpace(c.Param("publicId"))
+	if !isValidKpPrototypeID(publicID) {
+		c.JSON(http.StatusNotFound, kpError("KP_PROTOTYPE_NOT_FOUND", "prototype not found"))
+		return
+	}
+	if strings.TrimSpace(h.baseConf.KpAgentURL) == "" {
+		c.JSON(http.StatusServiceUnavailable, kpError("KP_AGENT_UNAVAILABLE", "KP agent is not configured"))
+		return
+	}
+
+	url := strings.TrimRight(h.baseConf.KpAgentURL, "/") + "/p/" + publicID + "/"
+	req, err := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, url, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, kpError("KP_PROTOTYPE_FAILED", err.Error()))
+		return
+	}
+	if h.baseConf.KpAgentAPIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+h.baseConf.KpAgentAPIKey)
+	}
+
+	res, err := (&http.Client{Timeout: 15 * time.Second}).Do(req)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, kpError("KP_AGENT_UNAVAILABLE", err.Error()))
+		return
+	}
+	defer res.Body.Close()
+
+	for _, name := range []string{
+		"Cache-Control",
+		"Content-Security-Policy",
+		"Referrer-Policy",
+		"X-Content-Type-Options",
+		"X-Robots-Tag",
+	} {
+		if value := res.Header.Get(name); value != "" {
+			c.Header(name, value)
+		}
+	}
+	contentType := res.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "text/html; charset=utf-8"
+	}
+	c.DataFromReader(res.StatusCode, res.ContentLength, contentType, res.Body, nil)
 }
 
 func (h *HandlerV1) callKpAgent(ctx context.Context, body kpAgentRequest) (*kpAgentResponse, error) {
@@ -179,6 +254,42 @@ func mapKpLocale(locale string) string {
 	default:
 		return "ru-RU"
 	}
+}
+
+func kpPrototypePublicBaseURL(c *gin.Context) string {
+	scheme := firstForwardedValue(c.GetHeader("X-Forwarded-Proto"))
+	if scheme != "http" && scheme != "https" {
+		if c.Request.TLS != nil {
+			scheme = "https"
+		} else {
+			scheme = "http"
+		}
+	}
+	host := firstForwardedValue(c.GetHeader("X-Forwarded-Host"))
+	if host == "" {
+		host = c.Request.Host
+	}
+	return scheme + "://" + host + "/v1/kp-prototypes"
+}
+
+func firstForwardedValue(value string) string {
+	return strings.ToLower(strings.TrimSpace(strings.Split(value, ",")[0]))
+}
+
+func isValidKpPrototypeID(value string) bool {
+	if len(value) < 8 || len(value) > 64 {
+		return false
+	}
+	for _, character := range value {
+		if (character >= 'a' && character <= 'z') ||
+			(character >= 'A' && character <= 'Z') ||
+			(character >= '0' && character <= '9') ||
+			character == '_' || character == '-' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func kpError(code, message string) gin.H {
