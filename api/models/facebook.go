@@ -165,6 +165,24 @@ type (
 		Required   bool   `json:"required"`
 	}
 
+	// FacebookCrmMapping is the per-project mapping for the amoCRM-style flow:
+	// which tables/relations a lead is written to and which pipeline/stage a new
+	// deal lands in. Any blank field falls back to the platform default, so the
+	// integration is not bound to one project's schema. Used for both the GET
+	// (response) and PUT (request) of /v1/facebook/crm-mapping.
+	FacebookCrmMapping struct {
+		ContactsTable    string `json:"contacts_table"`
+		DealsTable       string `json:"deals_table"`
+		LeadFormsTable   string `json:"lead_forms_table"`
+		DealContactField string `json:"deal_contact_field"`
+		DealFormField    string `json:"deal_form_field"`
+		PipelineField    string `json:"pipeline_field"`
+		PipelineValue    string `json:"pipeline_value"`
+		StageField       string `json:"stage_field"`
+		StageValue       string `json:"stage_value"`
+		SourceField      string `json:"source_field"`
+	}
+
 	// FacebookConnectionStatus reports whether the stored user token is still
 	// active; Reason explains the inactive state when Active is false.
 	FacebookConnectionStatus struct {

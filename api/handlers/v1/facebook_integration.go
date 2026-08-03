@@ -42,8 +42,6 @@ func (h *HandlerV1) FacebookSubscribe(c *gin.Context) {
 	var (
 		page  models.FacebookPage
 		found bool
-
-		pageName = strings.TrimSpace(req.PageName)
 	)
 
 	for _, p := range pages {
@@ -57,19 +55,35 @@ func (h *HandlerV1) FacebookSubscribe(c *gin.Context) {
 		return
 	}
 
+	resourceID, err := h.facebookConnectPage(c.Request.Context(), state, page, req.PageName)
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	// Pre-populate the project's source form list; non-fatal.
+	h.facebookSyncPageForms(c.Request.Context(), state, page)
+
+	h.HandleResponse(c, status_http.OK, gin.H{"resource_id": resourceID, "page_id": page.ID})
+}
+
+// facebookConnectPage subscribes one page to the leadgen webhook and upserts its
+// META_LEADS project resource, preserving any saved form mapping, CRM mapping,
+// and original connect time on re-subscribe. Returns the resource id. Shared by
+// the manual subscribe endpoint and the post-OAuth auto-connect.
+func (h *HandlerV1) facebookConnectPage(ctx context.Context, state models.FacebookOAuthState, page models.FacebookPage, pageName string) (string, error) {
+	pageName = strings.TrimSpace(pageName)
 	if pageName == "" {
 		pageName = page.Name
 	}
 
-	if err = h.facebookSubscribePage(c.Request.Context(), page.ID, page.AccessToken); err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
+	if err := h.facebookSubscribePage(ctx, page.ID, page.AccessToken); err != nil {
+		return "", err
 	}
 
-	existing, err := h.findFacebookResource(c.Request.Context(), state.ProjectId, state.EnvironmentId, page.ID)
+	existing, err := h.findFacebookResource(ctx, state.ProjectId, state.EnvironmentId, page.ID)
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
+		return "", err
 	}
 
 	credentials := &pb.FacebookLeadsCredentials{
@@ -80,34 +94,29 @@ func (h *HandlerV1) FacebookSubscribe(c *gin.Context) {
 		ConnectedAt:     time.Now().UTC().Format(time.RFC3339),
 		Status:          config.FacebookStatusActive,
 	}
-	// On re-subscribe keep the saved form mapping and original connect time.
 	if prev := existing.GetSettings().GetFacebookLeads(); prev != nil {
 		credentials.Forms = prev.GetForms()
+		credentials.CrmMapping = prev.GetCrmMapping()
 		if prev.GetConnectedAt() != "" {
 			credentials.ConnectedAt = prev.GetConnectedAt()
 		}
 	}
-
 	if existing.GetName() != "" {
 		pageName = existing.GetName()
 	}
 
-	resource, err := h.companyServices.Resource().UpsertProjectResource(
-		c.Request.Context(), &pb.AddResourceToProjectRequest{
-			Name:          pageName,
-			ProjectId:     state.ProjectId,
-			EnvironmentId: state.EnvironmentId,
-			Type:          pb.ResourceType_META_LEADS,
-			ExternalId:    page.ID,
-			Settings:      &pb.Settings{FacebookLeads: credentials},
-		},
-	)
+	resource, err := h.companyServices.Resource().UpsertProjectResource(ctx, &pb.AddResourceToProjectRequest{
+		Name:          pageName,
+		ProjectId:     state.ProjectId,
+		EnvironmentId: state.EnvironmentId,
+		Type:          pb.ResourceType_META_LEADS,
+		ExternalId:    page.ID,
+		Settings:      &pb.Settings{FacebookLeads: credentials},
+	})
 	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, err.Error())
-		return
+		return "", err
 	}
-
-	h.HandleResponse(c, status_http.OK, gin.H{"resource_id": resource.GetId(), "page_id": page.ID})
+	return resource.GetId(), nil
 }
 
 // FacebookSaveMapping stores the form → table field mapping. Forms absent here
@@ -311,4 +320,107 @@ func facebookFormsFromProto(forms []*pb.FacebookLeadFormMapping) []models.Facebo
 		})
 	}
 	return result
+}
+
+// FacebookGetCrmMapping returns the effective CRM mapping for the project —
+// defaults overlaid with any stored per-project override — plus the raw
+// defaults so the UI can show what a reset would restore.
+func (h *HandlerV1) FacebookGetCrmMapping(c *gin.Context) {
+	state, ok := h.authContext(c)
+	if !ok {
+		return
+	}
+
+	list, err := h.companyServices.Resource().GetProjectResourceList(c.Request.Context(), &pb.GetProjectResourceListRequest{
+		ProjectId:     state.ProjectId,
+		EnvironmentId: state.EnvironmentId,
+		Type:          pb.ResourceType_META_LEADS,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	effective := defaultCRMMapping()
+	isCustom := false
+	for _, resource := range list.GetResources() {
+		if resource.GetSettings().GetFacebookLeads().GetCrmMapping() != nil {
+			effective = h.resolveCRMMapping(resource)
+			isCustom = true
+			break
+		}
+	}
+
+	h.HandleResponse(c, status_http.OK, gin.H{
+		"mapping":   crmMappingToResponse(effective),
+		"defaults":  crmMappingToResponse(defaultCRMMapping()),
+		"is_custom": isCustom,
+	})
+}
+
+// FacebookSaveCrmMapping stores the project's CRM mapping on every connected
+// META_LEADS resource (the schema is project-level, but each page resource
+// carries its own copy so ingestion can read it without extra lookups).
+// Facebook must be connected first, since the mapping lives on those resources.
+func (h *HandlerV1) FacebookSaveCrmMapping(c *gin.Context) {
+	state, ok := h.authContext(c)
+	if !ok {
+		return
+	}
+
+	var req models.FacebookCrmMapping
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+
+	list, err := h.companyServices.Resource().GetProjectResourceList(c.Request.Context(), &pb.GetProjectResourceListRequest{
+		ProjectId:     state.ProjectId,
+		EnvironmentId: state.EnvironmentId,
+		Type:          pb.ResourceType_META_LEADS,
+	})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	resources := list.GetResources()
+	if len(resources) == 0 {
+		h.HandleResponse(c, status_http.BadRequest, "connect a facebook page first")
+		return
+	}
+
+	mappingProto := crmMappingRequestToProto(req)
+
+	for _, resource := range resources {
+		credentials := resource.GetSettings().GetFacebookLeads()
+		if credentials == nil {
+			credentials = &pb.FacebookLeadsCredentials{PageId: resource.GetExternalId()}
+		}
+		credentials.CrmMapping = mappingProto
+
+		name := resource.GetName()
+		if name == "" {
+			name = credentials.GetPageName()
+		}
+
+		if _, err := h.companyServices.Resource().UpdateProjectResource(c.Request.Context(), &pb.ProjectResource{
+			Id:            resource.GetId(),
+			ProjectId:     state.ProjectId,
+			EnvironmentId: state.EnvironmentId,
+			Name:          name,
+			Type:          pb.ResourceType_META_LEADS.String(),
+			ResourceType:  int32(pb.ResourceType_META_LEADS),
+			ExternalId:    resource.GetExternalId(),
+			Settings:      &pb.Settings{FacebookLeads: credentials},
+		}); err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+	}
+
+	h.HandleResponse(c, status_http.OK, gin.H{
+		"updated_resources": len(resources),
+		"mapping":           crmMappingToResponse(overlayCRMMapping(defaultCRMMapping(), mappingProto)),
+	})
 }

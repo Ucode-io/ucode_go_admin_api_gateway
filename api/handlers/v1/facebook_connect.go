@@ -157,7 +157,32 @@ func (h *HandlerV1) FacebookCallback(c *gin.Context) {
 		return
 	}
 
+	// After OAuth, subscribe every page the user manages and pull its forms so
+	// no manual page/form selection is needed. Best-effort: failures are logged
+	// but never block the success redirect (the user token is already stored).
+	h.facebookAutoConnectAllPages(c.Request.Context(), state, longLived)
+
 	h.redirectFacebookOAuth(c, facebookOAuthOutcome{success: true, state: state})
+}
+
+// facebookAutoConnectAllPages subscribes every page the connected user manages
+// to the leadgen webhook and pre-syncs each page's forms into lead_forms, so a
+// single OAuth captures all current (and, via page-level subscription, future)
+// forms with zero manual selection.
+func (h *HandlerV1) facebookAutoConnectAllPages(ctx context.Context, state models.FacebookOAuthState, userToken string) {
+	pages, err := h.facebookListPages(ctx, userToken)
+	if err != nil {
+		h.log.Warn("facebook auto-connect: list pages failed: " + err.Error())
+		return
+	}
+
+	for _, page := range pages {
+		if _, err := h.facebookConnectPage(ctx, state, page, ""); err != nil {
+			h.log.Warn("facebook auto-connect: connect page " + page.ID + " failed: " + err.Error())
+			continue
+		}
+		h.facebookSyncPageForms(ctx, state, page)
+	}
 }
 
 // FacebookStatus reports whether the connected Meta user token is still active so

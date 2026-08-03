@@ -764,6 +764,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		facebook.POST("/subscribe", h.V1.FacebookSubscribe)
 		facebook.PUT("/mapping", h.V1.FacebookSaveMapping)
 
+		facebook.GET("/crm-mapping", h.V1.FacebookGetCrmMapping)
+		facebook.PUT("/crm-mapping", h.V1.FacebookSaveCrmMapping)
+
 		facebook.GET("/integration", h.V1.FacebookIntegration)
 		facebook.DELETE("/integration/:id", h.V1.FacebookDisconnect)
 	}

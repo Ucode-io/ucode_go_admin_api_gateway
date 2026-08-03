@@ -147,30 +147,14 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 	}
 
 	for _, resource := range resources {
-		var (
-			credentials = resource.GetSettings().GetFacebookLeads()
-			mapping     *pb.FacebookLeadFormMapping
-		)
-
+		credentials := resource.GetSettings().GetFacebookLeads()
 		if credentials == nil {
 			continue
 		}
 
-		for _, form := range credentials.GetForms() {
-			if form.GetFormId() == value.FormID {
-				mapping = form
-				break
-			}
-		}
-		if mapping == nil {
-			h.log.Info("facebook lead: form not mapped, skipping",
-				logger.String("page_id", pageID),
-				logger.String("form_id", value.FormID),
-				logger.String("project_id", resource.GetProjectId()),
-			)
-			continue
-		}
-
+		// All forms of a connected page are captured automatically — no per-form
+		// mapping gate. The lead is fetched once and written to every project
+		// mapped to this page (fan-out).
 		if lead == nil {
 			fetched, err := h.facebookFetchLead(ctx, value.LeadgenID, credentials.GetPageAccessToken())
 			if err != nil {
@@ -181,10 +165,10 @@ func (h *HandlerV1) ingestFacebookLead(ctx context.Context, pageID string, value
 			lead = &fetched
 		}
 
-		if err := h.writeFacebookLead(ctx, resource, mapping, *lead, value); err != nil {
+		if err := h.writeProfessionalCRMLead(ctx, resource, *lead, value); err != nil {
 			h.log.Error("facebook lead: write failed", logger.Error(err),
 				logger.String("project_id", resource.GetProjectId()),
-				logger.String("table_slug", mapping.GetTableSlug()),
+				logger.String("form_id", value.FormID),
 			)
 		}
 	}

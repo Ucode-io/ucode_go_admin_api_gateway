@@ -483,6 +483,24 @@ message FacebookLeadsCredentials {
     string connected_at = 5;
     string status = 6;
     repeated FacebookLeadFormMapping forms = 7;
+    FacebookCrmMapping crm_mapping = 8;
+}
+
+// Per-project mapping for the amoCRM-style lead flow: which tables/relations an
+// incoming lead is written to and which pipeline/stage a new deal lands in.
+// Empty fields fall back to platform defaults, so the integration is not bound
+// to any single project's schema.
+message FacebookCrmMapping {
+    string contacts_table = 1;
+    string deals_table = 2;
+    string lead_forms_table = 3;
+    string deal_contact_field = 4; // relation field on deals -> contacts
+    string deal_form_field = 5;    // relation field on deals -> lead_forms
+    string pipeline_field = 6;
+    string pipeline_value = 7;
+    string stage_field = 8;
+    string stage_value = 9;
+    string source_field = 10;
 }
 
 // One lead form mapped to one project table. A page may have many forms; each
