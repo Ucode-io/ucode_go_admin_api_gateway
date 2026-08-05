@@ -47,15 +47,17 @@ type kpAgentError struct {
 }
 
 type kpAgentResponse struct {
-	Ok           bool              `json:"ok"`
-	RequestID    string            `json:"requestId"`
-	Title        string            `json:"title"`
-	HTML         string            `json:"html"`
-	PageCount    int               `json:"pageCount"`
-	DownloadURL  string            `json:"downloadUrl"`
-	PrototypeURL string            `json:"prototypeUrl"`
-	Prototype    *kpAgentPrototype `json:"prototype"`
-	Error        *kpAgentError     `json:"error"`
+	Ok              bool              `json:"ok"`
+	RequestID       string            `json:"requestId"`
+	Title           string            `json:"title"`
+	HTML            string            `json:"html"`
+	PageCount       int               `json:"pageCount"`
+	QAStatus        string            `json:"qaStatus"`
+	DownloadURL     string            `json:"downloadUrl"`
+	HTMLDownloadURL string            `json:"htmlDownloadUrl"`
+	PrototypeURL    string            `json:"prototypeUrl"`
+	Prototype       *kpAgentPrototype `json:"prototype"`
+	Error           *kpAgentError     `json:"error"`
 }
 
 type kpAgentPrototype struct {
@@ -65,14 +67,20 @@ type kpAgentPrototype struct {
 	RendererVersion string `json:"rendererVersion,omitempty"`
 }
 
-// kpPdfCacheEntry is the tenant-isolation record stored in centralRedis under
-// config.KpProposalPdfCachePrefix+requestId when a proposal has a downloadable
-// PDF. It lets GET /v1/kp-proposals/:requestId/pdf (kp_proposal_pdf.go) verify
-// the caller's project/environment owns requestId, across gateway replicas.
-type kpPdfCacheEntry struct {
-	ProjectID     string `json:"projectId"`
-	EnvironmentID string `json:"environmentId"`
-	Title         string `json:"title"`
+// kpProposalCacheEntry is the tenant/metadata record stored in centralRedis under
+// config.KpProposalCachePrefix+requestId, written once by GenerateKpProposal and
+// read by every other KP artifact endpoint (GetKpProposal, GetKpProposalHTML,
+// DownloadKpProposalPDF) to verify the caller's project/environment owns requestId
+// and to know which artifacts actually exist, across gateway replicas.
+type kpProposalCacheEntry struct {
+	ProjectID     string            `json:"projectId"`
+	EnvironmentID string            `json:"environmentId"`
+	Title         string            `json:"title"`
+	PageCount     int               `json:"pageCount"`
+	QAStatus      string            `json:"qaStatus"`
+	HasHTML       bool              `json:"hasHtml"`
+	HasPDF        bool              `json:"hasPdf"`
+	Prototype     *kpAgentPrototype `json:"prototype,omitempty"`
 }
 
 // GenerateKpProposal godoc
@@ -92,14 +100,8 @@ type kpPdfCacheEntry struct {
 func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 	// AuthMiddleware has already validated the JWT and populated the context.
 	// A valid, project-scoped token establishes project-level access.
-	projectID, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(cast.ToString(projectID)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
-		return
-	}
-	environmentID, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(cast.ToString(environmentID)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+	projectID, environmentID, ok := h.kpTenantFromContext(c)
+	if !ok {
 		return
 	}
 
@@ -160,19 +162,34 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 		prototype["rendererVersion"] = agentResp.Prototype.RendererVersion
 	}
 
-	var pdfURL string
-	if agentResp.DownloadURL != "" && h.centralRedis != nil {
-		entry, err := json.Marshal(kpPdfCacheEntry{
-			ProjectID:     cast.ToString(projectID),
-			EnvironmentID: cast.ToString(environmentID),
+	cachedPrototype := agentResp.Prototype
+	if cachedPrototype == nil {
+		cachedPrototype = &kpAgentPrototype{URL: prototypeURL}
+	}
+
+	var htmlURL, pdfURL string
+	if h.centralRedis != nil {
+		entry, err := json.Marshal(kpProposalCacheEntry{
+			ProjectID:     projectID,
+			EnvironmentID: environmentID,
 			Title:         agentResp.Title,
+			PageCount:     agentResp.PageCount,
+			QAStatus:      agentResp.QAStatus,
+			HasHTML:       agentResp.HTMLDownloadURL != "",
+			HasPDF:        agentResp.DownloadURL != "",
+			Prototype:     cachedPrototype,
 		})
 		if err != nil {
-			h.log.Error("kp-proposal: failed to marshal pdf cache entry", logger.Error(err))
-		} else if err := h.centralRedis.Set(c.Request.Context(), config.KpProposalPdfCachePrefix+agentResp.RequestID, entry, config.KpProposalPdfCacheTTL).Err(); err != nil {
-			h.log.Error("kp-proposal: failed to cache pdf tenant mapping", logger.Error(err))
+			h.log.Error("kp-proposal: failed to marshal proposal cache entry", logger.Error(err))
+		} else if err := h.centralRedis.Set(c.Request.Context(), config.KpProposalCachePrefix+agentResp.RequestID, entry, config.KpProposalCacheTTL).Err(); err != nil {
+			h.log.Error("kp-proposal: failed to cache proposal tenant/metadata mapping", logger.Error(err))
 		} else {
-			pdfURL = "/v1/kp-proposals/" + agentResp.RequestID + "/pdf"
+			if agentResp.HTMLDownloadURL != "" {
+				htmlURL = "/v1/kp-proposals/" + agentResp.RequestID + "/html"
+			}
+			if agentResp.DownloadURL != "" {
+				pdfURL = "/v1/kp-proposals/" + agentResp.RequestID + "/pdf"
+			}
 		}
 	}
 
@@ -182,11 +199,200 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 		"requestId":    agentResp.RequestID,
 		"title":        agentResp.Title,
 		"html":         agentResp.HTML,
+		"htmlUrl":      htmlURL,
 		"pageCount":    agentResp.PageCount,
 		"prototypeUrl": prototypeURL,
 		"prototype":    prototype,
 		"pdfUrl":       pdfURL,
 	})
+}
+
+// kpTenantFromContext resolves the project/environment scope AuthMiddleware
+// already validated onto the gin context, shared by every KP proposal handler
+// that needs it (GenerateKpProposal, GetKpProposal, GetKpProposalHTML,
+// DownloadKpProposalPDF). On failure it has already written the response.
+func (h *HandlerV1) kpTenantFromContext(c *gin.Context) (projectID, environmentID string, ok bool) {
+	rawProjectID, exists := c.Get("project_id")
+	if !exists || !util.IsValidUUID(cast.ToString(rawProjectID)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
+		return "", "", false
+	}
+	rawEnvironmentID, exists := c.Get("environment_id")
+	if !exists || !util.IsValidUUID(cast.ToString(rawEnvironmentID)) {
+		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+		return "", "", false
+	}
+	return cast.ToString(rawProjectID), cast.ToString(rawEnvironmentID), true
+}
+
+// loadKpProposalCacheEntry reads the requestId -> tenant/metadata record written
+// by GenerateKpProposal. On a miss (unknown, expired, or corrupt entry) it has
+// already written a 404 KP_ARTIFACT_NOT_FOUND response — callers only need to
+// additionally check tenant ownership against the returned entry.
+func (h *HandlerV1) loadKpProposalCacheEntry(c *gin.Context, requestID string) (kpProposalCacheEntry, bool) {
+	var entry kpProposalCacheEntry
+	notFound := func() (kpProposalCacheEntry, bool) {
+		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "KP artifact not found"))
+		return entry, false
+	}
+	if h.centralRedis == nil {
+		return notFound()
+	}
+	cached, err := h.centralRedis.Get(c.Request.Context(), config.KpProposalCachePrefix+requestID).Bytes()
+	if err != nil {
+		return notFound()
+	}
+	if err := json.Unmarshal(cached, &entry); err != nil {
+		return notFound()
+	}
+	return entry, true
+}
+
+// GetKpProposal godoc
+// @Security ApiKeyAuth
+// @ID v1_get_kp_proposal
+// @Router /v1/kp-proposals/{requestId} [GET]
+// @Summary Get metadata for a previously generated KP
+// @Description Durable, tenant-scoped metadata lookup backing the persistent /kp/{requestId} preview URL — survives refresh and works regardless of which gateway replica handled the original POST.
+// @Tags KP
+// @Param Authorization header string true "Bearer access token"
+// @Param requestId path string true "KP request id"
+// @Success 200 {object} status_http.Response "KP metadata"
+// @Failure 400 {object} status_http.Response "Bad Request"
+// @Failure 403 {object} status_http.Response "Forbidden"
+// @Failure 404 {object} status_http.Response "Not Found"
+func (h *HandlerV1) GetKpProposal(c *gin.Context) {
+	projectID, environmentID, ok := h.kpTenantFromContext(c)
+	if !ok {
+		return
+	}
+
+	requestID := c.Param("requestId")
+	if !isValidKpRequestID(requestID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid requestId format")
+		return
+	}
+
+	entry, ok := h.loadKpProposalCacheEntry(c, requestID)
+	if !ok {
+		return
+	}
+	if entry.ProjectID != projectID || entry.EnvironmentID != environmentID {
+		h.HandleResponse(c, status_http.Forbidden, kpError("KP_ARTIFACT_FORBIDDEN", "requestId does not belong to the current project/environment"))
+		return
+	}
+
+	data := gin.H{
+		"ok":        true,
+		"status":    "completed",
+		"requestId": requestID,
+		"title":     entry.Title,
+		"pageCount": entry.PageCount,
+		"qaStatus":  entry.QAStatus,
+		"htmlUrl":   "",
+		"pdfUrl":    "",
+	}
+	if entry.HasHTML {
+		data["htmlUrl"] = "/v1/kp-proposals/" + requestID + "/html"
+	}
+	if entry.HasPDF {
+		data["pdfUrl"] = "/v1/kp-proposals/" + requestID + "/pdf"
+	}
+	if entry.Prototype != nil {
+		data["prototype"] = entry.Prototype
+	}
+	h.HandleResponse(c, status_http.OK, data)
+}
+
+// GetKpProposalHTML godoc
+// @Security ApiKeyAuth
+// @ID v1_get_kp_proposal_html
+// @Router /v1/kp-proposals/{requestId}/html [GET]
+// @Summary Get the raw HTML rendition of a previously generated KP
+// @Description Proxies GET {KP_AGENT_URL}/v1/proposals/{requestId}/html, enforcing tenant ownership. Returns the HTML document directly, no JSON envelope.
+// @Tags KP
+// @Param Authorization header string true "Bearer access token"
+// @Param requestId path string true "KP request id"
+// @Success 200 {string} string "HTML document"
+// @Failure 400 {object} status_http.Response "Bad Request"
+// @Failure 403 {object} status_http.Response "Forbidden"
+// @Failure 404 {object} status_http.Response "Not Found"
+// @Failure 410 {object} status_http.Response "Gone"
+// @Failure 502 {object} status_http.Response "Bad Gateway"
+// @Failure 503 {object} status_http.Response "Service Unavailable"
+func (h *HandlerV1) GetKpProposalHTML(c *gin.Context) {
+	projectID, environmentID, ok := h.kpTenantFromContext(c)
+	if !ok {
+		return
+	}
+
+	requestID := c.Param("requestId")
+	if !isValidKpRequestID(requestID) {
+		h.HandleResponse(c, status_http.InvalidArgument, "invalid requestId format")
+		return
+	}
+
+	entry, ok := h.loadKpProposalCacheEntry(c, requestID)
+	if !ok {
+		return
+	}
+	if entry.ProjectID != projectID || entry.EnvironmentID != environmentID {
+		h.HandleResponse(c, status_http.Forbidden, kpError("KP_ARTIFACT_FORBIDDEN", "requestId does not belong to the current project/environment"))
+		return
+	}
+	if !entry.HasHTML {
+		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "HTML artifact not found"))
+		return
+	}
+
+	if strings.TrimSpace(h.baseConf.KpAgentURL) == "" {
+		h.HandleResponse(c, status_http.ServiceUnavailable, kpError("KP_AGENT_UNAVAILABLE", "KP agent is not configured"))
+		return
+	}
+
+	agentURL := strings.TrimRight(h.baseConf.KpAgentURL, "/") + "/v1/proposals/" + requestID + "/html"
+	httpReq, err := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, agentURL, nil)
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+	if h.baseConf.KpAgentAPIKey != "" {
+		httpReq.Header.Set("Authorization", "Bearer "+h.baseConf.KpAgentAPIKey)
+	}
+
+	client := &http.Client{Timeout: kpAgentArtifactTimeout}
+	res, err := client.Do(httpReq)
+	if err != nil {
+		h.HandleResponse(c, status_http.BadGateway, kpError("KP_AGENT_UNAVAILABLE", err.Error()))
+		return
+	}
+	defer res.Body.Close()
+
+	switch res.StatusCode {
+	case http.StatusOK:
+		// handled below
+	case http.StatusNotFound:
+		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "HTML artifact not found"))
+		return
+	case http.StatusGone:
+		h.HandleResponse(c, status_http.Gone, kpError("KP_ARTIFACT_GONE", "HTML artifact is no longer available"))
+		return
+	case http.StatusUnauthorized, http.StatusForbidden:
+		h.HandleResponse(c, status_http.BadGateway, kpError("KP_AGENT_AUTH_FAILED", "KP agent rejected the service credential"))
+		return
+	default:
+		h.HandleResponse(c, status_http.BadGateway, kpError("KP_AGENT_UNAVAILABLE", "KP agent returned an unexpected status: "+res.Status))
+		return
+	}
+
+	if !strings.HasPrefix(res.Header.Get("Content-Type"), "text/html") {
+		h.HandleResponse(c, status_http.BadGateway, kpError("KP_ARTIFACT_INVALID", "KP agent did not return HTML"))
+		return
+	}
+
+	c.Header("Cache-Control", "private, no-store")
+	c.Header("X-Content-Type-Options", "nosniff")
+	c.DataFromReader(http.StatusOK, res.ContentLength, "text/html; charset=utf-8", res.Body, nil)
 }
 
 // GetKpPrototype proxies a published prototype from the internal agent. The

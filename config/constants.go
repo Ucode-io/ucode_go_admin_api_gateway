@@ -163,14 +163,16 @@ const (
 	InstagramSignatureHeader  = "X-Hub-Signature-256"
 	InstagramSignaturePrefix  = "sha256="
 
-	// KP (commercial proposal) PDF download. requestId -> {projectId,environmentId,title}
-	// tenant-isolation cache, so GET /v1/kp-proposals/:requestId/pdf can be served by
-	// either gateway replica after POST /v1/kp-proposals landed on the other one. TTL is
-	// kept longer than the agent's own in-memory PDF retention (KP_AGENT_PDF_RETENTION_MS,
-	// default 2h) so the agent's own 404/410 is always the source of truth, never a
-	// premature cache eviction here.
-	KpProposalPdfCachePrefix = "kp:pdf:"
-	KpProposalPdfCacheTTL    = 3 * time.Hour
+	// KP (commercial proposal) preview/download. requestId -> {projectId,environmentId,
+	// title,pageCount,qaStatus,hasHtml,hasPdf,prototype} record, written once by
+	// POST /v1/kp-proposals and read by GET /v1/kp-proposals/:requestId (metadata),
+	// .../html and .../pdf — so all three can be served by either gateway replica
+	// regardless of which replica handled the original POST. TTL is kept longer than
+	// the agent's own in-memory artifact retention (KP_AGENT_ARTIFACT_RETENTION_MS on
+	// the agent, default 2h) so the agent's own 404/410 is always the source of truth
+	// for "is it still there", never a premature cache eviction here.
+	KpProposalCachePrefix = "kp:proposal:"
+	KpProposalCacheTTL    = 3 * time.Hour
 )
 
 var (

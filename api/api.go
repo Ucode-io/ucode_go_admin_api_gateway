@@ -174,6 +174,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		// KP (commercial proposal) generation — synchronous HTML via kp-generator-agent.
 		v1.POST("/kp-proposals", h.V1.GenerateKpProposal)
+		v1.GET("/kp-proposals/:requestId", h.V1.GetKpProposal)
+		v1.GET("/kp-proposals/:requestId/html", h.V1.GetKpProposalHTML)
 		v1.GET("/kp-proposals/:requestId/pdf", h.V1.DownloadKpProposalPDF)
 
 		// Excel Reader

@@ -1,24 +1,20 @@
 package v1
 
 import (
-	"encoding/json"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
-	"ucode/ucode_go_api_gateway/config"
-	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 )
 
-// kpAgentPdfTimeout bounds the proxied PDF download call to the agent. Kept
-// short relative to kpAgentTimeout (generation): the PDF was already rendered
-// during POST /v1/kp-proposals, this call is just a file fetch.
-const kpAgentPdfTimeout = 30 * time.Second
+// kpAgentArtifactTimeout bounds proxied artifact fetches to the agent (PDF, HTML).
+// Kept short relative to kpAgentTimeout (generation): the artifact was already
+// rendered during POST /v1/kp-proposals, this call is just a file fetch.
+const kpAgentArtifactTimeout = 30 * time.Second
 
 var kpRequestIDPattern = regexp.MustCompile(`^KP-[A-Za-z0-9_-]+$`)
 
@@ -47,14 +43,8 @@ func isValidKpRequestID(requestID string) bool {
 // @Failure 502 {object} status_http.Response "Bad Gateway"
 // @Failure 503 {object} status_http.Response "Service Unavailable"
 func (h *HandlerV1) DownloadKpProposalPDF(c *gin.Context) {
-	projectID, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(cast.ToString(projectID)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
-		return
-	}
-	environmentID, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(cast.ToString(environmentID)) {
-		h.HandleResponse(c, status_http.InvalidArgument, config.ErrEnvironmentIdValid)
+	projectID, environmentID, ok := h.kpTenantFromContext(c)
+	if !ok {
 		return
 	}
 
@@ -64,26 +54,16 @@ func (h *HandlerV1) DownloadKpProposalPDF(c *gin.Context) {
 		return
 	}
 
-	// requestId -> {projectId,environmentId} tenant-isolation lookup. This is
-	// intentionally the source of "does this artifact exist" too: a request that
-	// never had a PDF, or whose cache entry expired, looks identical to the agent
-	// having nothing for it, and both map to KP_ARTIFACT_NOT_FOUND.
-	if h.centralRedis == nil {
-		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "PDF artifact not found"))
+	entry, ok := h.loadKpProposalCacheEntry(c, requestID)
+	if !ok {
 		return
 	}
-	cached, err := h.centralRedis.Get(c.Request.Context(), config.KpProposalPdfCachePrefix+requestID).Bytes()
-	if err != nil {
-		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "PDF artifact not found"))
-		return
-	}
-	var entry kpPdfCacheEntry
-	if err := json.Unmarshal(cached, &entry); err != nil {
-		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "PDF artifact not found"))
-		return
-	}
-	if entry.ProjectID != cast.ToString(projectID) || entry.EnvironmentID != cast.ToString(environmentID) {
+	if entry.ProjectID != projectID || entry.EnvironmentID != environmentID {
 		h.HandleResponse(c, status_http.Forbidden, kpError("KP_ARTIFACT_FORBIDDEN", "requestId does not belong to the current project/environment"))
+		return
+	}
+	if !entry.HasPDF {
+		h.HandleResponse(c, status_http.NotFound, kpError("KP_ARTIFACT_NOT_FOUND", "PDF artifact not found"))
 		return
 	}
 
@@ -102,7 +82,7 @@ func (h *HandlerV1) DownloadKpProposalPDF(c *gin.Context) {
 		httpReq.Header.Set("Authorization", "Bearer "+h.baseConf.KpAgentAPIKey)
 	}
 
-	client := &http.Client{Timeout: kpAgentPdfTimeout}
+	client := &http.Client{Timeout: kpAgentArtifactTimeout}
 	res, err := client.Do(httpReq)
 	if err != nil {
 		h.HandleResponse(c, status_http.BadGateway, kpError("KP_AGENT_UNAVAILABLE", err.Error()))
