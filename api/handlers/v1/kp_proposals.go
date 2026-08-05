@@ -52,7 +52,7 @@ type kpAgentResponse struct {
 	Title        string            `json:"title"`
 	HTML         string            `json:"html"`
 	PageCount    int               `json:"pageCount"`
-	HasPDF       bool              `json:"hasPdf"`
+	DownloadURL  string            `json:"downloadUrl"`
 	PrototypeURL string            `json:"prototypeUrl"`
 	Prototype    *kpAgentPrototype `json:"prototype"`
 	Error        *kpAgentError     `json:"error"`
@@ -161,7 +161,7 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 	}
 
 	var pdfURL string
-	if agentResp.HasPDF && h.centralRedis != nil {
+	if agentResp.DownloadURL != "" && h.centralRedis != nil {
 		entry, err := json.Marshal(kpPdfCacheEntry{
 			ProjectID:     cast.ToString(projectID),
 			EnvironmentID: cast.ToString(environmentID),
