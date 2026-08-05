@@ -84,6 +84,16 @@ var (
 		Status:      "NOT_FOUND",
 		Description: "The user not found",
 	}
+	Gone = Status{
+		Code:        410,
+		Status:      "GONE",
+		Description: "The requested resource is no longer available",
+	}
+	BadGateway = Status{
+		Code:        502,
+		Status:      "BAD_GATEWAY",
+		Description: "An upstream service returned an invalid response",
+	}
 	GrpcStatusToHTTP = map[string]Status{
 		"Created":         Created,
 		"Ok":              OK,

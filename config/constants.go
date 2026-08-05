@@ -162,6 +162,15 @@ const (
 	InstagramStatusConnected  = "connected"
 	InstagramSignatureHeader  = "X-Hub-Signature-256"
 	InstagramSignaturePrefix  = "sha256="
+
+	// KP (commercial proposal) PDF download. requestId -> {projectId,environmentId,title}
+	// tenant-isolation cache, so GET /v1/kp-proposals/:requestId/pdf can be served by
+	// either gateway replica after POST /v1/kp-proposals landed on the other one. TTL is
+	// kept longer than the agent's own in-memory PDF retention (KP_AGENT_PDF_RETENTION_MS,
+	// default 2h) so the agent's own 404/410 is always the source of truth, never a
+	// premature cache eviction here.
+	KpProposalPdfCachePrefix = "kp:pdf:"
+	KpProposalPdfCacheTTL    = 3 * time.Hour
 )
 
 var (

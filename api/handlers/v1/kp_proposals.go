@@ -12,6 +12,7 @@ import (
 
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	"ucode/ucode_go_api_gateway/pkg/logger"
 	"ucode/ucode_go_api_gateway/pkg/util"
 
 	"github.com/gin-gonic/gin"
@@ -50,7 +51,18 @@ type kpAgentResponse struct {
 	Title     string        `json:"title"`
 	HTML      string        `json:"html"`
 	PageCount int           `json:"pageCount"`
+	HasPDF    bool          `json:"hasPdf"`
 	Error     *kpAgentError `json:"error"`
+}
+
+// kpPdfCacheEntry is the tenant-isolation record stored in centralRedis under
+// config.KpProposalPdfCachePrefix+requestId when a proposal has a downloadable
+// PDF. It lets GET /v1/kp-proposals/:requestId/pdf (kp_proposal_pdf.go) verify
+// the caller's project/environment owns requestId, across gateway replicas.
+type kpPdfCacheEntry struct {
+	ProjectID     string `json:"projectId"`
+	EnvironmentID string `json:"environmentId"`
+	Title         string `json:"title"`
 }
 
 // GenerateKpProposal godoc
@@ -123,6 +135,22 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 		return
 	}
 
+	var pdfURL string
+	if agentResp.HasPDF && h.centralRedis != nil {
+		entry, err := json.Marshal(kpPdfCacheEntry{
+			ProjectID:     cast.ToString(projectID),
+			EnvironmentID: cast.ToString(environmentID),
+			Title:         agentResp.Title,
+		})
+		if err != nil {
+			h.log.Error("kp-proposal: failed to marshal pdf cache entry", logger.Error(err))
+		} else if err := h.centralRedis.Set(c.Request.Context(), config.KpProposalPdfCachePrefix+agentResp.RequestID, entry, config.KpProposalPdfCacheTTL).Err(); err != nil {
+			h.log.Error("kp-proposal: failed to cache pdf tenant mapping", logger.Error(err))
+		} else {
+			pdfURL = "/v1/kp-proposals/" + agentResp.RequestID + "/pdf"
+		}
+	}
+
 	h.HandleResponse(c, status_http.OK, gin.H{
 		"ok":        true,
 		"status":    "completed",
@@ -130,6 +158,7 @@ func (h *HandlerV1) GenerateKpProposal(c *gin.Context) {
 		"title":     agentResp.Title,
 		"html":      agentResp.HTML,
 		"pageCount": agentResp.PageCount,
+		"pdfUrl":    pdfURL,
 	})
 }
 
