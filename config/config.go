@@ -128,8 +128,9 @@ type BaseConfig struct {
 
 	AutomationURL   string
 	OpenFaaSBaseUrl string
-	KnativeBaseUrl  string
-	MCPServerURL    string
+	KnativeBaseUrl   string
+	KnativeBaseUrlUz string
+	MCPServerURL     string
 
 	// KP generator agent (standalone HTML KP service, internal ClusterIP).
 	KpAgentURL    string
@@ -279,6 +280,7 @@ func BaseLoad() BaseConfig {
 	config.AutomationURL = cast.ToString(GetOrReturnDefaultValue("AUTOMATION_URL", ""))
 	config.OpenFaaSBaseUrl = cast.ToString(GetOrReturnDefaultValue("OPENFAAS_BASE_URL", ""))
 	config.KnativeBaseUrl = cast.ToString(GetOrReturnDefaultValue("KNATIVE_BASE_URL", ""))
+	config.KnativeBaseUrlUz = cast.ToString(GetOrReturnDefaultValue("FUNC_BASE_URL_UZB", ""))
 	config.MCPServerURL = cast.ToString(GetOrReturnDefaultValue("MCP_SERVER_URL", ""))
 	config.KpAgentURL = cast.ToString(GetOrReturnDefaultValue("KP_AGENT_URL", ""))
 	config.KpAgentAPIKey = cast.ToString(GetOrReturnDefaultValue("KP_AGENT_API_KEY", ""))

@@ -87,6 +87,10 @@ func DoInvokeFunction(request models.DoInvokeFunctionStruct, c *gin.Context, h H
 		invokeFunction.Data = data
 		invokeFunction.OpenFaaSURL = h.BaseConf().OpenFaaSBaseUrl
 		invokeFunction.KnativeURL = h.BaseConf().KnativeBaseUrl
+		//HISOBIM project -> UZ knative cluster
+		if request.Resource.ProjectId == "b744d518-5f66-4818-bfd7-9f3f44ce3379" && h.BaseConf().KnativeBaseUrlUz != "" {
+			invokeFunction.KnativeURL = h.BaseConf().KnativeBaseUrlUz
+		}
 		invokeFunction.AutomationURL = h.BaseConf().AutomationURL
 
 		switch requestType {
