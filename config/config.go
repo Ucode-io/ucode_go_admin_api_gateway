@@ -126,8 +126,8 @@ type BaseConfig struct {
 	OpenAIBaseURL string
 	OpenAIAgents  AIAgents
 
-	AutomationURL   string
-	OpenFaaSBaseUrl string
+	AutomationURL    string
+	OpenFaaSBaseUrl  string
 	KnativeBaseUrl   string
 	KnativeBaseUrlUz string
 	MCPServerURL     string
@@ -197,6 +197,11 @@ type BaseConfig struct {
 	FacebookGraphAPIVersion string
 
 	FacebookWebhookVerifyToken string
+
+	// Lead poller: a safety-net that periodically pulls new leads from connected
+	// pages' forms in case a webhook was delayed or not delivered. Off by default.
+	FacebookLeadPollEnabled     bool
+	FacebookLeadPollIntervalSec int
 
 	// GoogleLeadsWebhookURL is the public URL Google posts leads to; returned to
 	// the user so they can paste it into the Google Ads lead form settings.
@@ -337,6 +342,8 @@ func BaseLoad() BaseConfig {
 	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
 	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
 	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
+	config.FacebookLeadPollEnabled = cast.ToBool(GetOrReturnDefaultValue("FACEBOOK_LEAD_POLL_ENABLED", true))
+	config.FacebookLeadPollIntervalSec = cast.ToInt(GetOrReturnDefaultValue("FACEBOOK_LEAD_POLL_INTERVAL_SEC", 120))
 
 	config.GoogleLeadsWebhookURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("GOOGLE_LEADS_WEBHOOK_URL", "")), "/")
 
