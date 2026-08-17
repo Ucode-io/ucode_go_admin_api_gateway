@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -38,6 +39,13 @@ type crmMapping struct {
 	StageField    string
 	StageValue    string
 	SourceField   string
+
+	// PipelineStageField is a per-pipeline scalar stage column (ProfessionalCrm
+	// stores the Sales Project pipeline's stage in `pipeline_sales_project`); it
+	// is set to StageValue. StartDateField gets the lead's arrival time. Both are
+	// optional — left blank they are simply not written.
+	PipelineStageField string
+	StartDateField     string
 }
 
 // defaultCRMMapping seeds the amoCRM-style flow for a project that has not
@@ -45,16 +53,18 @@ type crmMapping struct {
 // schema but are only a fallback, never the sole source of truth.
 func defaultCRMMapping() crmMapping {
 	return crmMapping{
-		ContactsTable:    "contacts",
-		DealsTable:       "deals",
-		LeadFormsTable:   "lead_forms",
-		DealContactField: "contacts_id",
-		DealFormField:    "lead_forms_id",
-		PipelineField:    "pipeline",
-		PipelineValue:    "Sales Project",
-		StageField:       "stage",
-		StageValue:       "Новые заявки",
-		SourceField:      "source",
+		ContactsTable:      "contacts",
+		DealsTable:         "deals",
+		LeadFormsTable:     "lead_forms",
+		DealContactField:   "contacts_id",
+		DealFormField:      "lead_forms_id",
+		PipelineField:      "pipeline",
+		PipelineValue:      "Sales Project",
+		StageField:         "stage",
+		StageValue:         "Новая заявка",
+		SourceField:        "source",
+		PipelineStageField: "pipeline_sales_project",
+		StartDateField:     "start_date",
 	}
 }
 
@@ -127,10 +137,11 @@ func crmMappingRequestToProto(req models.FacebookCrmMapping) *pb.FacebookCrmMapp
 // crmLeadFields is the normalized person/contact data extracted from a Facebook
 // lead's field_data, independent of how the form named its questions.
 type crmLeadFields struct {
-	firstName string
-	lastName  string
-	email     string
-	phone     string
+	firstName   string
+	lastName    string
+	email       string
+	phone       string
+	createdTime string // lead's created_time from Graph (ISO8601)
 }
 
 func (f crmLeadFields) hasContactIdentity() bool {
@@ -154,6 +165,7 @@ func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.P
 
 	mapping := h.resolveCRMMapping(resource)
 	fields := professionalCRMLeadFields(lead.FieldData)
+	fields.createdTime = lead.CreatedTime
 
 	contactGUID, err := h.crmFindOrCreateContact(ctx, svc, resourceEnvID, mapping, fields)
 	if err != nil {
@@ -396,6 +408,19 @@ func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManag
 		m.PipelineField: []string{m.PipelineValue},
 		m.StageField:    []string{m.StageValue},
 		m.SourceField:   []string{source},
+	}
+	// Per-pipeline scalar stage column (e.g. pipeline_sales_project) holds the
+	// same entry-stage value so the deal lands in the right board column.
+	if m.PipelineStageField != "" {
+		payload[m.PipelineStageField] = m.StageValue
+	}
+	// start_date = when the lead came in (falls back to now if unparseable).
+	if m.StartDateField != "" {
+		ts := parseFacebookTime(f.createdTime)
+		if ts == 0 {
+			ts = time.Now().Unix()
+		}
+		payload[m.StartDateField] = time.Unix(ts, 0).UTC().Format(time.RFC3339)
 	}
 	if contactGUID != "" && m.DealContactField != "" {
 		payload[m.DealContactField] = contactGUID
