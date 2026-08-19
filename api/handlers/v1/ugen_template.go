@@ -1153,11 +1153,34 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 		return err
 	}
 
+	// Phase 1 — schema: copy fields + relations for EVERY table before any
+	// layout is copied. A table's detail-page layout has relation-tabs that FK
+	// to relation(id), and those relations frequently belong to a different
+	// table (e.g. the "companies" detail page shows related "deals", whose
+	// relation has table_from="deals"). Copying layouts interleaved per table
+	// therefore hit view_relation_permission_relation_id_fkey / tab_relation_id_fkey
+	// whenever the referenced relation had not been created yet. Relation IDs are
+	// preserved on copy (Relation.Create keeps the supplied id), so we record the
+	// ones we actually create and use that set to prune dangling layout tabs below.
+	createdRelationIDs := make(map[string]bool)
 	for _, table := range tablesResp.GetTables() {
 		if skipUgenTemplateTable(table.GetSlug()) {
 			continue
 		}
-		if err = h.copyTemplateTableDetails(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); err != nil {
+		if err = h.copyTemplateTableSchema(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table, createdRelationIDs); err != nil {
+			return err
+		}
+	}
+
+	// Phase 2 — presentation: copy layouts / views / custom events now that every
+	// relation exists. Layout relation-tabs whose relation was skipped (e.g. a
+	// login table's relation to role/client_type) are dropped so the copy cannot
+	// reference a relation that does not exist in the target.
+	for _, table := range tablesResp.GetTables() {
+		if skipUgenTemplateTable(table.GetSlug()) {
+			continue
+		}
+		if err = h.copyTemplateTableViews(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table, createdRelationIDs); err != nil {
 			return err
 		}
 	}
@@ -1211,7 +1234,10 @@ func isForeignKeyViolation(err error) bool {
 	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
 }
 
-func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
+// copyTemplateTableSchema copies a table's fields and relations. It records the
+// id of every relation it creates into createdRelationIDs so the later layout
+// pass can drop relation-tabs whose relation was skipped or never copied.
+func (h *HandlerV1) copyTemplateTableSchema(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table, createdRelationIDs map[string]bool) error {
 	fieldsResp, err := sourceService.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{
 		Limit:     1000,
 		Offset:    0,
@@ -1259,8 +1285,21 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		if _, err = targetService.GoObjectBuilderService().Relation().Create(ctx, relation); err != nil {
 			return fmt.Errorf("create relation %s -> %s: %w", relation.GetTableFrom(), relation.GetTableTo(), err)
 		}
+		if relation.GetId() != "" {
+			createdRelationIDs[relation.GetId()] = true
+		}
 	}
 
+	return nil
+}
+
+// copyTemplateTableViews copies a table's layouts, views and custom events. It
+// must run only after every table's relations exist (see copyTemplateTableSchema)
+// because layout relation-tabs and their view_relation_permission rows FK to
+// relation(id). createdRelationIDs is the set of relations actually created; any
+// layout relation-tab outside it is pruned so the copy cannot violate
+// tab_relation_id_fkey / view_relation_permission_relation_id_fkey.
+func (h *HandlerV1) copyTemplateTableViews(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table, createdRelationIDs map[string]bool) error {
 	layoutsResp, err := sourceService.GoObjectBuilderService().Layout().GetLayoutByTableID(ctx, &pbo.GetLayoutByTableIDRequest{
 		TableId:   table.GetId(),
 		ProjectId: sourceResourceEnvID,
@@ -1277,6 +1316,7 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		layoutReq.EnvId = targetResourceEnvID
 		layoutReq.TableId = table.GetId()
 		layoutReq.WithoutResponse = true
+		layoutReq.Tabs = pruneDanglingRelationTabs(layoutReq.GetTabs(), createdRelationIDs)
 		if _, err = targetService.GoObjectBuilderService().Layout().Update(ctx, layoutReq); err != nil {
 			return fmt.Errorf("create layout %s: %w", layout.GetId(), err)
 		}
@@ -1330,6 +1370,31 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 	}
 
 	return nil
+}
+
+// pruneDanglingRelationTabs removes a layout's relation-tabs whose relation was
+// not copied into the target (skipped relations such as a login table's
+// role/client_type links, or relations that live only on skipped tables). Both
+// tab.relation_id and view_relation_permission.relation_id FK to relation(id),
+// so a dangling reference would abort the whole Layout.Update with SQLSTATE
+// 23503. Non-relation tabs are kept but have any stray relation reference
+// cleared so they still render their sections.
+func pruneDanglingRelationTabs(tabs []*pbo.TabRequest, createdRelationIDs map[string]bool) []*pbo.TabRequest {
+	if len(tabs) == 0 {
+		return tabs
+	}
+	kept := make([]*pbo.TabRequest, 0, len(tabs))
+	for _, tab := range tabs {
+		relID := tab.GetRelationId()
+		if relID != "" && !createdRelationIDs[relID] {
+			if tab.GetType() == "relation" {
+				continue
+			}
+			tab.RelationId = ""
+		}
+		kept = append(kept, tab)
+	}
+	return kept
 }
 
 func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
