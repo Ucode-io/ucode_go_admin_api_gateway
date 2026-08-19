@@ -46,6 +46,12 @@ type crmMapping struct {
 	// optional — left blank they are simply not written.
 	PipelineStageField string
 	StartDateField     string
+
+	// FormAcceptField is the boolean column on the lead_forms table that gates
+	// ingestion under the allowlist policy: a lead is written only when its form's
+	// row has this column set truthy. New/un-enabled forms are ignored (but their
+	// row is still created, disabled, so the user can enable it in the CRM).
+	FormAcceptField string
 }
 
 // defaultCRMMapping seeds the amoCRM-style flow for a project that has not
@@ -65,6 +71,7 @@ func defaultCRMMapping() crmMapping {
 		SourceField:        "source",
 		PipelineStageField: "pipeline_sales_project",
 		StartDateField:     "start_date",
+		FormAcceptField:    "accept_leads",
 	}
 }
 
@@ -167,17 +174,25 @@ func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.P
 	fields := professionalCRMLeadFields(lead.FieldData)
 	fields.createdTime = lead.CreatedTime
 
+	// Resolve the source form FIRST so the allowlist gate runs before any
+	// contact/deal is written. A form that is not enabled (accept_leads=false, or
+	// no row yet) is skipped entirely — its row is still created disabled so the
+	// user can find and enable it in the CRM. If the lookup itself fails we
+	// fail-open (accept) rather than silently drop a lead on a transient error.
+	formGUID, formName, accepted, err := h.crmFindOrCreateLeadForm(ctx, svc, resourceEnvID, mapping, resource, value.FormID)
+	if err != nil {
+		h.log.Warn("facebook lead: resolve source form failed, accepting anyway: " + err.Error())
+	} else if !accepted {
+		h.log.Info("facebook lead: form not enabled, skipping",
+			logger.String("project_id", resource.GetProjectId()),
+			logger.String("form_id", value.FormID),
+		)
+		return nil
+	}
+
 	contactGUID, err := h.crmFindOrCreateContact(ctx, svc, resourceEnvID, mapping, fields)
 	if err != nil {
 		return fmt.Errorf("find-or-create contact: %w", err)
-	}
-
-	// The form link is best-effort: if resolving/creating the lead_forms row
-	// fails we still want the deal so a lead is never lost, just without its
-	// source relation.
-	formGUID, formName, err := h.crmFindOrCreateLeadForm(ctx, svc, resourceEnvID, mapping, resource, value.FormID)
-	if err != nil {
-		h.log.Warn("facebook lead: resolve source form failed: " + err.Error())
 	}
 
 	return h.crmCreateDeal(ctx, svc, resourceEnvID, mapping, contactGUID, formGUID, formName, fields, value)
@@ -245,6 +260,11 @@ func (h *HandlerV1) facebookSyncPageForms(ctx context.Context, state models.Face
 			"status":    form.Status,
 			"page_id":   page.ID,
 			"page_name": page.Name,
+		}
+		// Allowlist default: pre-synced forms start disabled; the user enables the
+		// ones they want leads from (toggling accept_leads in the CRM).
+		if mapping.FormAcceptField != "" {
+			payload[mapping.FormAcceptField] = false
 		}
 		if err := h.crmCreateItem(ctx, svc, resourceEnvID, mapping.LeadFormsTable, payload); err != nil {
 			h.log.Warn("facebook sync forms: create lead_forms row failed (lead_forms table missing?): " + err.Error())
@@ -337,19 +357,22 @@ func (h *HandlerV1) crmBackfillContact(ctx context.Context, svc services.Service
 
 // crmFindOrCreateLeadForm resolves the lead_forms row for a Facebook form,
 // creating it (with the form name fetched from Graph) when it does not yet
-// exist so future forms are captured automatically. Returns (guid, name).
-func (h *HandlerV1) crmFindOrCreateLeadForm(ctx context.Context, svc services.ServiceManagerI, resourceEnvID string, m crmMapping, resource *pb.ProjectResource, formID string) (string, string, error) {
+// exist so future forms are visible in the CRM. Returns (guid, name, accepted):
+// accepted reflects the allowlist gate — an existing row's accept_leads column,
+// and false for a freshly-created row (new forms start disabled and must be
+// enabled by the user before their leads are captured).
+func (h *HandlerV1) crmFindOrCreateLeadForm(ctx context.Context, svc services.ServiceManagerI, resourceEnvID string, m crmMapping, resource *pb.ProjectResource, formID string) (string, string, bool, error) {
 	formID = strings.TrimSpace(formID)
 	if formID == "" {
-		return "", "", nil
+		return "", "", false, nil
 	}
 
 	if row, err := h.crmLookupRow(ctx, svc, resourceEnvID, m.LeadFormsTable, "form_id", formID); err != nil {
-		return "", "", err
+		return "", "", false, err
 	} else if row != nil {
 		guid, _ := row["guid"].(string)
 		name, _ := row["name"].(string)
-		return guid, name, nil
+		return guid, name, crmFormAccepted(row, m.FormAcceptField), nil
 	}
 
 	credentials := resource.GetSettings().GetFacebookLeads()
@@ -366,6 +389,11 @@ func (h *HandlerV1) crmFindOrCreateLeadForm(ctx context.Context, svc services.Se
 		"form_id": formID,
 		"status":  "active",
 	}
+	// New forms are disabled by default under the allowlist policy — the row is
+	// created only so the user can see the form and switch it on.
+	if m.FormAcceptField != "" {
+		payload[m.FormAcceptField] = false
+	}
 	if name != "" {
 		payload["name"] = name
 	}
@@ -379,9 +407,29 @@ func (h *HandlerV1) crmFindOrCreateLeadForm(ctx context.Context, svc services.Se
 	}
 
 	if err := h.crmCreateItem(ctx, svc, resourceEnvID, m.LeadFormsTable, payload); err != nil {
-		return "", name, err
+		return "", name, false, err
 	}
-	return guid, name, nil
+	return guid, name, false, nil
+}
+
+// crmFormAccepted reports whether a lead_forms row is enabled to capture leads.
+// The accept flag may come back from object-builder as a real bool or as a
+// string ("true"/"1"/"yes"/"on"), so both are handled. A blank/absent column
+// means not enabled (allowlist default).
+func crmFormAccepted(row map[string]any, field string) bool {
+	if field == "" {
+		return true
+	}
+	switch v := row[field].(type) {
+	case bool:
+		return v
+	case string:
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "true", "t", "1", "yes", "on":
+			return true
+		}
+	}
+	return false
 }
 
 // crmCreateDeal writes the deal linking the contact and the source form, placed
