@@ -837,10 +837,19 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		chargedAmount = charge.GetChargedAmount()
 	}
 
-	// provision performs every mutating step of the template clone. It is a
-	// closure so it captures the already-resolved source/target context without a
-	// wide parameter list; any error it returns triggers the compensating refund.
-	provision := func() (gin.H, error) {
+	// authToken and headProjectID are captured now because the two slow steps
+	// (full schema/data copy and the GitLab fork+publish) run in a background
+	// goroutine after this handler returns. The gin.Context — and its headers —
+	// must not be read once the request is done.
+	authToken := c.GetHeader("Authorization")
+	headProjectID := projectId.(string)
+
+	// provisionSync runs only the fast, identity-establishing steps: create the
+	// new project, environment, resource, API key, MCP row and chat. It stops
+	// before copyUgenTemplateData and publishTemplateMicrofrontend, which together
+	// take minutes (GitLab fork+import alone is 30-90s) and previously blew past
+	// Cloudflare's ~100s edge timeout (HTTP 524). Those run in the background below.
+	provisionSync := func() (*templateProvisionResult, error) {
 		targetProject, err := h.companyServices.Project().Create(
 			ctx, &pb.CreateProjectRequest{
 				Title:        sanitizeProjectNameForBackend(projectName),
@@ -905,6 +914,8 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			apiKey = apiKeys.GetData()[0].GetAppId()
 		}
 
+		// Created "provisioning" — the background job flips it to "ready" once the
+		// schema/data copy and microfrontend publish finish (or "error" on failure).
 		newMcpProject, err := mainService.GoObjectBuilderService().McpProject().CreateMcpProject(
 			ctx, &pbo.CreateMcpProjectReqeust{
 				ResourceEnvId:  mainResourceEnvID,
@@ -915,7 +926,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 				UcodeProjectId: targetProject.GetProjectId(),
 				ApiKey:         apiKey,
 				EnvironmentId:  targetEnv.GetId(),
-				Status:         "ready",
+				Status:         "provisioning",
 				AppVisibility:  sourceMcp.GetAppVisibility(),
 				ProjectType:    sourceMcp.GetProjectType(),
 			},
@@ -948,71 +959,114 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			ResourceType:   int32(targetResource.GetResourceType()),
 		}
 
-		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId, targetProjectData.UcodeProjectId); err != nil {
-			return nil, fmt.Errorf("copy template data: %v", err)
-		}
-
-		published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, mainResourceEnvID, c.GetHeader("Authorization"))
-		if err != nil {
-			return nil, fmt.Errorf("publish template microfrontend: %v", err)
-		}
-
-		if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
-			ResourceEnvId:       mainResourceEnvID,
-			Id:                  newMcpProject.GetId(),
-			MicrofrontendId:     published.Data.ID,
-			MicrofrontendRepoId: published.Data.RepoId,
-			MicrofrontendBranch: published.Data.Branch,
-			MicrofrontendUrl:    published.Data.Url,
-		}); err != nil {
-			return nil, fmt.Errorf("save template microfrontend refs: %v", err)
-		}
-
-		return gin.H{
-			"project_id":                 targetProject.GetProjectId(),
-			"ucode_project_id":           targetProject.GetProjectId(),
-			"environment_id":             targetEnv.GetId(),
-			"mcp_project_id":             newMcpProject.GetId(),
-			"chat_id":                    chat.GetId(),
-			"api_key":                    apiKey,
-			"resource_env_id":            targetProjectData.ResourceEnvId,
-			"main_resource_env_id":       mainResourceEnvID,
-			"microfrontend_id":           published.Data.ID,
-			"microfrontend_repo_id":      published.Data.RepoId,
-			"microfrontend_url":          published.Data.Url,
-			"microfrontend_branch":       published.Data.Branch,
-			"template_preview_url":       tmpl.GetPreviewUrl(),
-			"source_mcp_project_id":      tmpl.GetMcpProjectId(),
-			"source_resource_env_id":     tmpl.GetSourceResourceEnvId(),
-			"source_mcp_resource_env_id": tmpl.GetSourceMcpResourceEnvId(),
-			"source_repo_id":             tmpl.GetSourceRepoId(),
-			"source_function_id":         tmpl.GetSourceFunctionId(),
+		return &templateProvisionResult{
+			targetService: targetService,
+			data:          targetProjectData,
+			mcpID:         newMcpProject.GetId(),
+			response: gin.H{
+				"project_id":                 targetProject.GetProjectId(),
+				"ucode_project_id":           targetProject.GetProjectId(),
+				"environment_id":             targetEnv.GetId(),
+				"mcp_project_id":             newMcpProject.GetId(),
+				"chat_id":                    chat.GetId(),
+				"api_key":                    apiKey,
+				"resource_env_id":            targetProjectData.ResourceEnvId,
+				"main_resource_env_id":       mainResourceEnvID,
+				// Provisioning still running in the background; the microfrontend
+				// refs are filled in on the MCP row once publish completes. Poll
+				// GET /v1/mcp_project/:id and watch `status` flip ready/error.
+				"status":                     "provisioning",
+				"template_preview_url":       tmpl.GetPreviewUrl(),
+				"source_mcp_project_id":      tmpl.GetMcpProjectId(),
+				"source_resource_env_id":     tmpl.GetSourceResourceEnvId(),
+				"source_mcp_resource_env_id": tmpl.GetSourceMcpResourceEnvId(),
+				"source_repo_id":             tmpl.GetSourceRepoId(),
+				"source_function_id":         tmpl.GetSourceFunctionId(),
+			},
 		}, nil
 	}
 
-	result, err := provision()
+	prov, err := provisionSync()
 	if err != nil {
-		// Compensating refund: the charge succeeded but provisioning did not, so
-		// give the money back. Best-effort — a failed refund is logged loudly for
-		// manual reconciliation rather than masking the original error.
+		// The fast steps failed before we ever returned to the client. Compensate
+		// the charge (if any) so the user never pays for a project that was not
+		// created. Best-effort — a failed refund is logged for reconciliation.
 		if chargeTxID != "" {
 			if _, refundErr := h.companyServices.Billing().RefundProjectBalance(ctx, &pb.RefundProjectBalanceRequest{
-				ProjectId:     projectId.(string),
+				ProjectId:     headProjectID,
 				TransactionId: chargeTxID,
 				Comment:       "refund: template provisioning failed",
 			}); refundErr != nil {
-				log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", projectId.(string), chargeTxID, refundErr)
+				log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", headProjectID, chargeTxID, refundErr)
 			}
 		}
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
+	// Background: the two slow steps. On success mark the MCP row ready with its
+	// microfrontend refs; on failure mark it errored and refund. ctx is
+	// context.Background() (declared above), so client disconnect never cancels it.
+	go func(res *templateProvisionResult) {
+		bgErr := func() error {
+			if err := h.copyUgenTemplateData(ctx, sourceService, res.targetService, tmpl.GetSourceResourceEnvId(), res.data.ResourceEnvId, res.data.UcodeProjectId); err != nil {
+				return fmt.Errorf("copy template data: %w", err)
+			}
+
+			published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, res.data, mainResourceEnvID, authToken)
+			if err != nil {
+				return fmt.Errorf("publish template microfrontend: %w", err)
+			}
+
+			if _, err := mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+				ResourceEnvId:       mainResourceEnvID,
+				Id:                  res.mcpID,
+				MicrofrontendId:     published.Data.ID,
+				MicrofrontendRepoId: published.Data.RepoId,
+				MicrofrontendBranch: published.Data.Branch,
+				MicrofrontendUrl:    published.Data.Url,
+				Status:              "ready",
+			}); err != nil {
+				return fmt.Errorf("save template microfrontend refs: %w", err)
+			}
+			return nil
+		}()
+
+		if bgErr != nil {
+			log.Printf("[ugen-template] async provisioning FAILED mcp=%s project=%s: %v", res.mcpID, res.data.UcodeProjectId, bgErr)
+			if _, err := mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+				ResourceEnvId: mainResourceEnvID,
+				Id:            res.mcpID,
+				Status:        "error",
+			}); err != nil {
+				log.Printf("[ugen-template] mark mcp errored FAILED mcp=%s: %v", res.mcpID, err)
+			}
+			if chargeTxID != "" {
+				if _, refundErr := h.companyServices.Billing().RefundProjectBalance(ctx, &pb.RefundProjectBalanceRequest{
+					ProjectId:     headProjectID,
+					TransactionId: chargeTxID,
+					Comment:       "refund: template provisioning failed",
+				}); refundErr != nil {
+					log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", headProjectID, chargeTxID, refundErr)
+				}
+			}
+		}
+	}(prov)
+
 	if chargeTxID != "" {
-		result["charged_amount"] = chargedAmount
-		result["charge_transaction_id"] = chargeTxID
+		prov.response["charged_amount"] = chargedAmount
+		prov.response["charge_transaction_id"] = chargeTxID
 	}
-	h.HandleResponse(c, status_http.OK, result)
+	h.HandleResponse(c, status_http.OK, prov.response)
+}
+
+// templateProvisionResult carries the fast-path outcome of CreateProjectFromTemplate
+// from the synchronous provisioning closure to the background copy/publish job.
+type templateProvisionResult struct {
+	targetService servicepkg.ServiceManagerI
+	data          *models.ProjectData
+	mcpID         string
+	response      gin.H
 }
 
 // respondBillingError maps the billing service's gRPC status codes to the HTTP
