@@ -964,14 +964,14 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			data:          targetProjectData,
 			mcpID:         newMcpProject.GetId(),
 			response: gin.H{
-				"project_id":                 targetProject.GetProjectId(),
-				"ucode_project_id":           targetProject.GetProjectId(),
-				"environment_id":             targetEnv.GetId(),
-				"mcp_project_id":             newMcpProject.GetId(),
-				"chat_id":                    chat.GetId(),
-				"api_key":                    apiKey,
-				"resource_env_id":            targetProjectData.ResourceEnvId,
-				"main_resource_env_id":       mainResourceEnvID,
+				"project_id":           targetProject.GetProjectId(),
+				"ucode_project_id":     targetProject.GetProjectId(),
+				"environment_id":       targetEnv.GetId(),
+				"mcp_project_id":       newMcpProject.GetId(),
+				"chat_id":              chat.GetId(),
+				"api_key":              apiKey,
+				"resource_env_id":      targetProjectData.ResourceEnvId,
+				"main_resource_env_id": mainResourceEnvID,
 				// Provisioning still running in the background; the microfrontend
 				// refs are filled in on the MCP row once publish completes. Poll
 				// GET /v1/mcp_project/:id and watch `status` flip ready/error.
@@ -1239,53 +1239,43 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 		}
 	}
 
-	// Copy rows last and FK-tolerantly. Template tables can reference each other
-	// (e.g. approval_actions -> companies) and GetAll returns them unordered, so a
-	// straight per-table copy may insert a child row before its parent and hit a
-	// foreign-key violation. Retry the tables that fail on an FK error after the
-	// others are inserted, repeating until a pass makes no progress; non-FK errors
-	// fail immediately.
-	pending := make([]*pbo.Table, 0, len(tablesResp.GetTables()))
+	// Rows: business/custom tables are cloned as empty structure (no data). Only
+	// ucode's default system tables (role, client_type, person, sms_template) are
+	// copied WITH their rows, so the new project inherits the template's base
+	// configuration (roles, client types, SMS templates, ...). Copied
+	// FK-tolerantly in case a default table references another (e.g.
+	// client_type -> role): retry the failures until a pass makes no progress.
+	pending := make([]*pbo.Table, 0, 4)
 	for _, table := range tablesResp.GetTables() {
-		if skipUgenTemplateTable(table.GetSlug()) {
-			continue
+		if isDefaultUcodeTable(table.GetSlug()) {
+			pending = append(pending, table)
 		}
-		pending = append(pending, table)
 	}
+	// Best-effort: base-config data must never fail an otherwise-good clone. FK
+	// errors are retried (handles ordering like client_type -> role); any other
+	// error is logged and skipped.
 	for len(pending) > 0 {
-		var (
-			failed  []*pbo.Table
-			lastErr error
-		)
+		var failed []*pbo.Table
 		for _, table := range pending {
-			if err = h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); err != nil {
-				if isForeignKeyViolation(err) {
+			if rowErr := h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); rowErr != nil {
+				if isForeignKeyViolation(rowErr) {
 					failed = append(failed, table)
-					lastErr = err
 					continue
 				}
-				return err
+				log.Printf("[ugen-template] skip default-table rows %s: %v", table.GetSlug(), rowErr)
 			}
 		}
 		if len(failed) == len(pending) {
-			// No table advanced this pass — the remaining FK failures are a genuine
-			// missing/circular reference, not just ordering. Surface the error.
-			return lastErr
+			// Only unresolved FK failures remain and none advanced this pass.
+			for _, table := range failed {
+				log.Printf("[ugen-template] default-table rows unresolved (FK) %s", table.GetSlug())
+			}
+			break
 		}
 		pending = failed
 	}
 
 	return nil
-}
-
-// isForeignKeyViolation reports whether err is a PostgreSQL foreign-key violation
-// (SQLSTATE 23503), as surfaced through the object-builder gRPC error string.
-func isForeignKeyViolation(err error) bool {
-	if err == nil {
-		return false
-	}
-	msg := err.Error()
-	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
 }
 
 // copyTemplateTableSchema copies a table's fields and relations. It records the
@@ -1451,6 +1441,19 @@ func pruneDanglingRelationTabs(tabs []*pbo.TabRequest, createdRelationIDs map[st
 	return kept
 }
 
+// isForeignKeyViolation reports whether err is a PostgreSQL foreign-key violation
+// (SQLSTATE 23503), as surfaced through the object-builder gRPC error string.
+func isForeignKeyViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
+}
+
+// copyTemplateRows copies every row of a source table into the target. Used only
+// for ucode's default system tables (see isDefaultUcodeTable); business tables
+// are cloned as empty structure.
 func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
 	if table.GetIsLoginTable() {
 		return nil
@@ -1711,13 +1714,23 @@ func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectNam
 	return result, nil
 }
 
-func skipUgenTemplateTable(slug string) bool {
+// isDefaultUcodeTable reports whether slug is one of ucode's default system
+// tables that every project already provisions. Their SCHEMA is not re-created
+// on template clone (skipUgenTemplateTable), but their ROWS are copied so the new
+// project inherits the template's base config (roles, client types, SMS templates).
+func isDefaultUcodeTable(slug string) bool {
 	switch slug {
 	case "role", "client_type", "person", "sms_template":
 		return true
 	default:
 		return false
 	}
+}
+
+// skipUgenTemplateTable reports whether a table's schema copy should be skipped —
+// the default ucode tables already exist in the target project.
+func skipUgenTemplateTable(slug string) bool {
+	return isDefaultUcodeTable(slug)
 }
 
 func skipUgenTemplateField(slug, fieldType string, isLoginTable bool) bool {
