@@ -774,19 +774,33 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
-	// MCP project metadata (title / env / visibility / type) is read from the data
-	// resource env (source_resource_env_id); its project_files are ignored here.
-	sourceMcp, err := sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+	// MCP project metadata (env vars / visibility / type) is a nice-to-have. The
+	// template's mcp row and its table data can live in different DBs, so try the
+	// mcp env first, then the data env; if the row is in neither, don't fail the
+	// clone — proceed with empty metadata (proto getters are nil-safe). Its
+	// project_files are ignored here regardless.
+	sourceMcp, mcpErr := sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx,
 		&pbo.McpProjectId{
-			ResourceEnvId: tmpl.GetSourceResourceEnvId(),
+			ResourceEnvId: tmpl.GetSourceMcpResourceEnvId(),
 			Id:            tmpl.GetMcpProjectId(),
 			WithoutFiles:  true,
 		},
 	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get source mcp project: %v", err))
-		return
+	if mcpErr != nil {
+		log.Printf("[ugen-template] source mcp metadata not in mcp env %s: %v", tmpl.GetSourceMcpResourceEnvId(), mcpErr)
+		sourceMcp, mcpErr = sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+			ctx,
+			&pbo.McpProjectId{
+				ResourceEnvId: tmpl.GetSourceResourceEnvId(),
+				Id:            tmpl.GetMcpProjectId(),
+				WithoutFiles:  true,
+			},
+		)
+		if mcpErr != nil {
+			log.Printf("[ugen-template] source mcp metadata not in data env %s either; proceeding with empty metadata: %v", tmpl.GetSourceResourceEnvId(), mcpErr)
+			sourceMcp = nil
+		}
 	}
 
 	// Microfrontend files come straight from the microfrontend repo, resolved via
