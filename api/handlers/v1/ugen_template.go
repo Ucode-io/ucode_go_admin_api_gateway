@@ -963,6 +963,22 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			return nil, fmt.Errorf("create template project chat: %v", err)
 		}
 
+		// Point the cloned frontend at THIS project's backend, not the template
+		// source. .env / .env.* are protected files copied verbatim, so they carry
+		// the source's VITE_X_API_KEY and project/env ids — the cloned app would
+		// otherwise read and write the SOURCE's data. Rewrite them with the new
+		// project's identity and persist the corrected .env into the stored files.
+		rewrittenFiles := rewriteTemplateEnvFiles(sourceMcpFiles, apiKey, targetProject.GetProjectId(), newMcpProject.GetId(), targetEnv.GetId())
+		if envFiles := filterTemplateEnvFiles(rewrittenFiles); len(envFiles) > 0 {
+			if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+				ResourceEnvId: mainResourceEnvID,
+				Id:            newMcpProject.GetId(),
+				ProjectFiles:  envFiles,
+			}); err != nil {
+				return nil, fmt.Errorf("rewrite mcp env files: %v", err)
+			}
+		}
+
 		targetProjectData := &models.ProjectData{
 			McpProjectId:   newMcpProject.GetId(),
 			UcodeProjectId: targetProject.GetProjectId(),
@@ -977,6 +993,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			targetService: targetService,
 			data:          targetProjectData,
 			mcpID:         newMcpProject.GetId(),
+			publishFiles:  rewrittenFiles,
 			response: gin.H{
 				"project_id":           targetProject.GetProjectId(),
 				"ucode_project_id":     targetProject.GetProjectId(),
@@ -1027,7 +1044,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 				return fmt.Errorf("copy template data: %w", err)
 			}
 
-			published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, res.data, mainResourceEnvID, authToken)
+			published, err := h.publishTemplateMicrofrontend(ctx, projectName, res.publishFiles, res.data, mainResourceEnvID, authToken)
 			if err != nil {
 				return fmt.Errorf("publish template microfrontend: %w", err)
 			}
@@ -1080,7 +1097,79 @@ type templateProvisionResult struct {
 	targetService servicepkg.ServiceManagerI
 	data          *models.ProjectData
 	mcpID         string
-	response      gin.H
+	// publishFiles is sourceMcpFiles with .env rewritten for the new project.
+	publishFiles []*pbo.McpProjectFiles
+	response     gin.H
+}
+
+// templateEnvRewriteKeys maps the .env variables that must carry the new
+// project's identity so the cloned frontend talks to its own backend instead of
+// the template source. Base URLs (VITE_*_BASE_URL) are platform-wide and kept.
+var templateEnvRewriteKeys = []string{
+	"VITE_X_API_KEY",
+	"VITE_UCODE_PROJECT_ID",
+	"VITE_PROJECT_ID",
+	"VITE_ENVIRONMENT_ID",
+}
+
+// isTemplateEnvFile reports whether a file path is a dotenv file (.env, .env.*).
+func isTemplateEnvFile(path string) bool {
+	base := path
+	if idx := strings.LastIndexByte(path, '/'); idx >= 0 {
+		base = path[idx+1:]
+	}
+	return base == ".env" || strings.HasPrefix(base, ".env.")
+}
+
+// rewriteTemplateEnvFiles returns files with every dotenv file's project-identity
+// variables (VITE_X_API_KEY / VITE_UCODE_PROJECT_ID / VITE_PROJECT_ID /
+// VITE_ENVIRONMENT_ID) replaced by the new project's values. Non-env files and
+// unrelated lines pass through untouched. Only existing keys are replaced; a
+// missing key is not appended.
+func rewriteTemplateEnvFiles(files []*pbo.McpProjectFiles, apiKey, ucodeProjectID, mcpProjectID, environmentID string) []*pbo.McpProjectFiles {
+	replacements := map[string]string{
+		"VITE_X_API_KEY":        apiKey,
+		"VITE_UCODE_PROJECT_ID": ucodeProjectID,
+		"VITE_PROJECT_ID":       mcpProjectID,
+		"VITE_ENVIRONMENT_ID":   environmentID,
+	}
+	out := make([]*pbo.McpProjectFiles, 0, len(files))
+	for _, f := range files {
+		if f == nil || !isTemplateEnvFile(f.GetPath()) {
+			out = append(out, f)
+			continue
+		}
+		lines := strings.Split(f.GetContent(), "\n")
+		for i, line := range lines {
+			trimmed := strings.TrimLeft(line, " \t")
+			for _, key := range templateEnvRewriteKeys {
+				val := replacements[key]
+				if val == "" {
+					continue
+				}
+				if strings.HasPrefix(trimmed, key+"=") {
+					lines[i] = key + "=" + val
+					break
+				}
+			}
+		}
+		out = append(out, &pbo.McpProjectFiles{
+			Path:    f.GetPath(),
+			Content: strings.Join(lines, "\n"),
+		})
+	}
+	return out
+}
+
+// filterTemplateEnvFiles returns only the dotenv files from a file list.
+func filterTemplateEnvFiles(files []*pbo.McpProjectFiles) []*pbo.McpProjectFiles {
+	out := make([]*pbo.McpProjectFiles, 0, 4)
+	for _, f := range files {
+		if f != nil && isTemplateEnvFile(f.GetPath()) {
+			out = append(out, f)
+		}
+	}
+	return out
 }
 
 // respondBillingError maps the billing service's gRPC status codes to the HTTP
