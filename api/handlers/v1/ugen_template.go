@@ -1342,21 +1342,20 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 		}
 	}
 
-	// Rows: business/custom tables are cloned as empty structure (no data). Only
-	// ucode's default system tables (role, client_type, person, sms_template) are
-	// copied WITH their rows, so the new project inherits the template's base
-	// configuration (roles, client types, SMS templates, ...). Copied
-	// FK-tolerantly in case a default table references another (e.g.
-	// client_type -> role): retry the failures until a pass makes no progress.
-	pending := make([]*pbo.Table, 0, 4)
+	// Rows: copy the template's sample data. Every table's rows are copied — both
+	// business/custom tables AND the default ucode tables (role, client_type,
+	// person, sms_template) — so a clone comes with the template's sample data.
+	// Login tables are skipped inside copyTemplateRows because their rows carry
+	// auth references (user_id_auth/client_type_id/role_id) that would violate the
+	// target's foreign keys.
+	pending := make([]*pbo.Table, 0, len(tablesResp.GetTables()))
 	for _, table := range tablesResp.GetTables() {
-		if isDefaultUcodeTable(table.GetSlug()) {
-			pending = append(pending, table)
-		}
+		pending = append(pending, table)
 	}
-	// Best-effort: base-config data must never fail an otherwise-good clone. FK
-	// errors are retried (handles ordering like client_type -> role); any other
-	// error is logged and skipped.
+	// Best-effort + FK-tolerant: template tables reference each other and GetAll
+	// returns them unordered, so a child row can precede its parent. FK failures
+	// are retried until a pass makes no progress; any other error is logged and
+	// skipped so one bad row never fails an otherwise-good clone.
 	for len(pending) > 0 {
 		var failed []*pbo.Table
 		for _, table := range pending {
@@ -1365,13 +1364,13 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 					failed = append(failed, table)
 					continue
 				}
-				log.Printf("[ugen-template] skip default-table rows %s: %v", table.GetSlug(), rowErr)
+				log.Printf("[ugen-template] skip rows %s: %v", table.GetSlug(), rowErr)
 			}
 		}
 		if len(failed) == len(pending) {
 			// Only unresolved FK failures remain and none advanced this pass.
 			for _, table := range failed {
-				log.Printf("[ugen-template] default-table rows unresolved (FK) %s", table.GetSlug())
+				log.Printf("[ugen-template] rows unresolved (FK) %s", table.GetSlug())
 			}
 			break
 		}
@@ -1554,9 +1553,9 @@ func isForeignKeyViolation(err error) bool {
 	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
 }
 
-// copyTemplateRows copies every row of a source table into the target. Used only
-// for ucode's default system tables (see isDefaultUcodeTable); business tables
-// are cloned as empty structure.
+// copyTemplateRows copies every row of a source table into the target so a clone
+// includes the template's sample data. Login tables are skipped — their rows
+// carry auth references that would violate the target's foreign keys.
 func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
 	if table.GetIsLoginTable() {
 		return nil
