@@ -179,6 +179,9 @@ func main() {
 
 	api.SetUpAPI(r, h, baseConf, tracer, tracker)
 
+	// Facebook lead poller (webhook safety net) — no-op unless FACEBOOK_LEAD_POLL_ENABLED.
+	h.V1.StartLeadPoller(context.Background())
+
 	log.Info("server is running...")
 	if err := r.Run(baseConf.HTTPPort); err != nil {
 		return

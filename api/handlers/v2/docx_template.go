@@ -947,7 +947,7 @@ func (h *HandlerV2) ConvertHtmlToDocxOrPdf(c *gin.Context) {
 		return
 	}
 
-	if request.OutputFormat != "docx" && request.OutputFormat != "pdf" {
+	if request.OutputFormat != "docx" && request.OutputFormat != "pdf" && request.OutputFormat != "png" {
 		h.HandleResponse(c, status_http.InvalidArgument, "format must be 'docx' or 'pdf'")
 		return
 	}

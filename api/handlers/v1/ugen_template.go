@@ -109,111 +109,82 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 	if req.GetMcpProjectId() == "" {
 		return fmt.Errorf("mcp_project_id is required")
 	}
-	if req.GetSourceResourceEnvId() == "" {
-		projectID, ok := c.Get("project_id")
-		if !ok || !util.IsValidUUID(projectID.(string)) {
-			return config.ErrProjectIdValid
-		}
-		environmentID, ok := c.Get("environment_id")
-		if !ok || !util.IsValidUUID(environmentID.(string)) {
-			return config.ErrEnvironmentIdValid
-		}
-		resource, err := h.companyServices.ServiceResource().GetSingle(
-			ctx,
-			&pb.GetSingleServiceResourceReq{
-				ProjectId:     projectID.(string),
-				EnvironmentId: environmentID.(string),
-				ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("get source builder resource from context: %w", err)
-		}
-		if resource.GetResourceEnvironmentId() == "" {
-			return fmt.Errorf("source_resource_env_id could not be resolved from current project")
-		}
-		req.SourceResourceEnvId = resource.GetResourceEnvironmentId()
-	}
 	if req.GetSourceFunctionId() == "" {
 		return fmt.Errorf("source_function_id is required")
 	}
 
-	_, sourceMcpProjectID, sourceMcpNodeType, err := h.resolveTemplateSourceMcpResource(ctx, c, req.GetSourceMcpResourceEnvId())
-	if err != nil {
-		return err
+	// The mcp_project ROW lives in the head/current project's builder DB, so read
+	// it from the request context. Everything about the source is then derived
+	// from that row — we do NOT trust client-sent resource-env ids, because the
+	// data env (where the source project's tables live) is its own CHILD builder
+	// env, not the head env (which only has the default tables).
+	headProjectID, ok := c.Get("project_id")
+	if !ok || !util.IsValidUUID(headProjectID.(string)) {
+		return config.ErrProjectIdValid
+	}
+	headEnvID, ok := c.Get("environment_id")
+	if !ok || !util.IsValidUUID(headEnvID.(string)) {
+		return config.ErrEnvironmentIdValid
 	}
 
-	sourceMcpService, err := h.GetProjectSrvc(ctx, sourceMcpProjectID, sourceMcpNodeType)
+	headResource, err := h.companyServices.ServiceResource().GetSingle(
+		ctx,
+		&pb.GetSingleServiceResourceReq{
+			ProjectId:     headProjectID.(string),
+			EnvironmentId: headEnvID.(string),
+			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
+		},
+	)
 	if err != nil {
-		return fmt.Errorf("get source mcp project service: %w", err)
+		return fmt.Errorf("get head builder resource: %w", err)
+	}
+	mcpResourceEnvID := headResource.GetResourceEnvironmentId()
+	if mcpResourceEnvID == "" || headResource.GetNodeType() == "" {
+		return fmt.Errorf("head builder resource is incomplete")
 	}
 
-	if _, err = sourceMcpService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+	headService, err := h.GetProjectSrvc(ctx, headProjectID.(string), headResource.GetNodeType())
+	if err != nil {
+		return fmt.Errorf("get head project service: %w", err)
+	}
+
+	sourceMcp, err := headService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx,
 		&pbo.McpProjectId{
-			ResourceEnvId: req.GetSourceResourceEnvId(),
+			ResourceEnvId: mcpResourceEnvID,
 			Id:            req.GetMcpProjectId(),
 			WithoutFiles:  true,
 		},
-	); err != nil {
+	)
+	if err != nil {
 		return fmt.Errorf("get source mcp project: %w", err)
 	}
-
-	sourceDataResourceEnv, err := h.companyServices.Resource().GetResourceEnvironment(
-		ctx,
-		&pb.GetResourceEnvironmentReq{Id: req.GetSourceResourceEnvId()},
-	)
-	if err != nil {
-		return fmt.Errorf("get source resource env: %w", err)
-	}
-	if sourceDataResourceEnv.GetProjectId() == "" || sourceDataResourceEnv.GetEnvironmentId() == "" {
-		return fmt.Errorf("source_resource_env_id does not resolve project/environment")
-	}
-	if sourceDataResourceEnv.GetServiceType() != 0 && sourceDataResourceEnv.GetServiceType() != int32(pb.ServiceType_BUILDER_SERVICE) {
-		return fmt.Errorf("source_resource_env_id must belong to builder service")
-	}
-	if sourceDataResourceEnv.GetResourceType() != 0 && sourceDataResourceEnv.GetResourceType() != int32(pb.ResourceType_POSTGRESQL) {
-		return fmt.Errorf("source_resource_env_id must belong to postgres resource")
+	if !util.IsValidUUID(sourceMcp.GetUcodeProjectId()) || !util.IsValidUUID(sourceMcp.GetEnvironmentId()) {
+		return fmt.Errorf("source mcp project has no child ucode_project_id/environment_id")
 	}
 
-	sourceDataResource, err := h.companyServices.ServiceResource().GetSingle(
+	// Resolve the source project's DATA env — its own child builder resource env,
+	// where its tables/rows/functions live.
+	dataResource, err := h.companyServices.ServiceResource().GetSingle(
 		ctx,
 		&pb.GetSingleServiceResourceReq{
-			ProjectId:     sourceDataResourceEnv.GetProjectId(),
-			EnvironmentId: sourceDataResourceEnv.GetEnvironmentId(),
+			ProjectId:     sourceMcp.GetUcodeProjectId(),
+			EnvironmentId: sourceMcp.GetEnvironmentId(),
 			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("get source builder resource: %w", err)
+		return fmt.Errorf("get source data builder resource: %w", err)
 	}
-	if sourceDataResource.GetResourceEnvironmentId() != "" && sourceDataResource.GetResourceEnvironmentId() != req.GetSourceResourceEnvId() {
-		return fmt.Errorf("source_resource_env_id does not match source project's builder resource")
-	}
-
-	sourceNodeType := sourceDataResource.GetNodeType()
-	if sourceNodeType == "" {
-		sourceNodeType = sourceDataResourceEnv.GetNodeType()
-	}
-	if sourceNodeType == "" {
-		return fmt.Errorf("source_node_type could not be resolved")
+	if dataResource.GetResourceEnvironmentId() == "" || dataResource.GetNodeType() == "" {
+		return fmt.Errorf("source data builder resource is incomplete")
 	}
 
-	resourceUgen, err := h.companyServices.ServiceResource().GetSingle(
-		ctx,
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     req.GetSourceProjectId(),
-			EnvironmentId: req.GetSourceEnvironmentId(),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("get source builder resource from context: %w", err)
-	}
-
-	req.SourceProjectId = sourceDataResourceEnv.GetProjectId()
-	req.SourceEnvironmentId = sourceDataResourceEnv.GetEnvironmentId()
-	req.SourceNodeType = sourceNodeType
+	req.SourceResourceEnvId = dataResource.GetResourceEnvironmentId()
+	req.SourceMcpResourceEnvId = mcpResourceEnvID
+	req.SourceProjectId = sourceMcp.GetUcodeProjectId()
+	req.SourceEnvironmentId = sourceMcp.GetEnvironmentId()
+	req.SourceNodeType = dataResource.GetNodeType()
 
 	sourceDataService, err := h.GetProjectSrvc(ctx, req.GetSourceProjectId(), req.GetSourceNodeType())
 	if err != nil {
@@ -224,7 +195,7 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 		ctx,
 		&pbo.FunctionPrimaryKey{
 			Id:        req.GetSourceFunctionId(),
-			ProjectId: resourceUgen.GetResourceEnvironmentId(),
+			ProjectId: req.GetSourceResourceEnvId(),
 		},
 	)
 	if err != nil {
@@ -245,66 +216,6 @@ func (h *HandlerV1) enrichCreateUgenTemplateSource(c *gin.Context, req *pb.Creat
 	}
 
 	return nil
-}
-
-func (h *HandlerV1) resolveTemplateSourceMcpResource(ctx context.Context, c *gin.Context, resourceEnvID string) (string, string, string, error) {
-	if resourceEnvID != "" {
-		resEnv, err := h.companyServices.Resource().GetResourceEnvironment(
-			ctx,
-			&pb.GetResourceEnvironmentReq{Id: resourceEnvID},
-		)
-		if err != nil {
-			return "", "", "", fmt.Errorf("get source mcp resource env: %w", err)
-		}
-		if resEnv.GetProjectId() == "" || resEnv.GetEnvironmentId() == "" {
-			return "", "", "", fmt.Errorf("source_mcp_resource_env_id does not resolve project/environment")
-		}
-		nodeType := resEnv.GetNodeType()
-		if nodeType == "" {
-			resource, err := h.companyServices.ServiceResource().GetSingle(
-				ctx,
-				&pb.GetSingleServiceResourceReq{
-					ProjectId:     resEnv.GetProjectId(),
-					EnvironmentId: resEnv.GetEnvironmentId(),
-					ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-				},
-			)
-			if err != nil {
-				return "", "", "", fmt.Errorf("get source mcp builder resource: %w", err)
-			}
-			nodeType = resource.GetNodeType()
-		}
-		if nodeType == "" {
-			return "", "", "", fmt.Errorf("source mcp node_type could not be resolved")
-		}
-		return resourceEnvID, resEnv.GetProjectId(), nodeType, nil
-	}
-
-	projectID, ok := c.Get("project_id")
-	if !ok || !util.IsValidUUID(projectID.(string)) {
-		return "", "", "", config.ErrProjectIdValid
-	}
-	environmentID, ok := c.Get("environment_id")
-	if !ok || !util.IsValidUUID(environmentID.(string)) {
-		return "", "", "", config.ErrEnvironmentIdValid
-	}
-
-	resource, err := h.companyServices.ServiceResource().GetSingle(
-		ctx,
-		&pb.GetSingleServiceResourceReq{
-			ProjectId:     projectID.(string),
-			EnvironmentId: environmentID.(string),
-			ServiceType:   pb.ServiceType_BUILDER_SERVICE,
-		},
-	)
-	if err != nil {
-		return "", "", "", fmt.Errorf("get current builder resource: %w", err)
-	}
-	if resource.GetResourceEnvironmentId() == "" || resource.GetNodeType() == "" {
-		return "", "", "", fmt.Errorf("current builder resource is incomplete")
-	}
-
-	return resource.GetResourceEnvironmentId(), projectID.(string), resource.GetNodeType(), nil
 }
 
 func normalizeUgenTemplatePreviewURL(rawURL string) string {
@@ -774,19 +685,33 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		return
 	}
 
-	// MCP project metadata (title / env / visibility / type) is read from the data
-	// resource env (source_resource_env_id); its project_files are ignored here.
-	sourceMcp, err := sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+	// MCP project metadata (env vars / visibility / type) is a nice-to-have. The
+	// template's mcp row and its table data can live in different DBs, so try the
+	// mcp env first, then the data env; if the row is in neither, don't fail the
+	// clone — proceed with empty metadata (proto getters are nil-safe). Its
+	// project_files are ignored here regardless.
+	sourceMcp, mcpErr := sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
 		ctx,
 		&pbo.McpProjectId{
-			ResourceEnvId: tmpl.GetSourceResourceEnvId(),
+			ResourceEnvId: tmpl.GetSourceMcpResourceEnvId(),
 			Id:            tmpl.GetMcpProjectId(),
 			WithoutFiles:  true,
 		},
 	)
-	if err != nil {
-		h.HandleResponse(c, status_http.GRPCError, fmt.Sprintf("get source mcp project: %v", err))
-		return
+	if mcpErr != nil {
+		log.Printf("[ugen-template] source mcp metadata not in mcp env %s: %v", tmpl.GetSourceMcpResourceEnvId(), mcpErr)
+		sourceMcp, mcpErr = sourceService.GoObjectBuilderService().McpProject().GetMcpProjectFiles(
+			ctx,
+			&pbo.McpProjectId{
+				ResourceEnvId: tmpl.GetSourceResourceEnvId(),
+				Id:            tmpl.GetMcpProjectId(),
+				WithoutFiles:  true,
+			},
+		)
+		if mcpErr != nil {
+			log.Printf("[ugen-template] source mcp metadata not in data env %s either; proceeding with empty metadata: %v", tmpl.GetSourceResourceEnvId(), mcpErr)
+			sourceMcp = nil
+		}
 	}
 
 	// Microfrontend files come straight from the microfrontend repo, resolved via
@@ -837,10 +762,19 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 		chargedAmount = charge.GetChargedAmount()
 	}
 
-	// provision performs every mutating step of the template clone. It is a
-	// closure so it captures the already-resolved source/target context without a
-	// wide parameter list; any error it returns triggers the compensating refund.
-	provision := func() (gin.H, error) {
+	// authToken and headProjectID are captured now because the two slow steps
+	// (full schema/data copy and the GitLab fork+publish) run in a background
+	// goroutine after this handler returns. The gin.Context — and its headers —
+	// must not be read once the request is done.
+	authToken := c.GetHeader("Authorization")
+	headProjectID := projectId.(string)
+
+	// provisionSync runs only the fast, identity-establishing steps: create the
+	// new project, environment, resource, API key, MCP row and chat. It stops
+	// before copyUgenTemplateData and publishTemplateMicrofrontend, which together
+	// take minutes (GitLab fork+import alone is 30-90s) and previously blew past
+	// Cloudflare's ~100s edge timeout (HTTP 524). Those run in the background below.
+	provisionSync := func() (*templateProvisionResult, error) {
 		targetProject, err := h.companyServices.Project().Create(
 			ctx, &pb.CreateProjectRequest{
 				Title:        sanitizeProjectNameForBackend(projectName),
@@ -905,6 +839,8 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			apiKey = apiKeys.GetData()[0].GetAppId()
 		}
 
+		// Created "provisioning" — the background job flips it to "ready" once the
+		// schema/data copy and microfrontend publish finish (or "error" on failure).
 		newMcpProject, err := mainService.GoObjectBuilderService().McpProject().CreateMcpProject(
 			ctx, &pbo.CreateMcpProjectReqeust{
 				ResourceEnvId:  mainResourceEnvID,
@@ -915,7 +851,7 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 				UcodeProjectId: targetProject.GetProjectId(),
 				ApiKey:         apiKey,
 				EnvironmentId:  targetEnv.GetId(),
-				Status:         "ready",
+				Status:         "provisioning",
 				AppVisibility:  sourceMcp.GetAppVisibility(),
 				ProjectType:    sourceMcp.GetProjectType(),
 			},
@@ -938,6 +874,22 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			return nil, fmt.Errorf("create template project chat: %v", err)
 		}
 
+		// Point the cloned frontend at THIS project's backend, not the template
+		// source. .env / .env.* are protected files copied verbatim, so they carry
+		// the source's VITE_X_API_KEY and project/env ids — the cloned app would
+		// otherwise read and write the SOURCE's data. Rewrite them with the new
+		// project's identity and persist the corrected .env into the stored files.
+		rewrittenFiles := rewriteTemplateEnvFiles(sourceMcpFiles, apiKey, targetProject.GetProjectId(), newMcpProject.GetId(), targetEnv.GetId())
+		if envFiles := filterTemplateEnvFiles(rewrittenFiles); len(envFiles) > 0 {
+			if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+				ResourceEnvId: mainResourceEnvID,
+				Id:            newMcpProject.GetId(),
+				ProjectFiles:  envFiles,
+			}); err != nil {
+				return nil, fmt.Errorf("rewrite mcp env files: %v", err)
+			}
+		}
+
 		targetProjectData := &models.ProjectData{
 			McpProjectId:   newMcpProject.GetId(),
 			UcodeProjectId: targetProject.GetProjectId(),
@@ -948,71 +900,187 @@ func (h *HandlerV1) CreateProjectFromTemplate(c *gin.Context) {
 			ResourceType:   int32(targetResource.GetResourceType()),
 		}
 
-		if err = h.copyUgenTemplateData(ctx, sourceService, targetService, tmpl.GetSourceResourceEnvId(), targetProjectData.ResourceEnvId, targetProjectData.UcodeProjectId); err != nil {
-			return nil, fmt.Errorf("copy template data: %v", err)
-		}
-
-		published, err := h.publishTemplateMicrofrontend(ctx, projectName, sourceMcpFiles, targetProjectData, mainResourceEnvID, c.GetHeader("Authorization"))
-		if err != nil {
-			return nil, fmt.Errorf("publish template microfrontend: %v", err)
-		}
-
-		if _, err = mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
-			ResourceEnvId:       mainResourceEnvID,
-			Id:                  newMcpProject.GetId(),
-			MicrofrontendId:     published.Data.ID,
-			MicrofrontendRepoId: published.Data.RepoId,
-			MicrofrontendBranch: published.Data.Branch,
-			MicrofrontendUrl:    published.Data.Url,
-		}); err != nil {
-			return nil, fmt.Errorf("save template microfrontend refs: %v", err)
-		}
-
-		return gin.H{
-			"project_id":                 targetProject.GetProjectId(),
-			"ucode_project_id":           targetProject.GetProjectId(),
-			"environment_id":             targetEnv.GetId(),
-			"mcp_project_id":             newMcpProject.GetId(),
-			"chat_id":                    chat.GetId(),
-			"api_key":                    apiKey,
-			"resource_env_id":            targetProjectData.ResourceEnvId,
-			"main_resource_env_id":       mainResourceEnvID,
-			"microfrontend_id":           published.Data.ID,
-			"microfrontend_repo_id":      published.Data.RepoId,
-			"microfrontend_url":          published.Data.Url,
-			"microfrontend_branch":       published.Data.Branch,
-			"template_preview_url":       tmpl.GetPreviewUrl(),
-			"source_mcp_project_id":      tmpl.GetMcpProjectId(),
-			"source_resource_env_id":     tmpl.GetSourceResourceEnvId(),
-			"source_mcp_resource_env_id": tmpl.GetSourceMcpResourceEnvId(),
-			"source_repo_id":             tmpl.GetSourceRepoId(),
-			"source_function_id":         tmpl.GetSourceFunctionId(),
+		return &templateProvisionResult{
+			targetService: targetService,
+			data:          targetProjectData,
+			mcpID:         newMcpProject.GetId(),
+			publishFiles:  rewrittenFiles,
+			response: gin.H{
+				"project_id":           targetProject.GetProjectId(),
+				"ucode_project_id":     targetProject.GetProjectId(),
+				"environment_id":       targetEnv.GetId(),
+				"mcp_project_id":       newMcpProject.GetId(),
+				"chat_id":              chat.GetId(),
+				"api_key":              apiKey,
+				"resource_env_id":      targetProjectData.ResourceEnvId,
+				"main_resource_env_id": mainResourceEnvID,
+				// Provisioning still running in the background; the microfrontend
+				// refs are filled in on the MCP row once publish completes. Poll
+				// GET /v1/mcp_project/:id and watch `status` flip ready/error.
+				"status":                     "provisioning",
+				"template_preview_url":       tmpl.GetPreviewUrl(),
+				"source_mcp_project_id":      tmpl.GetMcpProjectId(),
+				"source_resource_env_id":     tmpl.GetSourceResourceEnvId(),
+				"source_mcp_resource_env_id": tmpl.GetSourceMcpResourceEnvId(),
+				"source_repo_id":             tmpl.GetSourceRepoId(),
+				"source_function_id":         tmpl.GetSourceFunctionId(),
+			},
 		}, nil
 	}
 
-	result, err := provision()
+	prov, err := provisionSync()
 	if err != nil {
-		// Compensating refund: the charge succeeded but provisioning did not, so
-		// give the money back. Best-effort — a failed refund is logged loudly for
-		// manual reconciliation rather than masking the original error.
+		// The fast steps failed before we ever returned to the client. Compensate
+		// the charge (if any) so the user never pays for a project that was not
+		// created. Best-effort — a failed refund is logged for reconciliation.
 		if chargeTxID != "" {
 			if _, refundErr := h.companyServices.Billing().RefundProjectBalance(ctx, &pb.RefundProjectBalanceRequest{
-				ProjectId:     projectId.(string),
+				ProjectId:     headProjectID,
 				TransactionId: chargeTxID,
 				Comment:       "refund: template provisioning failed",
 			}); refundErr != nil {
-				log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", projectId.(string), chargeTxID, refundErr)
+				log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", headProjectID, chargeTxID, refundErr)
 			}
 		}
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 
+	// Background: the two slow steps. On success mark the MCP row ready with its
+	// microfrontend refs; on failure mark it errored and refund. ctx is
+	// context.Background() (declared above), so client disconnect never cancels it.
+	go func(res *templateProvisionResult) {
+		bgErr := func() error {
+			if err := h.copyUgenTemplateData(ctx, sourceService, res.targetService, tmpl.GetSourceResourceEnvId(), res.data.ResourceEnvId, res.data.UcodeProjectId); err != nil {
+				return fmt.Errorf("copy template data: %w", err)
+			}
+
+			published, err := h.publishTemplateMicrofrontend(ctx, projectName, res.publishFiles, res.data, mainResourceEnvID, authToken)
+			if err != nil {
+				return fmt.Errorf("publish template microfrontend: %w", err)
+			}
+
+			if _, err := mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+				ResourceEnvId:       mainResourceEnvID,
+				Id:                  res.mcpID,
+				MicrofrontendId:     published.Data.ID,
+				MicrofrontendRepoId: published.Data.RepoId,
+				MicrofrontendBranch: published.Data.Branch,
+				MicrofrontendUrl:    published.Data.Url,
+				Status:              "ready",
+			}); err != nil {
+				return fmt.Errorf("save template microfrontend refs: %w", err)
+			}
+			return nil
+		}()
+
+		if bgErr != nil {
+			log.Printf("[ugen-template] async provisioning FAILED mcp=%s project=%s: %v", res.mcpID, res.data.UcodeProjectId, bgErr)
+			if _, err := mainService.GoObjectBuilderService().McpProject().UpdateMcpProject(ctx, &pbo.McpProject{
+				ResourceEnvId: mainResourceEnvID,
+				Id:            res.mcpID,
+				Status:        "error",
+			}); err != nil {
+				log.Printf("[ugen-template] mark mcp errored FAILED mcp=%s: %v", res.mcpID, err)
+			}
+			if chargeTxID != "" {
+				if _, refundErr := h.companyServices.Billing().RefundProjectBalance(ctx, &pb.RefundProjectBalanceRequest{
+					ProjectId:     headProjectID,
+					TransactionId: chargeTxID,
+					Comment:       "refund: template provisioning failed",
+				}); refundErr != nil {
+					log.Printf("[ugen-template] REFUND FAILED project=%s charge_tx=%s: %v", headProjectID, chargeTxID, refundErr)
+				}
+			}
+		}
+	}(prov)
+
 	if chargeTxID != "" {
-		result["charged_amount"] = chargedAmount
-		result["charge_transaction_id"] = chargeTxID
+		prov.response["charged_amount"] = chargedAmount
+		prov.response["charge_transaction_id"] = chargeTxID
 	}
-	h.HandleResponse(c, status_http.OK, result)
+	h.HandleResponse(c, status_http.OK, prov.response)
+}
+
+// templateProvisionResult carries the fast-path outcome of CreateProjectFromTemplate
+// from the synchronous provisioning closure to the background copy/publish job.
+type templateProvisionResult struct {
+	targetService servicepkg.ServiceManagerI
+	data          *models.ProjectData
+	mcpID         string
+	// publishFiles is sourceMcpFiles with .env rewritten for the new project.
+	publishFiles []*pbo.McpProjectFiles
+	response     gin.H
+}
+
+// templateEnvRewriteKeys maps the .env variables that must carry the new
+// project's identity so the cloned frontend talks to its own backend instead of
+// the template source. Base URLs (VITE_*_BASE_URL) are platform-wide and kept.
+var templateEnvRewriteKeys = []string{
+	"VITE_X_API_KEY",
+	"VITE_UCODE_PROJECT_ID",
+	"VITE_PROJECT_ID",
+	"VITE_ENVIRONMENT_ID",
+}
+
+// isTemplateEnvFile reports whether a file path is a dotenv file (.env, .env.*).
+func isTemplateEnvFile(path string) bool {
+	base := path
+	if idx := strings.LastIndexByte(path, '/'); idx >= 0 {
+		base = path[idx+1:]
+	}
+	return base == ".env" || strings.HasPrefix(base, ".env.")
+}
+
+// rewriteTemplateEnvFiles returns files with every dotenv file's project-identity
+// variables (VITE_X_API_KEY / VITE_UCODE_PROJECT_ID / VITE_PROJECT_ID /
+// VITE_ENVIRONMENT_ID) replaced by the new project's values. Non-env files and
+// unrelated lines pass through untouched. Only existing keys are replaced; a
+// missing key is not appended.
+func rewriteTemplateEnvFiles(files []*pbo.McpProjectFiles, apiKey, ucodeProjectID, mcpProjectID, environmentID string) []*pbo.McpProjectFiles {
+	replacements := map[string]string{
+		"VITE_X_API_KEY":        apiKey,
+		"VITE_UCODE_PROJECT_ID": ucodeProjectID,
+		"VITE_PROJECT_ID":       mcpProjectID,
+		"VITE_ENVIRONMENT_ID":   environmentID,
+	}
+	out := make([]*pbo.McpProjectFiles, 0, len(files))
+	for _, f := range files {
+		if f == nil || !isTemplateEnvFile(f.GetPath()) {
+			out = append(out, f)
+			continue
+		}
+		lines := strings.Split(f.GetContent(), "\n")
+		for i, line := range lines {
+			trimmed := strings.TrimLeft(line, " \t")
+			for _, key := range templateEnvRewriteKeys {
+				val := replacements[key]
+				if val == "" {
+					continue
+				}
+				if strings.HasPrefix(trimmed, key+"=") {
+					lines[i] = key + "=" + val
+					break
+				}
+			}
+		}
+		out = append(out, &pbo.McpProjectFiles{
+			Path:    f.GetPath(),
+			Content: strings.Join(lines, "\n"),
+		})
+	}
+	return out
+}
+
+// filterTemplateEnvFiles returns only the dotenv files from a file list.
+func filterTemplateEnvFiles(files []*pbo.McpProjectFiles) []*pbo.McpProjectFiles {
+	out := make([]*pbo.McpProjectFiles, 0, 4)
+	for _, f := range files {
+		if f != nil && isTemplateEnvFile(f.GetPath()) {
+			out = append(out, f)
+		}
+	}
+	return out
 }
 
 // respondBillingError maps the billing service's gRPC status codes to the HTTP
@@ -1153,47 +1221,69 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 		return err
 	}
 
+	// Phase 1 — schema: copy fields + relations for EVERY table before any
+	// layout is copied. A table's detail-page layout has relation-tabs that FK
+	// to relation(id), and those relations frequently belong to a different
+	// table (e.g. the "companies" detail page shows related "deals", whose
+	// relation has table_from="deals"). Copying layouts interleaved per table
+	// therefore hit view_relation_permission_relation_id_fkey / tab_relation_id_fkey
+	// whenever the referenced relation had not been created yet. Relation IDs are
+	// preserved on copy (Relation.Create keeps the supplied id), so we record the
+	// ones we actually create and use that set to prune dangling layout tabs below.
+	createdRelationIDs := make(map[string]bool)
 	for _, table := range tablesResp.GetTables() {
 		if skipUgenTemplateTable(table.GetSlug()) {
 			continue
 		}
-		if err = h.copyTemplateTableDetails(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); err != nil {
+		if err = h.copyTemplateTableSchema(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table, createdRelationIDs); err != nil {
 			return err
 		}
 	}
 
-	// Copy rows last and FK-tolerantly. Template tables can reference each other
-	// (e.g. approval_actions -> companies) and GetAll returns them unordered, so a
-	// straight per-table copy may insert a child row before its parent and hit a
-	// foreign-key violation. Retry the tables that fail on an FK error after the
-	// others are inserted, repeating until a pass makes no progress; non-FK errors
-	// fail immediately.
-	pending := make([]*pbo.Table, 0, len(tablesResp.GetTables()))
+	// Phase 2 — presentation: copy layouts / views / custom events now that every
+	// relation exists. Layout relation-tabs whose relation was skipped (e.g. a
+	// login table's relation to role/client_type) are dropped so the copy cannot
+	// reference a relation that does not exist in the target.
 	for _, table := range tablesResp.GetTables() {
 		if skipUgenTemplateTable(table.GetSlug()) {
 			continue
 		}
+		if err = h.copyTemplateTableViews(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table, createdRelationIDs); err != nil {
+			return err
+		}
+	}
+
+	// Rows: copy the template's sample data. Every table's rows are copied — both
+	// business/custom tables AND the default ucode tables (role, client_type,
+	// person, sms_template) — so a clone comes with the template's sample data.
+	// Login tables are skipped inside copyTemplateRows because their rows carry
+	// auth references (user_id_auth/client_type_id/role_id) that would violate the
+	// target's foreign keys.
+	pending := make([]*pbo.Table, 0, len(tablesResp.GetTables()))
+	for _, table := range tablesResp.GetTables() {
 		pending = append(pending, table)
 	}
+	// Best-effort + FK-tolerant: template tables reference each other and GetAll
+	// returns them unordered, so a child row can precede its parent. FK failures
+	// are retried until a pass makes no progress; any other error is logged and
+	// skipped so one bad row never fails an otherwise-good clone.
 	for len(pending) > 0 {
-		var (
-			failed  []*pbo.Table
-			lastErr error
-		)
+		var failed []*pbo.Table
 		for _, table := range pending {
-			if err = h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); err != nil {
-				if isForeignKeyViolation(err) {
+			if rowErr := h.copyTemplateRows(ctx, sourceService, targetService, sourceResourceEnvID, targetResourceEnvID, table); rowErr != nil {
+				if isForeignKeyViolation(rowErr) {
 					failed = append(failed, table)
-					lastErr = err
 					continue
 				}
-				return err
+				log.Printf("[ugen-template] skip rows %s: %v", table.GetSlug(), rowErr)
 			}
 		}
 		if len(failed) == len(pending) {
-			// No table advanced this pass — the remaining FK failures are a genuine
-			// missing/circular reference, not just ordering. Surface the error.
-			return lastErr
+			// Only unresolved FK failures remain and none advanced this pass.
+			for _, table := range failed {
+				log.Printf("[ugen-template] rows unresolved (FK) %s", table.GetSlug())
+			}
+			break
 		}
 		pending = failed
 	}
@@ -1201,17 +1291,10 @@ func (h *HandlerV1) copyUgenTemplateData(ctx context.Context, sourceService, tar
 	return nil
 }
 
-// isForeignKeyViolation reports whether err is a PostgreSQL foreign-key violation
-// (SQLSTATE 23503), as surfaced through the object-builder gRPC error string.
-func isForeignKeyViolation(err error) bool {
-	if err == nil {
-		return false
-	}
-	msg := err.Error()
-	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
-}
-
-func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
+// copyTemplateTableSchema copies a table's fields and relations. It records the
+// id of every relation it creates into createdRelationIDs so the later layout
+// pass can drop relation-tabs whose relation was skipped or never copied.
+func (h *HandlerV1) copyTemplateTableSchema(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table, createdRelationIDs map[string]bool) error {
 	fieldsResp, err := sourceService.GoObjectBuilderService().Field().GetAll(ctx, &pbo.GetAllFieldsRequest{
 		Limit:     1000,
 		Offset:    0,
@@ -1245,6 +1328,19 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 	if err != nil {
 		return fmt.Errorf("get relations for %s: %w", table.GetSlug(), err)
 	}
+	// A relation's attributes (label, format: RELATION, icon, table_to, ...) live on
+	// the LOOKUP field row, not on the relation row — the "relation" table has no
+	// attributes column, so GetRelationsByTableFrom can never return them and the
+	// clone would recreate every relation with attributes = {} (LOOKUP fields then
+	// show "FROM deals TO companies" with no table_to for the frontend). Rebuild the
+	// relation_id -> attributes index from the source fields (already loaded above)
+	// and reattach it before Create.
+	sourceRelationAttrs := make(map[string]*structpb.Struct, len(fieldsResp.GetFields()))
+	for _, field := range fieldsResp.GetFields() {
+		if field.GetRelationId() != "" && field.GetAttributes() != nil {
+			sourceRelationAttrs[field.GetRelationId()] = field.GetAttributes()
+		}
+	}
 	for _, relation := range relationsResp.GetRelations() {
 		if skipUgenTemplateRelation(table, relation) {
 			continue
@@ -1253,14 +1349,30 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		relation.EnvId = targetResourceEnvID
 		relation.RelationFieldId = uuid.NewString()
 		relation.RelationToFieldId = uuid.NewString()
+		if attrs, ok := sourceRelationAttrs[relation.GetId()]; ok {
+			relation.Attributes = attrs
+		}
 		if relation.Attributes == nil {
 			relation.Attributes, _ = helper.ConvertMapToStruct(map[string]any{})
 		}
 		if _, err = targetService.GoObjectBuilderService().Relation().Create(ctx, relation); err != nil {
 			return fmt.Errorf("create relation %s -> %s: %w", relation.GetTableFrom(), relation.GetTableTo(), err)
 		}
+		if relation.GetId() != "" {
+			createdRelationIDs[relation.GetId()] = true
+		}
 	}
 
+	return nil
+}
+
+// copyTemplateTableViews copies a table's layouts, views and custom events. It
+// must run only after every table's relations exist (see copyTemplateTableSchema)
+// because layout relation-tabs and their view_relation_permission rows FK to
+// relation(id). createdRelationIDs is the set of relations actually created; any
+// layout relation-tab outside it is pruned so the copy cannot violate
+// tab_relation_id_fkey / view_relation_permission_relation_id_fkey.
+func (h *HandlerV1) copyTemplateTableViews(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table, createdRelationIDs map[string]bool) error {
 	layoutsResp, err := sourceService.GoObjectBuilderService().Layout().GetLayoutByTableID(ctx, &pbo.GetLayoutByTableIDRequest{
 		TableId:   table.GetId(),
 		ProjectId: sourceResourceEnvID,
@@ -1277,6 +1389,7 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 		layoutReq.EnvId = targetResourceEnvID
 		layoutReq.TableId = table.GetId()
 		layoutReq.WithoutResponse = true
+		layoutReq.Tabs = pruneDanglingRelationTabs(layoutReq.GetTabs(), createdRelationIDs)
 		if _, err = targetService.GoObjectBuilderService().Layout().Update(ctx, layoutReq); err != nil {
 			return fmt.Errorf("create layout %s: %w", layout.GetId(), err)
 		}
@@ -1332,6 +1445,44 @@ func (h *HandlerV1) copyTemplateTableDetails(ctx context.Context, sourceService,
 	return nil
 }
 
+// pruneDanglingRelationTabs removes a layout's relation-tabs whose relation was
+// not copied into the target (skipped relations such as a login table's
+// role/client_type links, or relations that live only on skipped tables). Both
+// tab.relation_id and view_relation_permission.relation_id FK to relation(id),
+// so a dangling reference would abort the whole Layout.Update with SQLSTATE
+// 23503. Non-relation tabs are kept but have any stray relation reference
+// cleared so they still render their sections.
+func pruneDanglingRelationTabs(tabs []*pbo.TabRequest, createdRelationIDs map[string]bool) []*pbo.TabRequest {
+	if len(tabs) == 0 {
+		return tabs
+	}
+	kept := make([]*pbo.TabRequest, 0, len(tabs))
+	for _, tab := range tabs {
+		relID := tab.GetRelationId()
+		if relID != "" && !createdRelationIDs[relID] {
+			if tab.GetType() == "relation" {
+				continue
+			}
+			tab.RelationId = ""
+		}
+		kept = append(kept, tab)
+	}
+	return kept
+}
+
+// isForeignKeyViolation reports whether err is a PostgreSQL foreign-key violation
+// (SQLSTATE 23503), as surfaced through the object-builder gRPC error string.
+func isForeignKeyViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "23503") || strings.Contains(msg, "foreign key constraint")
+}
+
+// copyTemplateRows copies every row of a source table into the target so a clone
+// includes the template's sample data. Login tables are skipped — their rows
+// carry auth references that would violate the target's foreign keys.
 func (h *HandlerV1) copyTemplateRows(ctx context.Context, sourceService, targetService servicepkg.ServiceManagerI, sourceResourceEnvID, targetResourceEnvID string, table *pbo.Table) error {
 	if table.GetIsLoginTable() {
 		return nil
@@ -1592,13 +1743,23 @@ func (h *HandlerV1) publishTemplateMicrofrontend(ctx context.Context, projectNam
 	return result, nil
 }
 
-func skipUgenTemplateTable(slug string) bool {
+// isDefaultUcodeTable reports whether slug is one of ucode's default system
+// tables that every project already provisions. Their SCHEMA is not re-created
+// on template clone (skipUgenTemplateTable), but their ROWS are copied so the new
+// project inherits the template's base config (roles, client types, SMS templates).
+func isDefaultUcodeTable(slug string) bool {
 	switch slug {
 	case "role", "client_type", "person", "sms_template":
 		return true
 	default:
 		return false
 	}
+}
+
+// skipUgenTemplateTable reports whether a table's schema copy should be skipped —
+// the default ucode tables already exist in the target project.
+func skipUgenTemplateTable(slug string) bool {
+	return isDefaultUcodeTable(slug)
 }
 
 func skipUgenTemplateField(slug, fieldType string, isLoginTable bool) bool {

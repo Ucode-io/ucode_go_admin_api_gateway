@@ -116,6 +116,10 @@ func (h *HandlerV1) facebookConnectPage(ctx context.Context, state models.Facebo
 	if err != nil {
 		return "", err
 	}
+
+	// Register the project so the lead poller (webhook safety net) scans it.
+	h.registerFacebookPollProject(ctx, state.ProjectId, state.EnvironmentId)
+
 	return resource.GetId(), nil
 }
 
