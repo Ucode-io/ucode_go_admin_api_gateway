@@ -61,6 +61,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
 
+	// Ipak Yo'li payment callback — public, the bank calls it (bearer-authenticated).
+	r.POST("/v1/webhooks/ipakyuli/payment", h.V1.IpakYuliPaymentWebhook)
+
 	v1 := r.Group("/v1")
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
@@ -255,6 +258,9 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			payment.GET("/card-list", h.V1.GetAllProjectCards)
 			payment.POST("/receipt-pay", h.V1.ReceiptPay)
 			payment.DELETE("/card/:id", h.V1.DeleteProjectCard)
+			// Ipak Yo'li: Visa/Mastercard hosted-page top-ups.
+			payment.POST("/ipakyuli/create", h.V1.CreateIpakPayment)
+			payment.GET("/ipakyuli/:transfer_id/status", h.V1.GetIpakPaymentStatus)
 		}
 		discount := v1.Group("/discounts")
 		{

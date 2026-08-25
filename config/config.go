@@ -109,6 +109,10 @@ type BaseConfig struct {
 	StripeApiKey        string
 	StripeWebhookSecret string
 
+	// Shared secret used to authenticate the Ipak Yo'li payment callback (the bank
+	// sends it in the Authorization: Bearer header on the webhook).
+	IpakPaymentCallbackBearer string
+
 	AnthropicAPIKey      string
 	AnthropicAPIKeyUcode string
 	AnthropicBeta        string
@@ -265,6 +269,8 @@ func BaseLoad() BaseConfig {
 
 	config.StripeApiKey = cast.ToString(GetOrReturnDefaultValue("STRIPE_API_KEY", ""))
 	config.StripeWebhookSecret = cast.ToString(GetOrReturnDefaultValue("STRIPE_WEBHOOK_SECRET", ""))
+
+	config.IpakPaymentCallbackBearer = cast.ToString(GetOrReturnDefaultValue("IPAK_PAYMENT_CALLBACK_BEARER", ""))
 
 	config.AnthropicAPIKey = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_API_KEY", ""))
 	config.AnthropicAPIKeyUcode = cast.ToString(GetOrReturnDefaultValue("ANTHROPIC_API_KEY_UCODE", ""))
