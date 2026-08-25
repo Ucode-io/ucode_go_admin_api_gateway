@@ -5,6 +5,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -131,8 +132,10 @@ func (h *HandlerV2) eventHandler(handler *tusd.Handler, bucketName string, s3Cli
 				continue
 			}
 
-			contentType := movieContentType(event.Upload.MetaData["filetype"])
-			if err := setObjectContentType(context.Background(), s3Client, bucketName, objectKey, contentType); err != nil {
+			fileName := event.Upload.MetaData["filename"]
+			contentType := uploadContentType(event.Upload.MetaData["filetype"], fileName)
+			disposition := uploadContentDisposition(fileName)
+			if err := setObjectContentType(context.Background(), s3Client, bucketName, objectKey, contentType, disposition); err != nil {
 				h.log.Error("tusd upload content type update failed",
 					logger.Error(err),
 					logger.String("bucket", bucketName),
@@ -152,16 +155,55 @@ func (h *HandlerV2) eventHandler(handler *tusd.Handler, bucketName string, s3Cli
 	}()
 }
 
-func movieContentType(fileType string) string {
-	mediaType, _, err := mime.ParseMediaType(fileType)
-	if err == nil && strings.HasPrefix(mediaType, "video/") {
+// uploadContentType resolves the object content type from the tus `filetype`
+// metadata, falling back to the `filename` extension and then to a neutral type.
+func uploadContentType(fileType, fileName string) string {
+	if mediaType, ok := parseMediaType(fileType); ok {
 		return mediaType
 	}
 
-	return "video/mp4"
+	if ext := filepath.Ext(strings.TrimSpace(fileName)); ext != "" {
+		if mediaType, ok := parseMediaType(mime.TypeByExtension(strings.ToLower(ext))); ok {
+			return mediaType
+		}
+	}
+
+	return "application/octet-stream"
 }
 
-func setObjectContentType(ctx context.Context, s3Client *s3.S3, bucketName, objectKey, contentType string) error {
+// parseMediaType reports whether value is a well formed `type/subtype` media
+// type and returns it without parameters.
+func parseMediaType(value string) (string, bool) {
+	mediaType, _, err := mime.ParseMediaType(value)
+	if err != nil {
+		return "", false
+	}
+
+	mainType, subType, ok := strings.Cut(mediaType, "/")
+	if !ok || mainType == "" || subType == "" {
+		return "", false
+	}
+
+	return mediaType, true
+}
+
+// uploadContentDisposition keeps the object inline but restores the original
+// file name for downloads, because the object key is a generated tusd id.
+func uploadContentDisposition(fileName string) string {
+	name := filepath.Base(strings.TrimSpace(strings.ReplaceAll(fileName, "\\", "/")))
+	if name == "." || name == "/" || name == "" {
+		return "inline"
+	}
+
+	disposition := mime.FormatMediaType("inline", map[string]string{"filename": name})
+	if disposition == "" {
+		return "inline"
+	}
+
+	return disposition
+}
+
+func setObjectContentType(ctx context.Context, s3Client *s3.S3, bucketName, objectKey, contentType, contentDisposition string) error {
 	head, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
@@ -177,7 +219,7 @@ func setObjectContentType(ctx context.Context, s3Client *s3.S3, bucketName, obje
 		MetadataDirective:  aws.String(s3.MetadataDirectiveReplace),
 		Metadata:           head.Metadata,
 		ContentType:        aws.String(contentType),
-		ContentDisposition: aws.String("inline"),
+		ContentDisposition: aws.String(contentDisposition),
 		CacheControl:       head.CacheControl,
 		ContentEncoding:    head.ContentEncoding,
 		ContentLanguage:    head.ContentLanguage,
