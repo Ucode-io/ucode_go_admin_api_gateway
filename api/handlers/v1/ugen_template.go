@@ -1328,6 +1328,19 @@ func (h *HandlerV1) copyTemplateTableSchema(ctx context.Context, sourceService, 
 	if err != nil {
 		return fmt.Errorf("get relations for %s: %w", table.GetSlug(), err)
 	}
+	// A relation's attributes (label, format: RELATION, icon, table_to, ...) live on
+	// the LOOKUP field row, not on the relation row — the "relation" table has no
+	// attributes column, so GetRelationsByTableFrom can never return them and the
+	// clone would recreate every relation with attributes = {} (LOOKUP fields then
+	// show "FROM deals TO companies" with no table_to for the frontend). Rebuild the
+	// relation_id -> attributes index from the source fields (already loaded above)
+	// and reattach it before Create.
+	sourceRelationAttrs := make(map[string]*structpb.Struct, len(fieldsResp.GetFields()))
+	for _, field := range fieldsResp.GetFields() {
+		if field.GetRelationId() != "" && field.GetAttributes() != nil {
+			sourceRelationAttrs[field.GetRelationId()] = field.GetAttributes()
+		}
+	}
 	for _, relation := range relationsResp.GetRelations() {
 		if skipUgenTemplateRelation(table, relation) {
 			continue
@@ -1336,6 +1349,9 @@ func (h *HandlerV1) copyTemplateTableSchema(ctx context.Context, sourceService, 
 		relation.EnvId = targetResourceEnvID
 		relation.RelationFieldId = uuid.NewString()
 		relation.RelationToFieldId = uuid.NewString()
+		if attrs, ok := sourceRelationAttrs[relation.GetId()]; ok {
+			relation.Attributes = attrs
+		}
 		if relation.Attributes == nil {
 			relation.Attributes, _ = helper.ConvertMapToStruct(map[string]any{})
 		}
