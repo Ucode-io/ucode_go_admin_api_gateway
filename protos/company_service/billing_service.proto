@@ -42,6 +42,11 @@ service BillingService {
   rpc ReceiptPay(ReceiptPayRequest) returns (ReceiptPayResponse);
   rpc DeleteProjectCard(PrimaryKey) returns (google.protobuf.Empty);
 
+  // Ipak Yo'li (Visa/Mastercard hosted-page top-ups)
+  rpc CreateIpakPayment(CreateIpakPaymentRequest) returns (CreateIpakPaymentResponse);
+  rpc ConfirmIpakPayment(ConfirmIpakPaymentRequest) returns (IpakPaymentStatusResponse);
+  rpc GetIpakPaymentStatus(ConfirmIpakPaymentRequest) returns (IpakPaymentStatusResponse);
+
   // Subscription
   rpc GetSubscription(PrimaryKey) returns (Subscription);
   rpc UpdateSubscription(Subscription) returns (Subscription);
@@ -379,6 +384,28 @@ message ReceiptPayResponse {
   double amount = 2;
   string status = 3;
   string organization = 4;
+}
+
+message CreateIpakPaymentRequest {
+  string project_id = 1;
+  string user_id = 2;
+  double amount = 3; // amount in UZS
+}
+
+message CreateIpakPaymentResponse {
+  string payment_url = 1;
+  string transfer_id = 2;
+  string transaction_id = 3;
+}
+
+message ConfirmIpakPaymentRequest {
+  string transfer_id = 1;
+}
+
+message IpakPaymentStatusResponse {
+  string status = 1; // normalized local status: pending / accepted / cancelled
+  double amount = 2;
+  string transfer_id = 3;
 }
 
 message Subscription {
