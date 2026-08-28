@@ -8,19 +8,10 @@ on:
 permissions:
   contents: write
   packages: write
-  id-token: write
 
 jobs:
-  vault-prod:
-    if: github.ref_name == 'master'
-    uses: Ucode-io/ci-cd/.github/workflows/get_vault_secrets.yml@main
-    with:
-      ENVIRONMENT: production
-    secrets: inherit
-
   prepare-meta-ads-prod:
     if: github.ref_name == 'master'
-    needs: vault-prod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,30 +23,21 @@ jobs:
           go-version-file: go.mod
           cache: false
 
-      - name: Download production environment
-        uses: actions/download-artifact@v4
-        with:
-          name: env-file
-          path: .
-
-      - name: Encrypt Meta Ads environment
+      - name: Create backend-only Meta Ads environment
         env:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
         run: |
           set -euo pipefail
           test -n "${META_ACCESS_TOKEN}"
-          go run ./scripts/encrypt_meta_ads_env.go .env .meta-ads.env.enc
-          test -s .meta-ads.env.enc
+          go run ./scripts/write_meta_ads_env.go .meta-ads.env
+          test -s .meta-ads.env
 
-      - name: Replace environment artifact with encrypted Meta bundle
+      - name: Upload Meta Ads environment artifact
         uses: actions/upload-artifact@v4
         with:
           name: env-file
           include-hidden-files: true
-          overwrite: true
-          path: |
-            .env
-            .meta-ads.env.enc
+          path: .meta-ads.env
 
   build-prod:
     if: github.ref_name == 'master'

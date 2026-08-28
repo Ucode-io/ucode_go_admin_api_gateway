@@ -16,7 +16,7 @@ META_LEAD_ACTION_TYPES=lead
 META_ATTRIBUTION_WINDOWS=
 ```
 
-`META_ACCESS_TOKEN` must be stored in backend secret storage. Do not add it to Git, frontend variables, request parameters, or logs. Production CI may package these values as an AES-GCM authenticated encrypted environment bundle. The bundle is decrypted only at process startup with the existing runtime `SECRET_KEY`; plaintext Meta credentials are not stored in Git or in the container image. The account ID may be supplied with or without the `act_` prefix.
+`META_ACCESS_TOKEN` must be stored in backend secret storage. Do not add it to Git, frontend variables, request parameters, or logs. When Vault write access is unavailable, production CI may create a dedicated backend-only `/meta-ads.env` from the encrypted GitHub Actions secret. That file is present only in the private production image and is loaded after the runtime `/app/.env`. The account ID may be supplied with or without the `act_` prefix.
 
 `META_LEAD_ACTION_TYPES` is an allowlist. Compare `observed_action_types` from a real 7–30 day response with Ads Manager before changing the production allowlist. Leaving `META_ATTRIBUTION_WINDOWS` empty uses the ad account attribution setting.
 
