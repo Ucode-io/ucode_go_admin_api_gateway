@@ -1,6 +1,6 @@
 # Meta Ads Analytics
 
-The gateway reads Meta Marketing API data on every authenticated dashboard request. It does not persist advertising data in PostgreSQL.
+The gateway reads Meta Marketing API data on authenticated refresh requests and can serve the latest Redis snapshot first for stale-while-revalidate clients. It does not persist advertising data in PostgreSQL.
 
 ## Configuration
 
@@ -9,9 +9,9 @@ META_GRAPH_BASE_URL=https://graph.facebook.com
 META_GRAPH_VERSION=v26.0
 META_AD_ACCOUNT_ID=843587364827107
 META_ACCESS_TOKEN=<SYSTEM_USER_TOKEN>
-META_ADS_CACHE_TTL_SEC=1800
+META_ADS_CACHE_TTL_SEC=86400
 META_ADS_REQUEST_TIMEOUT_SEC=30
-META_ADS_MAX_RANGE_DAYS=90
+META_ADS_MAX_RANGE_DAYS=366
 META_LEAD_ACTION_TYPES=lead
 META_ATTRIBUTION_WINDOWS=
 ```
@@ -27,6 +27,7 @@ Both endpoints require the existing gateway authentication middleware.
 ```http
 GET /v1/meta-ads/account
 GET /v1/meta-ads/dashboard?since=2026-08-01&until=2026-08-20
+GET /v1/meta-ads/dashboard?since=2026-08-01&until=2026-08-20&prefer_cache=true
 ```
 
 Dashboard filters:
@@ -37,11 +38,11 @@ Dashboard filters:
 - `publisher_platform`, `platform_position`, `device_platform`
 - `breakdowns=age_gender,country,region,placement,device`
 
-Comma-separated values are accepted for every filter except object IDs. The default date range is the latest seven UTC dates, the maximum is controlled by `META_ADS_MAX_RANGE_DAYS`, and all supported breakdowns are returned by default.
+Comma-separated values are accepted for every filter except object IDs. The default date range is the latest seven UTC dates, the maximum is controlled by `META_ADS_MAX_RANGE_DAYS`, and all supported breakdowns are returned by default. `prefer_cache=true` returns the latest cached response immediately when one exists; clients should then repeat the request without that flag to refresh from Meta.
 
 ## Freshness and fallback
 
-The handler checks Redis for the last successful response, requests fresh data directly from Meta, and overwrites Redis after success. A successful fresh response contains:
+The dashboard uses stale-while-revalidate on the client: it first asks Redis for the last successful response with `prefer_cache=true`, renders it immediately, then repeats the request without the flag. The fresh request reads Meta directly and overwrites Redis after success. A successful fresh response contains:
 
 ```json
 {"source":"meta","stale":false}
@@ -53,7 +54,7 @@ If Meta returns a transient error and a previous response exists, the gateway re
 {"source":"cache","stale":true,"warning":"Meta API is temporarily unavailable; returning the last successful response"}
 ```
 
-Redis is not the primary data source and is never used to skip the fresh Meta request. Cache keys contain only the public ad account ID and normalized dashboard filters; they never contain the access token.
+An intentional `prefer_cache=true` hit contains `{"source":"cache","stale":false}`. Cache keys contain only the public ad account ID and normalized dashboard filters; they never contain the access token.
 
 ## Response sections
 

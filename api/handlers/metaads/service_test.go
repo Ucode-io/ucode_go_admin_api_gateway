@@ -100,9 +100,9 @@ func TestDashboardAlwaysFetchesFreshDataAndUpdatesFallback(t *testing.T) {
 		Breakdowns: []string{"age_gender"},
 	}
 
-	first, err := service.dashboard(context.Background(), query)
+	first, err := service.dashboard(context.Background(), query, false)
 	require.NoError(t, err)
-	second, err := service.dashboard(context.Background(), query)
+	second, err := service.dashboard(context.Background(), query, false)
 	require.NoError(t, err)
 
 	require.Equal(t, "meta", first.Source)
@@ -112,6 +112,34 @@ func TestDashboardAlwaysFetchesFreshDataAndUpdatesFallback(t *testing.T) {
 	require.Equal(t, "meta", second.Source)
 	require.Equal(t, 2, client.accountCalls)
 	require.Equal(t, 2, cache.setCalls)
+}
+
+func TestDashboardReturnsCacheBeforeRefreshWhenPreferred(t *testing.T) {
+	cached := models.MetaAdsDashboardResponse{
+		GeneratedAt: "2026-08-01T00:00:00Z",
+		Source:      "meta",
+		Stale:       true,
+		Warning:     "old warning",
+		KPIs:        models.MetaAdsMetrics{Spend: 15},
+	}
+	payload, err := json.Marshal(cached)
+	require.NoError(t, err)
+	client := &fakeGraphClient{}
+	cache := &memoryDashboardCache{found: true, value: payload}
+	service := newService(client, cache, time.Minute, "1", []string{"lead"}, nil, logger.NewLogger("test", logger.LevelError))
+
+	response, err := service.dashboard(context.Background(), dashboardQuery{
+		Since: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
+		Until: time.Date(2026, 8, 7, 0, 0, 0, 0, time.UTC),
+	}, true)
+
+	require.NoError(t, err)
+	require.Equal(t, "cache", response.Source)
+	require.False(t, response.Stale)
+	require.Empty(t, response.Warning)
+	require.Equal(t, 15.0, response.KPIs.Spend)
+	require.Zero(t, client.accountCalls)
+	require.Zero(t, cache.setCalls)
 }
 
 func TestDashboardReturnsCachedResponseWhenMetaFails(t *testing.T) {
@@ -125,7 +153,7 @@ func TestDashboardReturnsCachedResponseWhenMetaFails(t *testing.T) {
 	response, err := service.dashboard(context.Background(), dashboardQuery{
 		Since: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
 		Until: time.Date(2026, 8, 7, 0, 0, 0, 0, time.UTC),
-	})
+	}, false)
 
 	require.NoError(t, err)
 	require.Equal(t, "cache", response.Source)

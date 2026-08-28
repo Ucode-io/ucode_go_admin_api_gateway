@@ -50,12 +50,17 @@ func newService(client graphDataClient, cache dashboardCache, cacheTTL time.Dura
 	}
 }
 
-func (s *service) dashboard(ctx context.Context, query dashboardQuery) (models.MetaAdsDashboardResponse, error) {
+func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCache bool) (models.MetaAdsDashboardResponse, error) {
 	startedAt := time.Now()
 	key := dashboardCacheKey(s.accountID, query)
 	cached, cacheFound, cacheErr := s.cache.Get(ctx, key)
 	if cacheErr != nil {
 		s.log.Warn("meta ads: read fallback cache failed", logger.Error(cacheErr))
+	}
+	if preferCache && cacheFound {
+		if response, ok := cachedDashboard(cached, false); ok {
+			return response, nil
+		}
 	}
 
 	fresh, err := s.fetchDashboard(ctx, query)
@@ -76,16 +81,26 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery) (models.M
 		return fresh, nil
 	}
 	if cacheFound {
-		var fallback models.MetaAdsDashboardResponse
-		if json.Unmarshal(cached, &fallback) == nil {
-			fallback.Source = "cache"
-			fallback.Stale = true
-			fallback.Warning = "Meta API is temporarily unavailable; returning the last successful response"
+		if fallback, ok := cachedDashboard(cached, true); ok {
 			s.log.Warn("meta ads: serving stale fallback", logger.Error(err))
 			return fallback, nil
 		}
 	}
 	return models.MetaAdsDashboardResponse{}, err
+}
+
+func cachedDashboard(payload []byte, stale bool) (models.MetaAdsDashboardResponse, bool) {
+	var response models.MetaAdsDashboardResponse
+	if json.Unmarshal(payload, &response) != nil {
+		return models.MetaAdsDashboardResponse{}, false
+	}
+	response.Source = "cache"
+	response.Stale = stale
+	response.Warning = ""
+	if stale {
+		response.Warning = "Meta API is temporarily unavailable; returning the last successful response"
+	}
+	return response, true
 }
 
 func (s *service) account(ctx context.Context) (models.MetaAdsAccount, error) {

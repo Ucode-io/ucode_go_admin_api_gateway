@@ -352,9 +352,9 @@ func BaseLoad() BaseConfig {
 	config.MetaAdsGraphVersion = cast.ToString(GetOrReturnDefaultValue("META_GRAPH_VERSION", "v26.0"))
 	config.MetaAdsAdAccountID = strings.TrimPrefix(strings.TrimSpace(cast.ToString(GetOrReturnDefaultValue("META_AD_ACCOUNT_ID", ""))), "act_")
 	config.MetaAdsAccessToken = strings.TrimSpace(cast.ToString(GetOrReturnDefaultValue("META_ACCESS_TOKEN", "")))
-	config.MetaAdsCacheTTLSeconds = cast.ToInt(GetOrReturnDefaultValue("META_ADS_CACHE_TTL_SEC", 1800))
+	config.MetaAdsCacheTTLSeconds = cast.ToInt(GetOrReturnDefaultValue("META_ADS_CACHE_TTL_SEC", 86400))
 	config.MetaAdsRequestTimeoutSec = cast.ToInt(GetOrReturnDefaultValue("META_ADS_REQUEST_TIMEOUT_SEC", 30))
-	config.MetaAdsMaxRangeDays = cast.ToInt(GetOrReturnDefaultValue("META_ADS_MAX_RANGE_DAYS", 90))
+	config.MetaAdsMaxRangeDays = cast.ToInt(GetOrReturnDefaultValue("META_ADS_MAX_RANGE_DAYS", 366))
 	config.MetaAdsLeadActionTypes = splitCommaSeparated(cast.ToString(GetOrReturnDefaultValue("META_LEAD_ACTION_TYPES", "lead")))
 	config.MetaAdsAttributionWindows = splitCommaSeparated(cast.ToString(GetOrReturnDefaultValue("META_ATTRIBUTION_WINDOWS", "")))
 

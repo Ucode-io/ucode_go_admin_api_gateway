@@ -33,6 +33,17 @@ func TestParseDashboardQueryRejectsLargeRanges(t *testing.T) {
 	require.EqualError(t, err, "date range cannot exceed 90 days")
 }
 
+func TestParseDashboardQueryAllowsFullYear(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	request := httptest.NewRequest("GET", "/?since=2026-01-01&until=2026-12-31", nil)
+	context, _ := gin.CreateTestContext(httptest.NewRecorder())
+	context.Request = request
+
+	_, err := parseDashboardQuery(context, 366)
+
+	require.NoError(t, err)
+}
+
 func TestParseDashboardQueryRejectsUnknownBreakdown(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	request := httptest.NewRequest("GET", "/?breakdowns=unsupported", nil)

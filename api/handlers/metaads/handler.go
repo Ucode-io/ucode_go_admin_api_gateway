@@ -54,7 +54,7 @@ func (h Handler) Dashboard(c *gin.Context) {
 		h.respond(c, status_http.BadRequest, err.Error())
 		return
 	}
-	response, err := h.service.dashboard(c.Request.Context(), query)
+	response, err := h.service.dashboard(c.Request.Context(), query, c.Query("prefer_cache") == "true")
 	if err != nil {
 		h.log.Error("meta ads: dashboard request failed", logger.Error(err))
 		h.respond(c, status_http.BadGateway, "Meta Ads data is temporarily unavailable")
