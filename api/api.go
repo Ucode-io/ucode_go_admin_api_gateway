@@ -777,6 +777,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		facebook.DELETE("/integration/:id", h.V1.FacebookDisconnect)
 	}
 
+	metaAds := r.Group("/v1/meta-ads")
+	metaAds.Use(h.V1.AuthMiddleware(cfg))
+	metaAds.Use(tracker.ApiCallCountMiddleware())
+	{
+		metaAds.GET("/account", h.MetaAds.Account)
+		metaAds.GET("/dashboard", h.MetaAds.Dashboard)
+	}
+
 	// Google Lead Form Ads webhook — public, Google posts leads here (no OAuth).
 	r.POST("/webhook/google", h.V1.GoogleWebhookReceive)
 
