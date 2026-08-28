@@ -1,0 +1,61 @@
+name: One-time Meta Ads Vault setup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  update-production-vault:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Vault CLI
+        uses: eLco/setup-vault@v1
+        with:
+          vault_version: 1.15.0
+
+      - name: Authenticate to Vault with GitHub OIDC
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_AUDIENCE: ${{ secrets.VAULT_AUDIENCE }}
+          VAULT_AUTH_PATH: ${{ secrets.VAULT_AUTH_PATH }}
+          VAULT_AUTH_ROLE: ${{ secrets.VAULT_AUTH_ROLE }}
+        run: |
+          set -euo pipefail
+          id_token="$(curl -fsSL -X GET "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${VAULT_AUDIENCE}" \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" | jq -r '.value')"
+          vault_token="$(vault write -field=token "${VAULT_AUTH_PATH}" role="${VAULT_AUTH_ROLE}" jwt="${id_token}")"
+          echo "::add-mask::${vault_token}"
+          echo "VAULT_TOKEN=${vault_token}" >> "${GITHUB_ENV}"
+
+      - name: Write Meta Ads production configuration
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${META_ACCESS_TOKEN}"
+          vault kv patch -mount=secret k8s/ucode-prod/go-admin-api-gateway \
+            META_ACCESS_TOKEN="${META_ACCESS_TOKEN}" \
+            META_AD_ACCOUNT_ID="843587364827107" \
+            META_GRAPH_BASE_URL="https://graph.facebook.com" \
+            META_GRAPH_VERSION="v26.0" \
+            META_ADS_CACHE_TTL_SEC="1800" \
+            META_ADS_REQUEST_TIMEOUT_SEC="30" \
+            META_ADS_MAX_RANGE_DAYS="90" \
+            META_LEAD_ACTION_TYPES="lead" \
+            META_ATTRIBUTION_WINDOWS=""
+
+      - name: Verify stored keys without exposing values
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        run: |
+          set -euo pipefail
+          path="k8s/ucode-prod/go-admin-api-gateway"
+          account_id="$(vault kv get -mount=secret -field=META_AD_ACCOUNT_ID "${path}")"
+          stored_token="$(vault kv get -mount=secret -field=META_ACCESS_TOKEN "${path}")"
+          test "${account_id}" = "843587364827107"
+          test "${#stored_token}" -gt 100
+          echo "Meta Ads production keys are present in Vault."
