@@ -1,11 +1,9 @@
 package config
 
 import (
-	"log"
 	"os"
 	"strings"
 
-	"github.com/joho/godotenv"
 	"github.com/spf13/cast"
 )
 
@@ -230,12 +228,7 @@ type BaseConfig struct {
 }
 
 func BaseLoad() BaseConfig {
-	if err := godotenv.Load("/app/.env"); err != nil {
-		if err := godotenv.Load(".env"); err != nil {
-			log.Println("No .env file found")
-		}
-		log.Println("No /app/.env file found")
-	}
+	loadRuntimeEnvironment()
 
 	config := BaseConfig{}
 
