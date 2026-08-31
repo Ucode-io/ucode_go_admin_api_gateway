@@ -195,6 +195,7 @@ type BaseConfig struct {
 	FacebookGraphAPIVersion string
 
 	FacebookWebhookVerifyToken string
+	FacebookLegacyAppSecrets   []string
 
 	// Lead poller: a safety-net that periodically pulls new leads from connected
 	// pages' forms in case a webhook was delayed or not delivered. Off by default.
@@ -223,6 +224,7 @@ type BaseConfig struct {
 	InstagramGraphBaseURL        string
 	InstagramGraphVersion        string
 	InstagramWebhookVerifyToken  string
+	InstagramLegacyClientSecrets []string
 	InstagramOAuthAuthorizeURL   string
 	InstagramOAuthAccessTokenURL string
 }
@@ -338,13 +340,16 @@ func BaseLoad() BaseConfig {
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 
-	config.FacebookAppID = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_ID", ""))
-	config.FacebookAppSecret = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_SECRET", ""))
-	config.FacebookRedirectURI = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_REDIRECT_URI", ""))
+	legacyFacebookAppID := cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_ID", ""))
+	legacyFacebookAppSecret := cast.ToString(GetOrReturnDefaultValue("FACEBOOK_APP_SECRET", ""))
+	config.FacebookAppID = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_FACEBOOK_APP_ID", "")), legacyFacebookAppID)
+	config.FacebookAppSecret = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_FACEBOOK_APP_SECRET", "")), legacyFacebookAppSecret)
+	config.FacebookRedirectURI = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_FACEBOOK_REDIRECT_URI", "")), cast.ToString(GetOrReturnDefaultValue("FACEBOOK_REDIRECT_URI", "")))
 	config.FacebookAuthBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_AUTH_BASE_URL", "https://graph.facebook.com")), "/")
 	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
 	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
-	config.FacebookWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", ""))
+	config.FacebookWebhookVerifyToken = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN", "")), cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", "")))
+	config.FacebookLegacyAppSecrets = legacySecrets(config.FacebookAppSecret, legacyFacebookAppSecret, cast.ToString(GetOrReturnDefaultValue("FACEBOOK_LEGACY_APP_SECRETS", "")))
 	config.FacebookLeadPollEnabled = cast.ToBool(GetOrReturnDefaultValue("FACEBOOK_LEAD_POLL_ENABLED", true))
 	config.FacebookLeadPollIntervalSec = cast.ToInt(GetOrReturnDefaultValue("FACEBOOK_LEAD_POLL_INTERVAL_SEC", 120))
 
@@ -360,14 +365,17 @@ func BaseLoad() BaseConfig {
 
 	config.GoogleLeadsWebhookURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("GOOGLE_LEADS_WEBHOOK_URL", "")), "/")
 
-	config.InstagramClientID = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_CLIENT_ID", ""))
-	config.InstagramClientSecret = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_CLIENT_SECRET", ""))
-	config.InstagramRedirectURI = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_REDIRECT_URI", ""))
-	config.InstagramFrontendSuccessURL = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/instagram-success"))
-	config.InstagramFrontendErrorURL = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/instagram-error"))
+	legacyInstagramClientID := cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_CLIENT_ID", ""))
+	legacyInstagramClientSecret := cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_CLIENT_SECRET", ""))
+	config.InstagramClientID = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_INSTAGRAM_CLIENT_ID", "")), legacyInstagramClientID)
+	config.InstagramClientSecret = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_INSTAGRAM_CLIENT_SECRET", "")), legacyInstagramClientSecret)
+	config.InstagramRedirectURI = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_INSTAGRAM_REDIRECT_URI", "")), cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_REDIRECT_URI", "")))
+	config.InstagramFrontendSuccessURL = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_INSTAGRAM_FRONTEND_SUCCESS_URL", "")), cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_FRONTEND_SUCCESS_URL", "https://app.u-code.io/settings/instagram-success")))
+	config.InstagramFrontendErrorURL = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_INSTAGRAM_FRONTEND_ERROR_URL", "")), cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_FRONTEND_ERROR_URL", "https://app.u-code.io/settings/instagram-error")))
 	config.InstagramGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_GRAPH_BASE_URL", "https://graph.instagram.com")), "/")
 	config.InstagramGraphVersion = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_GRAPH_VERSION", "v25.0"))
-	config.InstagramWebhookVerifyToken = cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_WEBHOOK_VERIFY_TOKEN", ""))
+	config.InstagramWebhookVerifyToken = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN", "")), cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_WEBHOOK_VERIFY_TOKEN", "")))
+	config.InstagramLegacyClientSecrets = legacySecrets(config.InstagramClientSecret, legacyInstagramClientSecret, cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_LEGACY_CLIENT_SECRETS", "")))
 	config.InstagramOAuthAuthorizeURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_OAUTH_AUTHORIZE_URL", "https://www.instagram.com/oauth/authorize")), "/")
 	config.InstagramOAuthAccessTokenURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("INSTAGRAM_OAUTH_ACCESS_TOKEN_URL", "https://api.instagram.com/oauth/access_token")), "/")
 

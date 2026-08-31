@@ -26,9 +26,17 @@ jobs:
       - name: Create backend-only Meta Ads environment
         env:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          UCODE_FACEBOOK_APP_SECRET: ${{ secrets.UCODE_FACEBOOK_APP_SECRET }}
+          UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN: ${{ secrets.UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN }}
+          UCODE_INSTAGRAM_CLIENT_SECRET: ${{ secrets.UCODE_INSTAGRAM_CLIENT_SECRET }}
+          UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN: ${{ secrets.UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN }}
         run: |
           set -euo pipefail
           test -n "${META_ACCESS_TOKEN}"
+          test -n "${UCODE_FACEBOOK_APP_SECRET}"
+          test -n "${UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN}"
+          test -n "${UCODE_INSTAGRAM_CLIENT_SECRET}"
+          test -n "${UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN}"
           go run ./scripts/write_meta_ads_env.go .meta-ads.env
           test -s .meta-ads.env
 
