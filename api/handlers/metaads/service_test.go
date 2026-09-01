@@ -15,33 +15,51 @@ import (
 )
 
 type fakeGraphClient struct {
-	lock         sync.Mutex
-	accountCalls int
-	err          error
+	lock          sync.Mutex
+	accountCalls  int
+	err           error
+	failOperation string
+}
+
+func (c *fakeGraphClient) operationError(operation string) error {
+	if c.err != nil {
+		return c.err
+	}
+	if c.failOperation == operation {
+		return errors.New(operation + " unavailable")
+	}
+	return nil
 }
 
 func (c *fakeGraphClient) fetchAccount(context.Context) (graphAccount, error) {
 	c.lock.Lock()
 	c.accountCalls++
 	c.lock.Unlock()
-	return graphAccount{ID: "act_1", Name: "Ads", Currency: "USD", TimezoneName: "Asia/Tashkent"}, c.err
+	return graphAccount{ID: "act_1", Name: "Ads", Currency: "USD", TimezoneName: "Asia/Tashkent"}, c.operationError("account-metadata")
 }
 
 func (c *fakeGraphClient) fetchCampaigns(context.Context) ([]graphCampaign, error) {
-	return []graphCampaign{{ID: "campaign-1", Name: "Campaign"}}, c.err
+	return []graphCampaign{{ID: "campaign-1", Name: "Campaign"}}, c.operationError("campaigns")
 }
 
 func (c *fakeGraphClient) fetchAdSets(context.Context) ([]graphAdSet, error) {
-	return []graphAdSet{{ID: "adset-1", CampaignID: "campaign-1", Name: "Ad set"}}, c.err
+	return []graphAdSet{{ID: "adset-1", CampaignID: "campaign-1", Name: "Ad set"}}, c.operationError("adsets")
 }
 
 func (c *fakeGraphClient) fetchAds(context.Context) ([]graphAd, error) {
-	return []graphAd{{ID: "ad-1", AdSetID: "adset-1", CampaignID: "campaign-1", Name: "Ad"}}, c.err
+	return []graphAd{{ID: "ad-1", AdSetID: "adset-1", CampaignID: "campaign-1", Name: "Ad"}}, c.operationError("ads")
 }
 
 func (c *fakeGraphClient) fetchInsights(_ context.Context, _ dashboardQuery, level string, daily bool, breakdowns []string, _ []string) ([]graphInsight, error) {
-	if c.err != nil {
-		return nil, c.err
+	operation := "insights-" + level
+	if daily {
+		operation += "-daily"
+	}
+	if len(breakdowns) > 0 {
+		operation = "breakdown"
+	}
+	if err := c.operationError(operation); err != nil {
+		return nil, err
 	}
 	insight := graphInsight{
 		CampaignID:       "campaign-1",
@@ -160,4 +178,35 @@ func TestDashboardReturnsCachedResponseWhenMetaFails(t *testing.T) {
 	require.True(t, response.Stale)
 	require.Equal(t, 15.0, response.KPIs.Spend)
 	require.NotEmpty(t, response.Warning)
+}
+
+func TestDashboardKeepsCoreMetricsWhenOptionalDatasetFails(t *testing.T) {
+	client := &fakeGraphClient{failOperation: "insights-ad"}
+	cache := &memoryDashboardCache{}
+	service := newService(client, cache, time.Minute, "1", []string{"lead"}, nil, logger.NewLogger("test", logger.LevelError))
+
+	response, err := service.dashboard(context.Background(), dashboardQuery{
+		Since: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
+		Until: time.Date(2026, 8, 7, 0, 0, 0, 0, time.UTC),
+	}, false)
+
+	require.NoError(t, err)
+	require.Equal(t, "meta", response.Source)
+	require.Equal(t, int64(5), response.KPIs.Leads)
+	require.Len(t, response.Campaigns, 1)
+	require.Contains(t, response.Warning, "ad metrics")
+	require.Equal(t, 1, cache.setCalls)
+}
+
+func TestDashboardStillFailsWhenCoreInsightsFail(t *testing.T) {
+	client := &fakeGraphClient{failOperation: "insights-account"}
+	cache := &memoryDashboardCache{}
+	service := newService(client, cache, time.Minute, "1", []string{"lead"}, nil, logger.NewLogger("test", logger.LevelError))
+
+	_, err := service.dashboard(context.Background(), dashboardQuery{
+		Since: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
+		Until: time.Date(2026, 8, 7, 0, 0, 0, 0, time.UTC),
+	}, false)
+
+	require.Error(t, err)
 }

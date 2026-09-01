@@ -38,7 +38,7 @@ Dashboard filters:
 - `publisher_platform`, `platform_position`, `device_platform`
 - `breakdowns=age_gender,country,region,placement,device`
 
-Comma-separated values are accepted for every filter except object IDs. The default date range is the latest seven UTC dates, the maximum is controlled by `META_ADS_MAX_RANGE_DAYS`, and all supported breakdowns are returned by default. `prefer_cache=true` returns the latest cached response immediately when one exists; clients should then repeat the request without that flag to refresh from Meta.
+Comma-separated values are accepted for every filter except object IDs. The default date range is the latest seven UTC dates and the maximum is controlled by `META_ADS_MAX_RANGE_DAYS`. Breakdowns are fetched only when explicitly requested because every breakdown is a separate Meta Insights request. `prefer_cache=true` returns the latest cached response immediately when one exists; clients should then repeat the request without that flag to refresh from Meta.
 
 ## Freshness and fallback
 

@@ -3,6 +3,7 @@ package metaads
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -56,6 +57,21 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 	cached, cacheFound, cacheErr := s.cache.Get(ctx, key)
 	if cacheErr != nil {
 		s.log.Warn("meta ads: read fallback cache failed", logger.Error(cacheErr))
+	}
+	// Releases before cache-first support stored default breakdowns in the key.
+	// Reuse that valid snapshot during rollout so deploying the lean default does
+	// not make the existing production cache disappear all at once.
+	if !cacheFound && len(query.Breakdowns) == 0 {
+		legacyQuery := query
+		legacyQuery.Breakdowns = defaultBreakdownNames()
+		legacyKey := dashboardCacheKey(s.accountID, legacyQuery)
+		legacyCached, legacyFound, legacyErr := s.cache.Get(ctx, legacyKey)
+		if legacyErr != nil {
+			s.log.Warn("meta ads: read legacy fallback cache failed", logger.Error(legacyErr))
+		}
+		if legacyFound {
+			cached, cacheFound = legacyCached, true
+		}
 	}
 	if preferCache && cacheFound {
 		if response, ok := cachedDashboard(cached, false); ok {
@@ -113,50 +129,87 @@ func (s *service) account(ctx context.Context) (models.MetaAdsAccount, error) {
 
 func (s *service) fetchDashboard(ctx context.Context, query dashboardQuery) (models.MetaAdsDashboardResponse, error) {
 	var (
-		account          graphAccount
-		campaigns        []graphCampaign
-		adSets           []graphAdSet
-		ads              []graphAd
-		accountInsights  []graphInsight
-		dailyInsights    []graphInsight
-		campaignInsights []graphInsight
-		adSetInsights    []graphInsight
-		adInsights       []graphInsight
+		account             graphAccount
+		campaigns           []graphCampaign
+		adSets              []graphAdSet
+		ads                 []graphAd
+		accountInsights     []graphInsight
+		dailyInsights       []graphInsight
+		campaignInsights    []graphInsight
+		adSetInsights       []graphInsight
+		adInsights          []graphInsight
+		accountErr          error
+		campaignsErr        error
+		adSetsErr           error
+		adsErr              error
+		accountInsightsErr  error
+		dailyInsightsErr    error
+		campaignInsightsErr error
+		adSetInsightsErr    error
+		adInsightsErr       error
 	)
 
-	group, groupCtx := errgroup.WithContext(ctx)
+	// A dashboard is composed from independent Meta datasets. Do not cancel all
+	// useful data when an optional hierarchy request fails or gets throttled.
+	// Account metadata and account-level insights are the only critical pieces;
+	// all other datasets degrade independently and are reported in Warning.
+	group := new(errgroup.Group)
 	group.SetLimit(4)
-	group.Go(func() error { var err error; account, err = s.client.fetchAccount(groupCtx); return err })
-	group.Go(func() error { var err error; campaigns, err = s.client.fetchCampaigns(groupCtx); return err })
-	group.Go(func() error { var err error; adSets, err = s.client.fetchAdSets(groupCtx); return err })
-	group.Go(func() error { var err error; ads, err = s.client.fetchAds(groupCtx); return err })
+	group.Go(func() error { account, accountErr = s.client.fetchAccount(ctx); return nil })
+	group.Go(func() error { campaigns, campaignsErr = s.client.fetchCampaigns(ctx); return nil })
+	group.Go(func() error { adSets, adSetsErr = s.client.fetchAdSets(ctx); return nil })
+	group.Go(func() error { ads, adsErr = s.client.fetchAds(ctx); return nil })
 	group.Go(func() error {
-		var err error
-		accountInsights, err = s.client.fetchInsights(groupCtx, query, "account", false, nil, s.attributionWindows)
-		return err
+		accountInsights, accountInsightsErr = s.client.fetchInsights(ctx, query, "account", false, nil, s.attributionWindows)
+		return nil
 	})
 	group.Go(func() error {
-		var err error
-		dailyInsights, err = s.client.fetchInsights(groupCtx, query, "account", true, nil, s.attributionWindows)
-		return err
+		dailyInsights, dailyInsightsErr = s.client.fetchInsights(ctx, query, "account", true, nil, s.attributionWindows)
+		return nil
 	})
 	group.Go(func() error {
-		var err error
-		campaignInsights, err = s.client.fetchInsights(groupCtx, query, "campaign", false, nil, s.attributionWindows)
-		return err
+		campaignInsights, campaignInsightsErr = s.client.fetchInsights(ctx, query, "campaign", false, nil, s.attributionWindows)
+		return nil
 	})
 	group.Go(func() error {
-		var err error
-		adSetInsights, err = s.client.fetchInsights(groupCtx, query, "adset", false, nil, s.attributionWindows)
-		return err
+		adSetInsights, adSetInsightsErr = s.client.fetchInsights(ctx, query, "adset", false, nil, s.attributionWindows)
+		return nil
 	})
 	group.Go(func() error {
-		var err error
-		adInsights, err = s.client.fetchInsights(groupCtx, query, "ad", false, nil, s.attributionWindows)
-		return err
+		adInsights, adInsightsErr = s.client.fetchInsights(ctx, query, "ad", false, nil, s.attributionWindows)
+		return nil
 	})
-	if err := group.Wait(); err != nil {
-		return models.MetaAdsDashboardResponse{}, err
+	_ = group.Wait()
+
+	if accountErr != nil {
+		return models.MetaAdsDashboardResponse{}, fmt.Errorf("fetch Meta account: %w", accountErr)
+	}
+	if accountInsightsErr != nil {
+		return models.MetaAdsDashboardResponse{}, fmt.Errorf("fetch Meta account insights: %w", accountInsightsErr)
+	}
+
+	unavailableDatasets := make([]string, 0, 7)
+	optionalErrors := []struct {
+		name string
+		err  error
+	}{
+		{name: "campaign metadata", err: campaignsErr},
+		{name: "ad set metadata", err: adSetsErr},
+		{name: "ad metadata", err: adsErr},
+		{name: "daily trends", err: dailyInsightsErr},
+		{name: "campaign metrics", err: campaignInsightsErr},
+		{name: "ad set metrics", err: adSetInsightsErr},
+		{name: "ad metrics", err: adInsightsErr},
+	}
+	for _, item := range optionalErrors {
+		if item.err == nil {
+			continue
+		}
+		unavailableDatasets = append(unavailableDatasets, item.name)
+		s.log.Warn("meta ads: optional dataset unavailable",
+			logger.String("dataset", item.name),
+			logger.Error(item.err),
+		)
 	}
 
 	breakdowns, unavailableBreakdowns := s.fetchBreakdowns(ctx, query)
@@ -179,9 +232,14 @@ func (s *service) fetchDashboard(ctx context.Context, query dashboardQuery) (mod
 		Breakdowns:  breakdowns,
 		ActionTypes: observedActionTypes(accountInsights, dailyInsights, campaignInsights, adSetInsights, adInsights),
 	}
-	if len(unavailableBreakdowns) > 0 {
-		response.Warning = "Unavailable breakdowns: " + strings.Join(unavailableBreakdowns, ", ")
+	warnings := make([]string, 0, 2)
+	if len(unavailableDatasets) > 0 {
+		warnings = append(warnings, "Unavailable datasets: "+strings.Join(unavailableDatasets, ", "))
 	}
+	if len(unavailableBreakdowns) > 0 {
+		warnings = append(warnings, "Unavailable breakdowns: "+strings.Join(unavailableBreakdowns, ", "))
+	}
+	response.Warning = strings.Join(warnings, "; ")
 	return response, nil
 }
 

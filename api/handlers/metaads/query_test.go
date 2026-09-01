@@ -22,6 +22,18 @@ func TestParseDashboardQuery(t *testing.T) {
 	require.Equal(t, []string{"age_gender", "country"}, query.Breakdowns)
 }
 
+func TestParseDashboardQueryDoesNotFetchBreakdownsByDefault(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	request := httptest.NewRequest("GET", "/?since=2026-08-01&until=2026-08-20", nil)
+	context, _ := gin.CreateTestContext(httptest.NewRecorder())
+	context.Request = request
+
+	query, err := parseDashboardQuery(context, 90)
+
+	require.NoError(t, err)
+	require.Empty(t, query.Breakdowns)
+}
+
 func TestParseDashboardQueryRejectsLargeRanges(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	request := httptest.NewRequest("GET", "/?since=2026-01-01&until=2026-08-20", nil)

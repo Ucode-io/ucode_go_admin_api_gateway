@@ -35,10 +35,10 @@ func parseDashboardQuery(c *gin.Context, maxRangeDays int) (dashboardQuery, erro
 		return dashboardQuery{}, fmt.Errorf("date range cannot exceed %d days", maxRangeDays)
 	}
 
+	// Breakdowns are expensive, independent Meta Insights requests. Keep the
+	// default dashboard request lean and fetch them only when a client asks for
+	// specific breakdowns.
 	breakdowns := commaValues(c.Query("breakdowns"))
-	if len(breakdowns) == 0 {
-		breakdowns = defaultBreakdownNames()
-	}
 	supported := supportedBreakdowns()
 	for _, name := range breakdowns {
 		if _, ok := supported[name]; !ok {
