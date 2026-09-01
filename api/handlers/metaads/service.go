@@ -54,31 +54,13 @@ func newService(client graphDataClient, cache dashboardCache, cacheTTL time.Dura
 func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCache bool) (models.MetaAdsDashboardResponse, error) {
 	startedAt := time.Now()
 	key := dashboardCacheKey(s.accountID, query)
-	fallbackKey := dashboardFallbackCacheKey(s.accountID)
 	cached, cacheFound, cacheErr := s.cache.Get(ctx, key)
 	if cacheErr != nil {
 		s.log.Warn("meta ads: read fallback cache failed", logger.Error(cacheErr))
 	}
-	// Releases before cache-first support stored default breakdowns in the key.
-	// Reuse that valid snapshot during rollout so deploying the lean default does
-	// not make the existing production cache disappear all at once.
-	if !cacheFound && len(query.Breakdowns) == 0 {
-		legacyQuery := query
-		legacyQuery.Breakdowns = defaultBreakdownNames()
-		legacyKey := dashboardCacheKey(s.accountID, legacyQuery)
-		legacyCached, legacyFound, legacyErr := s.cache.Get(ctx, legacyKey)
-		if legacyErr != nil {
-			s.log.Warn("meta ads: read legacy fallback cache failed", logger.Error(legacyErr))
-		}
-		if legacyFound {
-			cached, cacheFound = legacyCached, true
-		}
-	}
 	if preferCache && cacheFound {
 		if response, ok := cachedDashboard(cached, false); ok {
-			if setErr := s.cache.Set(ctx, fallbackKey, cached, s.fallbackCacheTTL()); setErr != nil {
-				s.log.Warn("meta ads: promote fallback cache failed", logger.Error(setErr))
-			}
+			s.updateLastSuccessfulCaches(ctx, cached, query)
 			return response, nil
 		}
 	}
@@ -101,9 +83,7 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 			if setErr := s.cache.Set(ctx, key, payload, s.cacheTTL); setErr != nil {
 				s.log.Warn("meta ads: update fallback cache failed", logger.Error(setErr))
 			}
-			if setErr := s.cache.Set(ctx, fallbackKey, payload, s.fallbackCacheTTL()); setErr != nil {
-				s.log.Warn("meta ads: update last successful cache failed", logger.Error(setErr))
-			}
+			s.updateLastSuccessfulCaches(ctx, payload, query)
 		}
 		s.log.Info("meta ads: dashboard refreshed",
 			logger.String("since", query.Since.Format("2006-01-02")),
@@ -134,16 +114,27 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 }
 
 func (s *service) lastSuccessfulDashboard(ctx context.Context, query dashboardQuery) (models.MetaAdsDashboardResponse, bool) {
-	payload, found, err := s.cache.Get(ctx, dashboardFallbackCacheKey(s.accountID))
-	if err != nil {
-		s.log.Warn("meta ads: read last successful cache failed", logger.Error(err))
-		return models.MetaAdsDashboardResponse{}, false
+	keys := []string{dashboardFallbackCacheKey(s.accountID), dashboardWideFallbackCacheKey(s.accountID)}
+	if dashboardRangeDays(query) >= 14 {
+		keys[0], keys[1] = keys[1], keys[0]
 	}
-	if !found {
-		return models.MetaAdsDashboardResponse{}, false
+	var fallback models.MetaAdsDashboardResponse
+	for _, key := range keys {
+		payload, found, err := s.cache.Get(ctx, key)
+		if err != nil {
+			s.log.Warn("meta ads: read last successful cache failed", logger.Error(err))
+			continue
+		}
+		if !found {
+			continue
+		}
+		var ok bool
+		fallback, ok = cachedDashboard(payload, true)
+		if ok {
+			break
+		}
 	}
-	fallback, ok := cachedDashboard(payload, true)
-	if !ok {
+	if fallback.DateRange.Since == "" || fallback.DateRange.Until == "" {
 		return models.MetaAdsDashboardResponse{}, false
 	}
 	fallback.Warning = fmt.Sprintf(
@@ -154,6 +145,22 @@ func (s *service) lastSuccessfulDashboard(ctx context.Context, query dashboardQu
 		fallback.DateRange.Until,
 	)
 	return fallback, true
+}
+
+func (s *service) updateLastSuccessfulCaches(ctx context.Context, payload []byte, query dashboardQuery) {
+	if setErr := s.cache.Set(ctx, dashboardFallbackCacheKey(s.accountID), payload, s.fallbackCacheTTL()); setErr != nil {
+		s.log.Warn("meta ads: update last successful cache failed", logger.Error(setErr))
+	}
+	if dashboardRangeDays(query) < 14 {
+		return
+	}
+	if setErr := s.cache.Set(ctx, dashboardWideFallbackCacheKey(s.accountID), payload, s.fallbackCacheTTL()); setErr != nil {
+		s.log.Warn("meta ads: update wide fallback cache failed", logger.Error(setErr))
+	}
+}
+
+func dashboardRangeDays(query dashboardQuery) int {
+	return int(query.Until.Sub(query.Since).Hours()/24) + 1
 }
 
 func (s *service) fallbackCacheTTL() time.Duration {

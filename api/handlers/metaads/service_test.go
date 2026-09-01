@@ -285,6 +285,39 @@ func TestDashboardReturnsLastSuccessfulPeriodAfterFreshRequestFails(t *testing.T
 	require.Equal(t, 1, client.accountCalls)
 }
 
+func TestDashboardPrefersWideSnapshotForWideRequestedRange(t *testing.T) {
+	accountID := "1"
+	encode := func(since, until string, spend float64) []byte {
+		payload, err := json.Marshal(models.MetaAdsDashboardResponse{
+			Source: "meta",
+			DateRange: models.MetaAdsDateRange{
+				Since: since,
+				Until: until,
+			},
+			KPIs: models.MetaAdsMetrics{Spend: spend},
+		})
+		require.NoError(t, err)
+		return payload
+	}
+	cache := &keyedMemoryDashboardCache{values: map[string][]byte{
+		dashboardFallbackCacheKey(accountID):     encode("2026-08-24", "2026-08-31", 241.86),
+		dashboardWideFallbackCacheKey(accountID): encode("2026-08-03", "2026-08-24", 950.88),
+	}}
+	client := &fakeGraphClient{err: errors.New("meta unavailable")}
+	service := newService(client, cache, time.Minute, accountID, []string{"lead"}, nil, logger.NewLogger("test", logger.LevelError))
+
+	response, err := service.dashboard(context.Background(), dashboardQuery{
+		Since: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
+		Until: time.Date(2026, 8, 31, 0, 0, 0, 0, time.UTC),
+	}, true)
+
+	require.NoError(t, err)
+	require.Equal(t, "2026-08-03", response.DateRange.Since)
+	require.Equal(t, "2026-08-24", response.DateRange.Until)
+	require.Equal(t, 950.88, response.KPIs.Spend)
+	require.Zero(t, client.accountCalls)
+}
+
 func TestDashboardStillFailsWhenCoreInsightsFail(t *testing.T) {
 	client := &fakeGraphClient{failOperation: "insights-account"}
 	cache := &memoryDashboardCache{}

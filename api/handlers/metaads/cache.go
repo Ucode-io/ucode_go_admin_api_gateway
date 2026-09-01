@@ -84,6 +84,10 @@ func dashboardFallbackCacheKey(accountID string) string {
 	return "meta-ads:dashboard:" + accountID + ":last-successful"
 }
 
+func dashboardWideFallbackCacheKey(accountID string) string {
+	return "meta-ads:dashboard:" + accountID + ":last-successful-wide"
+}
+
 func sortedCopy(values []string) []string {
 	result := append([]string(nil), values...)
 	sort.Strings(result)
