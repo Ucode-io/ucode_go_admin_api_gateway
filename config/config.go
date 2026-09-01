@@ -195,6 +195,8 @@ type BaseConfig struct {
 	FacebookGraphAPIVersion string
 
 	FacebookWebhookVerifyToken string
+	FacebookLegacyAppID        string
+	FacebookLegacyAppSecret    string
 	FacebookLegacyAppSecrets   []string
 
 	// Lead poller: a safety-net that periodically pulls new leads from connected
@@ -349,6 +351,8 @@ func BaseLoad() BaseConfig {
 	config.FacebookGraphBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_BASE_URL", "https://graph.facebook.com")), "/")
 	config.FacebookGraphAPIVersion = cast.ToString(GetOrReturnDefaultValue("FACEBOOK_GRAPH_API_VERSION", "v21.0"))
 	config.FacebookWebhookVerifyToken = firstNonEmpty(cast.ToString(GetOrReturnDefaultValue("UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN", "")), cast.ToString(GetOrReturnDefaultValue("FACEBOOK_WEBHOOK_VERIFY_TOKEN", "")))
+	config.FacebookLegacyAppID = legacyFacebookAppID
+	config.FacebookLegacyAppSecret = legacyFacebookAppSecret
 	config.FacebookLegacyAppSecrets = legacySecrets(config.FacebookAppSecret, legacyFacebookAppSecret, cast.ToString(GetOrReturnDefaultValue("FACEBOOK_LEGACY_APP_SECRETS", "")))
 	config.FacebookLeadPollEnabled = cast.ToBool(GetOrReturnDefaultValue("FACEBOOK_LEAD_POLL_ENABLED", true))
 	config.FacebookLeadPollIntervalSec = cast.ToInt(GetOrReturnDefaultValue("FACEBOOK_LEAD_POLL_INTERVAL_SEC", 120))

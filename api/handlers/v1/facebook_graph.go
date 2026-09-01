@@ -153,20 +153,31 @@ func (h *HandlerV1) facebookFetchUser(ctx context.Context, userToken string) (mo
 // facebookDebugToken inspects a user token via Graph debug_token (authenticated
 // with the app token) to learn whether it is still valid and when it expires.
 func (h *HandlerV1) facebookDebugToken(ctx context.Context, userToken string) (models.FacebookTokenDebugData, error) {
-	var resp models.FacebookTokenDebugResponse
-
-	err := h.facebookGraphGet(
-		ctx, "debug_token",
-		url.Values{
-			"input_token":  {userToken},
-			"access_token": {h.baseConf.FacebookAppID + "|" + h.baseConf.FacebookAppSecret},
-		},
-		&resp,
-	)
-	if err != nil {
-		return models.FacebookTokenDebugData{}, err
+	credentials := [][2]string{{h.baseConf.FacebookAppID, h.baseConf.FacebookAppSecret}}
+	if h.baseConf.FacebookLegacyAppID != "" && h.baseConf.FacebookLegacyAppSecret != "" &&
+		(h.baseConf.FacebookLegacyAppID != h.baseConf.FacebookAppID || h.baseConf.FacebookLegacyAppSecret != h.baseConf.FacebookAppSecret) {
+		credentials = append(credentials, [2]string{h.baseConf.FacebookLegacyAppID, h.baseConf.FacebookLegacyAppSecret})
 	}
-	return resp.Data, nil
+
+	var firstErr error
+	for _, credential := range credentials {
+		var resp models.FacebookTokenDebugResponse
+		err := h.facebookGraphGet(
+			ctx, "debug_token",
+			url.Values{
+				"input_token":  {userToken},
+				"access_token": {credential[0] + "|" + credential[1]},
+			},
+			&resp,
+		)
+		if err == nil {
+			return resp.Data, nil
+		}
+		if firstErr == nil {
+			firstErr = err
+		}
+	}
+	return models.FacebookTokenDebugData{}, firstErr
 }
 
 func (h *HandlerV1) facebookListPages(ctx context.Context, userToken string) ([]models.FacebookPage, error) {
