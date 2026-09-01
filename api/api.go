@@ -756,6 +756,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	// Public Instagram OAuth callback (no auth - Instagram calls this).
 	r.GET("/v1/instagram/callback", h.V1.InstagramCallback)
+	r.POST("/v1/instagram/deauthorize", h.V1.InstagramDeauthorize)
 
 	facebook := r.Group("/v1/facebook")
 	facebook.Use(h.V1.AuthMiddleware(cfg))
