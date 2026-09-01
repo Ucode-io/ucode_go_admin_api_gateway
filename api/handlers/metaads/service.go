@@ -82,6 +82,17 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 			return response, nil
 		}
 	}
+	if preferCache && !cacheFound {
+		if fallback, ok := s.lastSuccessfulDashboard(ctx, query); ok {
+			s.log.Warn("meta ads: serving last successful period before refresh",
+				logger.String("requested_since", query.Since.Format("2006-01-02")),
+				logger.String("requested_until", query.Until.Format("2006-01-02")),
+				logger.String("fallback_since", fallback.DateRange.Since),
+				logger.String("fallback_until", fallback.DateRange.Until),
+			)
+			return fallback, nil
+		}
+	}
 
 	fresh, err := s.fetchDashboard(ctx, query)
 	if err == nil {
@@ -109,30 +120,40 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 			return fallback, nil
 		}
 	}
-	lastSuccessful, lastSuccessfulFound, lastSuccessfulErr := s.cache.Get(ctx, fallbackKey)
-	if lastSuccessfulErr != nil {
-		s.log.Warn("meta ads: read last successful cache failed", logger.Error(lastSuccessfulErr))
-	}
-	if lastSuccessfulFound {
-		if fallback, ok := cachedDashboard(lastSuccessful, true); ok {
-			fallback.Warning = fmt.Sprintf(
-				"Meta API is temporarily unavailable for %s to %s; showing the last successful period %s to %s",
-				query.Since.Format("2006-01-02"),
-				query.Until.Format("2006-01-02"),
-				fallback.DateRange.Since,
-				fallback.DateRange.Until,
-			)
-			s.log.Warn("meta ads: serving last successful period",
-				logger.String("requested_since", query.Since.Format("2006-01-02")),
-				logger.String("requested_until", query.Until.Format("2006-01-02")),
-				logger.String("fallback_since", fallback.DateRange.Since),
-				logger.String("fallback_until", fallback.DateRange.Until),
-				logger.Error(err),
-			)
-			return fallback, nil
-		}
+	if fallback, ok := s.lastSuccessfulDashboard(ctx, query); ok {
+		s.log.Warn("meta ads: serving last successful period",
+			logger.String("requested_since", query.Since.Format("2006-01-02")),
+			logger.String("requested_until", query.Until.Format("2006-01-02")),
+			logger.String("fallback_since", fallback.DateRange.Since),
+			logger.String("fallback_until", fallback.DateRange.Until),
+			logger.Error(err),
+		)
+		return fallback, nil
 	}
 	return models.MetaAdsDashboardResponse{}, err
+}
+
+func (s *service) lastSuccessfulDashboard(ctx context.Context, query dashboardQuery) (models.MetaAdsDashboardResponse, bool) {
+	payload, found, err := s.cache.Get(ctx, dashboardFallbackCacheKey(s.accountID))
+	if err != nil {
+		s.log.Warn("meta ads: read last successful cache failed", logger.Error(err))
+		return models.MetaAdsDashboardResponse{}, false
+	}
+	if !found {
+		return models.MetaAdsDashboardResponse{}, false
+	}
+	fallback, ok := cachedDashboard(payload, true)
+	if !ok {
+		return models.MetaAdsDashboardResponse{}, false
+	}
+	fallback.Warning = fmt.Sprintf(
+		"Meta API is temporarily unavailable for %s to %s; showing the last successful period %s to %s",
+		query.Since.Format("2006-01-02"),
+		query.Until.Format("2006-01-02"),
+		fallback.DateRange.Since,
+		fallback.DateRange.Until,
+	)
+	return fallback, true
 }
 
 func (s *service) fallbackCacheTTL() time.Duration {
