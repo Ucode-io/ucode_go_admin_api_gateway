@@ -140,7 +140,7 @@ const (
 	FacebookOAuthStatePrefix = "facebook-oauth-state:"
 	FacebookOAuthStateTTL    = 10 * time.Minute
 	FacebookIntegrationName  = "Facebook Lead Ads"
-	FacebookOAuthScopes      = "pages_show_list,pages_read_engagement,leads_retrieval,pages_manage_metadata,pages_manage_ads,business_management"
+	FacebookOAuthScopes      = "pages_show_list,pages_read_engagement,leads_retrieval,pages_manage_metadata,business_management,ads_read"
 	FacebookSubscribedFields = "leadgen"
 	FacebookResourceType     = "META_LEADS"
 	FacebookStatusActive     = "active"
@@ -157,7 +157,7 @@ const (
 	InstagramOAuthStateTTL    = 10 * time.Minute
 	InstagramIntegrationName  = "Instagram Support"
 	InstagramOAuthScopes      = "instagram_business_basic,instagram_business_manage_messages"
-	InstagramSubscribedFields = "messages,messaging_postbacks,message_reactions,messaging_seen,messaging_optins"
+	InstagramSubscribedFields = "messages,message_edit,message_reactions,messaging_postbacks,messaging_referral,messaging_seen"
 	InstagramStatusPendingUI  = "pending_ui"
 	InstagramStatusConnected  = "connected"
 	InstagramSignatureHeader  = "X-Hub-Signature-256"
