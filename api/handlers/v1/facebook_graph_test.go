@@ -66,6 +66,37 @@ func TestFacebookMarketingAPICallsUseGrantedUserToken(t *testing.T) {
 	require.Equal(t, []string{"/v26.0/me/businesses", "/v26.0/me/adaccounts", "/v26.0/act_123/insights"}, paths)
 }
 
+func TestFacebookRunAppReviewCalls(t *testing.T) {
+	insightCalls := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "review-user-token", r.URL.Query().Get("access_token"))
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v26.0/me/adaccounts":
+			_, _ = w.Write([]byte(`{"data":[{"id":"act_123"}]}`))
+		case "/v26.0/act_123/insights":
+			insightCalls++
+			require.Equal(t, "spend,impressions", r.URL.Query().Get("fields"))
+			require.Equal(t, "last_7d", r.URL.Query().Get("date_preset"))
+			_, _ = w.Write([]byte(`{"data":[{"spend":"10.00","impressions":"100"}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	h := HandlerV1{baseConf: config.BaseConfig{
+		FacebookGraphBaseURL:    server.URL,
+		FacebookGraphAPIVersion: "v26.0",
+	}}
+
+	successes, attempts, err := h.facebookRunAppReviewCalls(context.Background(), "review-user-token", 3, 3, 0)
+	require.NoError(t, err)
+	require.Equal(t, 3, successes)
+	require.Equal(t, 3, attempts)
+	require.Equal(t, 3, insightCalls)
+}
+
 func TestFacebookDebugTokenFallsBackToLegacyApp(t *testing.T) {
 	var appTokens []string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

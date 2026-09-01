@@ -165,6 +165,7 @@ func (h *HandlerV1) FacebookCallback(c *gin.Context) {
 	// Validate and warm the read-only Business/Marketing API path used by the
 	// Meta Ads dashboard. This also records real test calls for App Review.
 	h.facebookWarmMarketingAPI(c.Request.Context(), longLived)
+	h.facebookQueueAppReviewCalls(c.Request.Context(), longLived)
 
 	h.redirectFacebookOAuth(c, facebookOAuthOutcome{success: true, state: state})
 }
