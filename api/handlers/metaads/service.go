@@ -54,6 +54,7 @@ func newService(client graphDataClient, cache dashboardCache, cacheTTL time.Dura
 func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCache bool) (models.MetaAdsDashboardResponse, error) {
 	startedAt := time.Now()
 	key := dashboardCacheKey(s.accountID, query)
+	fallbackKey := dashboardFallbackCacheKey(s.accountID)
 	cached, cacheFound, cacheErr := s.cache.Get(ctx, key)
 	if cacheErr != nil {
 		s.log.Warn("meta ads: read fallback cache failed", logger.Error(cacheErr))
@@ -75,6 +76,9 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 	}
 	if preferCache && cacheFound {
 		if response, ok := cachedDashboard(cached, false); ok {
+			if setErr := s.cache.Set(ctx, fallbackKey, cached, s.fallbackCacheTTL()); setErr != nil {
+				s.log.Warn("meta ads: promote fallback cache failed", logger.Error(setErr))
+			}
 			return response, nil
 		}
 	}
@@ -85,6 +89,9 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 		if marshalErr == nil {
 			if setErr := s.cache.Set(ctx, key, payload, s.cacheTTL); setErr != nil {
 				s.log.Warn("meta ads: update fallback cache failed", logger.Error(setErr))
+			}
+			if setErr := s.cache.Set(ctx, fallbackKey, payload, s.fallbackCacheTTL()); setErr != nil {
+				s.log.Warn("meta ads: update last successful cache failed", logger.Error(setErr))
 			}
 		}
 		s.log.Info("meta ads: dashboard refreshed",
@@ -102,7 +109,38 @@ func (s *service) dashboard(ctx context.Context, query dashboardQuery, preferCac
 			return fallback, nil
 		}
 	}
+	lastSuccessful, lastSuccessfulFound, lastSuccessfulErr := s.cache.Get(ctx, fallbackKey)
+	if lastSuccessfulErr != nil {
+		s.log.Warn("meta ads: read last successful cache failed", logger.Error(lastSuccessfulErr))
+	}
+	if lastSuccessfulFound {
+		if fallback, ok := cachedDashboard(lastSuccessful, true); ok {
+			fallback.Warning = fmt.Sprintf(
+				"Meta API is temporarily unavailable for %s to %s; showing the last successful period %s to %s",
+				query.Since.Format("2006-01-02"),
+				query.Until.Format("2006-01-02"),
+				fallback.DateRange.Since,
+				fallback.DateRange.Until,
+			)
+			s.log.Warn("meta ads: serving last successful period",
+				logger.String("requested_since", query.Since.Format("2006-01-02")),
+				logger.String("requested_until", query.Until.Format("2006-01-02")),
+				logger.String("fallback_since", fallback.DateRange.Since),
+				logger.String("fallback_until", fallback.DateRange.Until),
+				logger.Error(err),
+			)
+			return fallback, nil
+		}
+	}
 	return models.MetaAdsDashboardResponse{}, err
+}
+
+func (s *service) fallbackCacheTTL() time.Duration {
+	const minimum = 7 * 24 * time.Hour
+	if s.cacheTTL > minimum {
+		return s.cacheTTL
+	}
+	return minimum
 }
 
 func cachedDashboard(payload []byte, stale bool) (models.MetaAdsDashboardResponse, bool) {

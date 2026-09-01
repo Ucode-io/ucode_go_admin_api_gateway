@@ -93,6 +93,28 @@ type memoryDashboardCache struct {
 	setCalls int
 }
 
+type keyedMemoryDashboardCache struct {
+	lock   sync.Mutex
+	values map[string][]byte
+}
+
+func (c *keyedMemoryDashboardCache) Get(_ context.Context, key string) ([]byte, bool, error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	value, found := c.values[key]
+	return append([]byte(nil), value...), found, nil
+}
+
+func (c *keyedMemoryDashboardCache) Set(_ context.Context, key string, value []byte, _ time.Duration) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.values == nil {
+		c.values = make(map[string][]byte)
+	}
+	c.values[key] = append([]byte(nil), value...)
+	return nil
+}
+
 func (c *memoryDashboardCache) Get(context.Context, string) ([]byte, bool, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -129,7 +151,7 @@ func TestDashboardAlwaysFetchesFreshDataAndUpdatesFallback(t *testing.T) {
 	require.Len(t, first.Campaigns, 1)
 	require.Equal(t, "meta", second.Source)
 	require.Equal(t, 2, client.accountCalls)
-	require.Equal(t, 2, cache.setCalls)
+	require.Equal(t, 4, cache.setCalls)
 }
 
 func TestDashboardReturnsCacheBeforeRefreshWhenPreferred(t *testing.T) {
@@ -157,7 +179,7 @@ func TestDashboardReturnsCacheBeforeRefreshWhenPreferred(t *testing.T) {
 	require.Empty(t, response.Warning)
 	require.Equal(t, 15.0, response.KPIs.Spend)
 	require.Zero(t, client.accountCalls)
-	require.Zero(t, cache.setCalls)
+	require.Equal(t, 1, cache.setCalls)
 }
 
 func TestDashboardReturnsCachedResponseWhenMetaFails(t *testing.T) {
@@ -195,7 +217,41 @@ func TestDashboardKeepsCoreMetricsWhenOptionalDatasetFails(t *testing.T) {
 	require.Equal(t, int64(5), response.KPIs.Leads)
 	require.Len(t, response.Campaigns, 1)
 	require.Contains(t, response.Warning, "ad metrics")
-	require.Equal(t, 1, cache.setCalls)
+	require.Equal(t, 2, cache.setCalls)
+}
+
+func TestDashboardReturnsLastSuccessfulPeriodWhenRequestedRangeIsNotCached(t *testing.T) {
+	accountID := "1"
+	cached := models.MetaAdsDashboardResponse{
+		GeneratedAt: "2026-08-24T00:00:00Z",
+		Source:      "meta",
+		DateRange: models.MetaAdsDateRange{
+			Since: "2026-08-03",
+			Until: "2026-08-24",
+		},
+		KPIs: models.MetaAdsMetrics{Spend: 950.88},
+	}
+	payload, err := json.Marshal(cached)
+	require.NoError(t, err)
+	cache := &keyedMemoryDashboardCache{values: map[string][]byte{
+		dashboardFallbackCacheKey(accountID): payload,
+	}}
+	client := &fakeGraphClient{err: errors.New("meta unavailable")}
+	service := newService(client, cache, time.Minute, accountID, []string{"lead"}, nil, logger.NewLogger("test", logger.LevelError))
+
+	response, err := service.dashboard(context.Background(), dashboardQuery{
+		Since: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
+		Until: time.Date(2026, 8, 31, 0, 0, 0, 0, time.UTC),
+	}, true)
+
+	require.NoError(t, err)
+	require.Equal(t, "cache", response.Source)
+	require.True(t, response.Stale)
+	require.Equal(t, "2026-08-03", response.DateRange.Since)
+	require.Equal(t, "2026-08-24", response.DateRange.Until)
+	require.Equal(t, 950.88, response.KPIs.Spend)
+	require.Contains(t, response.Warning, "2026-08-01 to 2026-08-31")
+	require.Contains(t, response.Warning, "2026-08-03 to 2026-08-24")
 }
 
 func TestDashboardStillFailsWhenCoreInsightsFail(t *testing.T) {
