@@ -4,12 +4,67 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"ucode/ucode_go_api_gateway/config"
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestFacebookMarketingAPICallsUseGrantedUserToken(t *testing.T) {
+	var paths []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		paths = append(paths, r.URL.Path)
+		require.Equal(t, "review-user-token", r.URL.Query().Get("access_token"))
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v26.0/me/businesses":
+			require.Equal(t, "id,name", r.URL.Query().Get("fields"))
+			_, _ = w.Write([]byte(`{"data":[{"id":"business-1","name":"UCODE"}]}`))
+		case "/v26.0/me/adaccounts":
+			require.Equal(t, "id,name,account_status", r.URL.Query().Get("fields"))
+			_, _ = w.Write([]byte(`{"data":[{"id":"act_123","name":"UCODE Ads"}]}`))
+		case "/v26.0/act_123/insights":
+			require.Equal(t, "last_30d", r.URL.Query().Get("date_preset"))
+			require.Equal(t, "account", r.URL.Query().Get("level"))
+			_, _ = w.Write([]byte(`{"data":[{"spend":"10.00","impressions":"100"}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	h := HandlerV1{baseConf: config.BaseConfig{
+		FacebookGraphBaseURL:    server.URL,
+		FacebookGraphAPIVersion: "v26.0",
+	}}
+
+	var businesses struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	require.NoError(t, h.facebookGraphGet(context.Background(), "me/businesses", url.Values{
+		"fields": {"id,name"}, "access_token": {"review-user-token"},
+	}, &businesses))
+	var accounts struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	require.NoError(t, h.facebookGraphGet(context.Background(), "me/adaccounts", url.Values{
+		"fields": {"id,name,account_status"}, "access_token": {"review-user-token"},
+	}, &accounts))
+	var insights struct {
+		Data []map[string]any `json:"data"`
+	}
+	require.NoError(t, h.facebookGraphGet(context.Background(), accounts.Data[0].ID+"/insights", url.Values{
+		"date_preset": {"last_30d"}, "level": {"account"}, "access_token": {"review-user-token"},
+	}, &insights))
+
+	require.Equal(t, []string{"/v26.0/me/businesses", "/v26.0/me/adaccounts", "/v26.0/act_123/insights"}, paths)
+}
 
 func TestFacebookDebugTokenFallsBackToLegacyApp(t *testing.T) {
 	var appTokens []string

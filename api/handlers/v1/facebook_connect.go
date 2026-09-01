@@ -162,6 +162,10 @@ func (h *HandlerV1) FacebookCallback(c *gin.Context) {
 	// but never block the success redirect (the user token is already stored).
 	h.facebookAutoConnectAllPages(c.Request.Context(), state, longLived)
 
+	// Validate and warm the read-only Business/Marketing API path used by the
+	// Meta Ads dashboard. This also records real test calls for App Review.
+	h.facebookWarmMarketingAPI(c.Request.Context(), longLived)
+
 	h.redirectFacebookOAuth(c, facebookOAuthOutcome{success: true, state: state})
 }
 
