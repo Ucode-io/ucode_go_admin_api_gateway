@@ -22,11 +22,12 @@ const (
 )
 
 type crmAnalyticsPlan struct {
-	kind        crmAnalyticsKind
-	sql         string
-	params      []any
-	periodLabel string
-	language    string
+	kind              crmAnalyticsKind
+	sql               string
+	params            []any
+	periodLabel       string
+	language          string
+	includePercentage bool
 }
 
 func (p *ChatProcessor) runCommonCRMAnalytics(
@@ -72,6 +73,9 @@ func buildCommonCRMAnalyticsPlan(
 	if !ok {
 		return crmAnalyticsPlan{}, false
 	}
+	includePercentage := containsAnyFold(current,
+		"protsent", "prosent", "foiz", "ulush", "percent", "percentage", "%", "процент", "доля",
+	)
 
 	kind := crmAnalyticsKind("")
 	switch {
@@ -99,11 +103,12 @@ func buildCommonCRMAnalyticsPlan(
 
 	if kind == crmAnalyticsLeadCount {
 		return crmAnalyticsPlan{
-			kind:        kind,
-			sql:         `SELECT COUNT(*) AS count FROM "deals" WHERE ` + where,
-			params:      params,
-			periodLabel: periodLabel,
-			language:    language,
+			kind:              kind,
+			sql:               `SELECT COUNT(*) AS count FROM "deals" WHERE ` + where,
+			params:            params,
+			periodLabel:       periodLabel,
+			language:          language,
+			includePercentage: includePercentage,
 		}, true
 	}
 	if kind == crmAnalyticsLeadPhones {
@@ -118,9 +123,10 @@ WHERE d."created_at" >= $1::timestamp AND d."created_at" < $2::timestamp
   AND d."deleted_at" IS NULL
 ORDER BY d."created_at" DESC
 LIMIT 50`,
-			params:      params,
-			periodLabel: periodLabel,
-			language:    language,
+			params:            params,
+			periodLabel:       periodLabel,
+			language:          language,
+			includePercentage: includePercentage,
 		}, true
 	}
 
@@ -149,9 +155,10 @@ FROM "deals"
 WHERE ` + where + `
 GROUP BY 1
 ORDER BY 2 DESC`,
-		params:      params,
-		periodLabel: periodLabel,
-		language:    language,
+		params:            params,
+		periodLabel:       periodLabel,
+		language:          language,
+		includePercentage: includePercentage,
 	}, true
 }
 
@@ -404,7 +411,11 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 		return header + "\n" + strings.Join(lines, "\n"), nil
 	}
 
-	lines := make([]string, 0, len(rows))
+	type dimensionCount struct {
+		dimension string
+		count     int64
+	}
+	dimensionCounts := make([]dimensionCount, 0, len(rows))
 	total := int64(0)
 	for _, row := range rows {
 		count, ok := crmAnalyticsInteger(row["count"])
@@ -416,7 +427,7 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 			dimension = "Belgilanmagan"
 		}
 		total += count
-		lines = append(lines, fmt.Sprintf("- %s — %d", dimension, count))
+		dimensionCounts = append(dimensionCounts, dimensionCount{dimension: dimension, count: count})
 	}
 
 	header := ""
@@ -444,8 +455,42 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 			header = fmt.Sprintf("%s kelgan %d ta lid %s bo‘yicha:", plan.periodLabel, total, dimensionName)
 		}
 	}
-	if len(lines) == 0 {
+	if len(dimensionCounts) == 0 {
 		return header + "\n- Ma’lumot yo‘q", nil
+	}
+	if plan.includePercentage {
+		dimensionHeader := map[string]string{"status": "Status", "source": "Source", "pipeline": "Pipeline"}[dimensionName]
+		valueHeader := "Lidlar"
+		shareHeader := "Ulush"
+		totalLine := fmt.Sprintf("Jami: %d ta lid.", total)
+		if plan.language == "ru" {
+			dimensionHeader = map[string]string{"status": "Статус", "source": "Источник", "pipeline": "Воронка"}[dimensionName]
+			valueHeader = "Лиды"
+			shareHeader = "Доля"
+			totalLine = fmt.Sprintf("Итого: %d лидов.", total)
+		} else if plan.language == "en" {
+			dimensionHeader = map[string]string{"status": "Status", "source": "Source", "pipeline": "Pipeline"}[dimensionName]
+			valueHeader = "Leads"
+			shareHeader = "Share"
+			totalLine = fmt.Sprintf("Total: %d leads.", total)
+		}
+		tableLines := []string{
+			fmt.Sprintf("| %s | %s | %s |", dimensionHeader, valueHeader, shareHeader),
+			"| --- | ---: | ---: |",
+		}
+		for _, item := range dimensionCounts {
+			share := float64(0)
+			if total > 0 {
+				share = float64(item.count) * 100 / float64(total)
+			}
+			safeDimension := strings.ReplaceAll(item.dimension, "|", "¦")
+			tableLines = append(tableLines, fmt.Sprintf("| %s | %d | %.1f%% |", safeDimension, item.count, share))
+		}
+		return header + "\n\n" + strings.Join(tableLines, "\n") + "\n\n" + totalLine, nil
+	}
+	lines := make([]string, 0, len(dimensionCounts))
+	for _, item := range dimensionCounts {
+		lines = append(lines, fmt.Sprintf("- %s — %d", item.dimension, item.count))
 	}
 	return header + "\n" + strings.Join(lines, "\n"), nil
 }

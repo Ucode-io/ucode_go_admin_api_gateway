@@ -97,6 +97,22 @@ func TestBuildCommonCRMAnalyticsPlanGroupsBySourceAndPipeline(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMAnalyticsPlanRecognizesRequestedPercentages(t *testing.T) {
+	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+		Message: "otkan hafta neshta lid keldi sourcelari boyicha protsentlarini korsat",
+		PageContext: models.CRMAssistantPageContext{
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}, crmAnalyticsTestSchema())
+	if !ok || plan.kind != crmAnalyticsLeadSource {
+		t.Fatalf("expected source analytics plan, got %#v, ok=%v", plan, ok)
+	}
+	if !plan.includePercentage {
+		t.Fatal("expected percentage output to be enabled")
+	}
+}
+
 func TestBuildCommonCRMAnalyticsPlanListsYesterdayLeadPhones(t *testing.T) {
 	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
 		Message: "kechigi kegan lidlani nomerini tashavor",
@@ -381,6 +397,29 @@ func TestFormatCommonCRMAnalyticsReplies(t *testing.T) {
 	}})
 	if err != nil || !strings.Contains(sourceReply, "source bo‘yicha") || !strings.Contains(sourceReply, "target — 8") {
 		t.Fatalf("unexpected source reply %q, err=%v", sourceReply, err)
+	}
+
+	sourcePercentageReply, err := formatCommonCRMAnalyticsReply(crmAnalyticsPlan{
+		kind:              crmAnalyticsLeadSource,
+		periodLabel:       "Bu hafta",
+		language:          "uz",
+		includePercentage: true,
+	}, map[string]any{"rows": []map[string]any{
+		{"dimension": "target", "count": float64(9)},
+		{"dimension": "Source belgilanmagan", "count": float64(4)},
+	}})
+	if err != nil {
+		t.Fatalf("format source percentage reply: %v", err)
+	}
+	for _, expected := range []string{
+		"| Source | Lidlar | Ulush |",
+		"| target | 9 | 69.2% |",
+		"| Source belgilanmagan | 4 | 30.8% |",
+		"Jami: 13 ta lid.",
+	} {
+		if !strings.Contains(sourcePercentageReply, expected) {
+			t.Fatalf("source percentage reply %q does not contain %q", sourcePercentageReply, expected)
+		}
 	}
 
 	phoneReply, err := formatCommonCRMAnalyticsReply(crmAnalyticsPlan{
