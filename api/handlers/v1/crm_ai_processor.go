@@ -442,6 +442,17 @@ func canonicalDealScreenshotCardAction(
 		}
 		break
 	}
+	// Some resource-schema responses currently expose generated pipeline status
+	// fields without their STATUS type. The frontend card context has already
+	// narrowed pipeline_* entries to the selected pipeline, so one such slug is
+	// an unambiguous active-status fallback.
+	if len(statusFields) == 0 {
+		for _, field := range orderedCardFields {
+			if strings.HasPrefix(strings.ToLower(field), "pipeline_") {
+				statusFields = append(statusFields, field)
+			}
+		}
+	}
 	if len(statusFields) != 1 {
 		return models.CRMClientAction{}, false
 	}

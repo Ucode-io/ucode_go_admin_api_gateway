@@ -101,6 +101,17 @@ func TestCRMAssistantPromptTreatsReadableCardScreenshotAsCompleteRequest(t *test
 	}
 }
 
+func TestCRMAssistantPromptFormatsGroupedAnalyticsAsMarkdownTable(t *testing.T) {
+	for _, expected := range []string{
+		"GitHub Markdown pipe table",
+		"Do not use dash bullets for tabular data",
+	} {
+		if !strings.Contains(PromptCRMAssistant, expected) {
+			t.Fatalf("CRM assistant prompt is missing table-format rule %q", expected)
+		}
+	}
+}
+
 func TestBuildCRMAssistantMessageIncludesCurrentRenderableCardFields(t *testing.T) {
 	message := BuildCRMAssistantMessage(models.CRMAssistantInput{
 		Message: "cardni shunaqa qiber",

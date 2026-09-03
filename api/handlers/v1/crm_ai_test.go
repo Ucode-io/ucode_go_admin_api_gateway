@@ -402,6 +402,39 @@ func TestCanonicalDealScreenshotCardActionRejectsAmbiguousActiveStatus(t *testin
 	}
 }
 
+func TestCanonicalDealScreenshotCardActionUsesSelectedPipelineSlugWhenSchemaTypeIsMissing(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "name", Type: "SINGLE_LINE"},
+			{Slug: "pipeline", Type: "MULTISELECT"},
+			{Slug: "amount", Type: "NUMBER"},
+			{Slug: "pipeline_sales_project", Type: ""},
+		},
+	}}
+	pageContext := models.CRMAssistantPageContext{
+		Table: "deals",
+		CardFields: []models.CRMCardFieldContext{
+			{Slug: "name"},
+			{Slug: "pipeline"},
+			{Slug: "amount"},
+			{Slug: "pipeline_sales_project"},
+			{Slug: "contacts_id"},
+		},
+	}
+
+	got, ok := canonicalDealScreenshotCardAction(schema, pageContext)
+	if !ok {
+		t.Fatal("expected the selected pipeline_* field to identify the active status")
+	}
+	if !reflect.DeepEqual(got.FieldOrder, []string{"name", "pipeline", "amount", "pipeline_sales_project"}) {
+		t.Fatalf("field order = %#v", got.FieldOrder)
+	}
+	if !reflect.DeepEqual(got.HideFields, []string{"contacts_id"}) {
+		t.Fatalf("hidden fields = %#v", got.HideFields)
+	}
+}
+
 func TestCRMClientActionsContainCommonDealScreenshotCore(t *testing.T) {
 	actions := []models.CRMClientAction{{
 		Type:       "set_card_field_visibility",

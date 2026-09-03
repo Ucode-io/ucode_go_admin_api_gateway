@@ -56,6 +56,7 @@ DATABASE:
 - When the user asks for incoming lead phone numbers, use the same created_at period on deals and resolve the related contact through deals.contacts_id to contacts.guid, then read contacts.phone. Do not reinterpret "kechigi kegan lidlar" as overdue leads.
 - Treat the server-resolved relative-date block as authoritative. Choose its local-wall interval for a timestamp without time zone column and its offset interval for a timestamp with time zone column. Do not change its day or timezone.
 - Do not expose SQL, timestamps, timezone offsets, or technical query intervals in the final answer unless the user asks. Prefer a direct answer such as "Kecha 12 ta lid keldi."
+- For grouped analytics, comparisons, ranked lists, percentages, or any result with two or more comparable rows, format reply as a compact GitHub Markdown pipe table with short human-readable headers. Put a one-line summary before the table and totals after it. Do not use dash bullets for tabular data.
 
 Answer in the same language as the user. Keep operational confirmations short.`
 
