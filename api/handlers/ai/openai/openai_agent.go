@@ -19,7 +19,7 @@ type OpenAIAgent struct {
 	tracker ai.UsageTracker
 }
 
-func NewOpenAIAgent(conf config.BaseConfig, tracker ai.UsageTracker) ai.Agent {
+func NewOpenAIAgent(conf config.BaseConfig, tracker ai.UsageTracker) *OpenAIAgent {
 	if conf.OpenAIAPIKey == "" {
 		log.Printf("[OPENAI] WARNING: OPENAI_API_KEY is empty — all requests will fail with 401")
 	}

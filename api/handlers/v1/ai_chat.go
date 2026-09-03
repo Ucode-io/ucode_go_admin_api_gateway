@@ -9,6 +9,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/util"
@@ -180,24 +181,37 @@ type aiChatMessageReactionResponse struct {
 }
 
 func (h *HandlerV1) getAiChatUserID(c *gin.Context) (string, error) {
-	authInfo, err := h.adminAuthInfo(c)
-	if err == nil {
-		userID := authInfo.GetUserIdAuth()
-		if userID == "" {
-			userID = authInfo.GetUserId()
+	// Client AuthMiddleware already resolves the authenticated CRM user and
+	// stores the canonical auth-service ID in the request context.
+	if userID := strings.TrimSpace(c.GetString("user_id")); userID != "" {
+		return userID, nil
+	}
+
+	// Keep both middleware response types as fallbacks for callers that set the
+	// protobuf auth object directly. Avoid adminAuthInfo here because it writes
+	// a 403 response when a normal CRM bearer session has no Auth_Admin value.
+	if authInfoRaw, ok := c.Get("Auth"); ok {
+		if authInfo, valid := authInfoRaw.(*auth.V2HasAccessUserRes); valid {
+			if userID := firstNonEmpty(authInfo.GetUserIdAuth(), authInfo.GetUserId()); userID != "" {
+				return userID, nil
+			}
 		}
-		if userID != "" {
-			return userID, nil
+	}
+	if authInfoRaw, ok := c.Get("Auth_Admin"); ok {
+		if authInfo, valid := authInfoRaw.(*auth.HasAccessSuperAdminRes); valid {
+			if userID := firstNonEmpty(authInfo.GetUserIdAuth(), authInfo.GetUserId()); userID != "" {
+				return userID, nil
+			}
 		}
 	}
 
 	authDataRaw, ok := c.Get("auth")
 	if !ok {
-		return "", err
+		return "", fmt.Errorf("user_id is required")
 	}
 	authData, ok := authDataRaw.(models.AuthData)
 	if !ok || authData.Type != "API-KEY" {
-		return "", err
+		return "", fmt.Errorf("user_id is required")
 	}
 
 	for _, key := range []string{"id", "app_id", "client_id"} {
@@ -207,6 +221,15 @@ func (h *HandlerV1) getAiChatUserID(c *gin.Context) (string, error) {
 	}
 
 	return "", fmt.Errorf("user_id is required")
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if value = strings.TrimSpace(value); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func aiChatMessageReactionTypeFromRequest(reactionType string) (pbo.MessageReactionType, error) {
