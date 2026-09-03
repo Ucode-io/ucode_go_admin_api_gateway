@@ -61,9 +61,10 @@ func buildCommonCRMAnalyticsPlan(
 		return crmAnalyticsPlan{}, false
 	}
 
-	_, ok := findCRMSchemaTable(schema, "deals")
-	if !ok {
-		return crmAnalyticsPlan{}, false
+	if len(schema) > 0 {
+		if _, ok := findCRMSchemaTable(schema, "deals"); !ok {
+			return crmAnalyticsPlan{}, false
+		}
 	}
 
 	start, end, periodLabel, language, ok := resolveCRMRelativeDay(req)

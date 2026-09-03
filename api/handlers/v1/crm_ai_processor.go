@@ -23,12 +23,16 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	agent *openai.OpenAIAgent,
 	req models.CRMAssistantRequest,
 ) (*crmAssistantResult, error) {
+	// Common lead analytics only use conventional deal system fields. Run them
+	// before the much heavier project-schema fetch so routine dashboard questions
+	// stay fast even if a metadata service is temporarily slow.
+	if result, handled, analyticsErr := p.runCommonCRMAnalytics(ctx, req, nil); handled {
+		return result, analyticsErr
+	}
+
 	schema, err := p.getProjectSchemaCached(ctx, p.resourceEnvId)
 	if err != nil {
 		return nil, fmt.Errorf("load CRM schema: %w", err)
-	}
-	if result, handled, analyticsErr := p.runCommonCRMAnalytics(ctx, req, schema); handled {
-		return result, analyticsErr
 	}
 
 	message := strings.TrimSpace(req.Message)
@@ -176,6 +180,12 @@ func normalizeCRMClientActions(
 				aliases[normalizeCRMFieldAlias(alias)] = field.Slug
 			}
 		}
+		for alias, field := range builtInCRMFieldAliases(table.Slug) {
+			key := normalizeCRMFieldAlias(alias)
+			if _, exists := aliases[key]; !exists {
+				aliases[key] = field
+			}
+		}
 		tables[table.Slug] = aliases
 	}
 
@@ -213,6 +223,22 @@ func normalizeCRMClientActions(
 		})
 	}
 	return result
+}
+
+func builtInCRMFieldAliases(table string) map[string]string {
+	if table != "deals" {
+		return nil
+	}
+	return map[string]string{
+		"contacts_id":  "contacts_id",
+		"phone":        "contacts_id",
+		"phone number": "contacts_id",
+		"mobile":       "contacts_id",
+		"telefon":      "contacts_id",
+		"телефон":      "contacts_id",
+		"contact":      "contacts_id",
+		"kontakt":      "contacts_id",
+	}
 }
 
 func commonCRMFieldAliases(slug string) []string {

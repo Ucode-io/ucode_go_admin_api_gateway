@@ -167,6 +167,9 @@ func TestBuildCommonCRMAnalyticsPlanSupportsSystemFieldsMissingFromSchemaList(t 
 	if _, ok := buildCommonCRMAnalyticsPlan(request, []models.TableSchema{{Slug: "deals"}}); !ok {
 		t.Fatal("expected conventional deal system fields to be supported")
 	}
+	if _, ok := buildCommonCRMAnalyticsPlan(request, nil); !ok {
+		t.Fatal("expected optimized analytics to work before schema loading")
+	}
 	if plan, ok := buildCommonCRMAnalyticsPlan(request, []models.TableSchema{{Slug: "contacts"}}); ok {
 		t.Fatalf("unexpected plan without deals table: %#v", plan)
 	}

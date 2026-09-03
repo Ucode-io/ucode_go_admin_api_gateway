@@ -119,6 +119,10 @@ func (h *HandlerV1) getBuilderService(ctx context.Context, projectId, environmen
 // Callers that need auth context (node_type, resource_type) — e.g. creating
 // client_types/roles for a login table — use this instead of getAiChatServices.
 func (h *HandlerV1) resolveAiChatService(c *gin.Context) (services.ServiceManagerI, *pb.ServiceResourceModel, error) {
+	return h.resolveAiChatServiceWithContext(c, c.Request.Context())
+}
+
+func (h *HandlerV1) resolveAiChatServiceWithContext(c *gin.Context, ctx context.Context) (services.ServiceManagerI, *pb.ServiceResourceModel, error) {
 	projectId, ok := c.Get("project_id")
 	if !ok || !util.IsValidUUID(projectId.(string)) {
 		h.HandleResponse(c, status_http.InvalidArgument, config.ErrProjectIdValid)
@@ -132,7 +136,7 @@ func (h *HandlerV1) resolveAiChatService(c *gin.Context) (services.ServiceManage
 	}
 
 	resource, err := h.companyServices.ServiceResource().GetSingle(
-		c.Request.Context(),
+		ctx,
 		&pb.GetSingleServiceResourceReq{
 			ProjectId:     projectId.(string),
 			EnvironmentId: environmentId.(string),
@@ -149,7 +153,7 @@ func (h *HandlerV1) resolveAiChatService(c *gin.Context) (services.ServiceManage
 		return nil, nil, config.ErrProjectIdValid
 	}
 
-	service, err := h.GetProjectSrvc(c.Request.Context(), projectId.(string), resource.NodeType)
+	service, err := h.GetProjectSrvc(ctx, projectId.(string), resource.NodeType)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return nil, nil, err
@@ -159,7 +163,11 @@ func (h *HandlerV1) resolveAiChatService(c *gin.Context) (services.ServiceManage
 }
 
 func (h *HandlerV1) getAiChatServices(c *gin.Context) (services.ServiceManagerI, string, error) {
-	service, resource, err := h.resolveAiChatService(c)
+	return h.getAiChatServicesWithContext(c, c.Request.Context())
+}
+
+func (h *HandlerV1) getAiChatServicesWithContext(c *gin.Context, ctx context.Context) (services.ServiceManagerI, string, error) {
+	service, resource, err := h.resolveAiChatServiceWithContext(c, ctx)
 	if err != nil {
 		return nil, "", err
 	}

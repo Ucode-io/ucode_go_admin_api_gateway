@@ -71,7 +71,6 @@ func TestNormalizeCRMClientActionsResolvesDealPhoneToContactField(t *testing.T) 
 		Slug: "deals",
 		Fields: []models.FieldSchema{
 			{Slug: "source", Label: "Source"},
-			{Slug: "contacts_id", Label: "Контакт"},
 		},
 	}}
 	actions := normalizeCRMClientActions([]models.CRMClientAction{{

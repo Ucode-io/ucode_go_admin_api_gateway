@@ -21,6 +21,7 @@ import (
 
 const (
 	crmAssistantTimeout       = 150 * time.Second
+	crmAssistantSetupTimeout  = 10 * time.Second
 	crmPendingActionTTL       = 10 * time.Minute
 	crmPreferencesTTL         = 365 * 24 * time.Hour
 	crmMaxImages              = 3
@@ -50,7 +51,12 @@ func (h *HandlerV1) CreateCRMAssistantMessage(c *gin.Context) {
 		return
 	}
 
-	service, resourceEnvID, err := h.getAiChatServices(c)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), crmAssistantTimeout)
+	defer cancel()
+
+	serviceCtx, serviceCancel := context.WithTimeout(ctx, crmAssistantSetupTimeout)
+	service, resourceEnvID, err := h.getAiChatServicesWithContext(c, serviceCtx)
+	serviceCancel()
 	if err != nil {
 		return
 	}
@@ -74,14 +80,14 @@ func (h *HandlerV1) CreateCRMAssistantMessage(c *gin.Context) {
 		"",
 		c.GetHeader("Authorization"),
 	)
-	if project, projectErr := h.companyServices.Project().GetById(c.Request.Context(), &pb.GetProjectByIdRequest{ProjectId: projectID}); projectErr == nil {
+	billingCtx, billingCancel := context.WithTimeout(ctx, crmAssistantSetupTimeout)
+	if project, projectErr := h.companyServices.Project().GetById(billingCtx, &pb.GetProjectByIdRequest{ProjectId: projectID}); projectErr == nil {
 		processor.companyId = project.GetCompanyId()
 		processor.fareId = project.GetFareId()
 	}
-	processor.initTokenBudget(c.Request.Context())
+	processor.initTokenBudget(billingCtx)
+	billingCancel()
 
-	ctx, cancel := context.WithTimeout(c.Request.Context(), crmAssistantTimeout)
-	defer cancel()
 	agent := openai.NewOpenAIAgent(h.baseConf, processor)
 	result, err := processor.runCRMAssistantFlow(ctx, agent, req)
 	if err != nil {
