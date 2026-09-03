@@ -18,7 +18,7 @@ META_ATTRIBUTION_WINDOWS=
 
 `META_ACCESS_TOKEN` must be stored in backend secret storage. Do not add it to Git, frontend variables, request parameters, or logs. When Vault write access is unavailable, production CI may create a dedicated backend-only `/meta-ads.env` from the encrypted GitHub Actions secret. That file is present only in the private production image and is loaded after the runtime `/app/.env`. The account ID may be supplied with or without the `act_` prefix.
 
-`META_LEAD_ACTION_TYPES` is an allowlist. Compare `observed_action_types` from a real 7–30 day response with Ads Manager before changing the production allowlist. Leaving `META_ATTRIBUTION_WINDOWS` empty uses the ad account attribution setting.
+`META_LEAD_ACTION_TYPES` is an allowlist. Compare `observed_action_types` from a real 7–30 day response with Ads Manager before changing the production allowlist. When none of the configured lead actions is present, the Ucode Target landing-page funnel falls back to the account's `offsite_complete_registration_add_meta_leads` custom conversion. The fallback is ignored whenever a configured lead action is present, preventing historical rows that contain both action types from being counted twice. Leaving `META_ATTRIBUTION_WINDOWS` empty uses the ad account attribution setting.
 
 ## Endpoints
 

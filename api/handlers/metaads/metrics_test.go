@@ -44,3 +44,26 @@ func TestAggregateMetricsUsesLeadAllowlist(t *testing.T) {
 
 	require.Equal(t, int64(7), metrics.Leads)
 }
+
+func TestAggregateMetricsFallsBackToMetaLeadsCustomConversion(t *testing.T) {
+	insight := graphInsight{Actions: []graphAction{
+		{ActionType: metaLeadsCustomConversionAction, Value: "3"},
+		{ActionType: "complete_registration", Value: "3"},
+		{ActionType: "omni_complete_registration", Value: "3"},
+	}}
+
+	metrics := aggregateMetrics([]graphInsight{insight}, map[string]struct{}{"lead": {}})
+
+	require.Equal(t, int64(3), metrics.Leads)
+}
+
+func TestAggregateMetricsPrefersConfiguredLeadActionWithoutDoubleCountingFallback(t *testing.T) {
+	insight := graphInsight{Actions: []graphAction{
+		{ActionType: "lead", Value: "5"},
+		{ActionType: metaLeadsCustomConversionAction, Value: "3"},
+	}}
+
+	metrics := aggregateMetrics([]graphInsight{insight}, map[string]struct{}{"lead": {}})
+
+	require.Equal(t, int64(5), metrics.Leads)
+}
