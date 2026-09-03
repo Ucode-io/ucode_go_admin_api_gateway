@@ -14,8 +14,10 @@ import (
 type crmAnalyticsKind string
 
 const (
-	crmAnalyticsLeadCount  crmAnalyticsKind = "lead_count"
-	crmAnalyticsLeadStatus crmAnalyticsKind = "lead_status"
+	crmAnalyticsLeadCount    crmAnalyticsKind = "lead_count"
+	crmAnalyticsLeadStatus   crmAnalyticsKind = "lead_status"
+	crmAnalyticsLeadSource   crmAnalyticsKind = "lead_source"
+	crmAnalyticsLeadPipeline crmAnalyticsKind = "lead_pipeline"
 )
 
 type crmAnalyticsPlan struct {
@@ -71,6 +73,10 @@ func buildCommonCRMAnalyticsPlan(
 
 	kind := crmAnalyticsKind("")
 	switch {
+	case containsAnyFold(current, "source", "manba", "источник"):
+		kind = crmAnalyticsLeadSource
+	case containsAnyFold(current, "pipeline", "voronka", "воронк"):
+		kind = crmAnalyticsLeadPipeline
 	case containsAnyFold(current, "status", "stage", "bosqich", "статус", "этап"):
 		kind = crmAnalyticsLeadStatus
 	case containsAnyFold(current, "nechta", "neshta", "qancha", "how many", "count", "сколько", "soni") &&
@@ -97,12 +103,27 @@ func buildCommonCRMAnalyticsPlan(
 		}, true
 	}
 
-	// stage is commonly a Postgres text[] but can be scalar in older projects.
-	// Converting to jsonb lets one read expression support both physical shapes.
-	stageExpression := `COALESCE(NULLIF(CASE WHEN jsonb_typeof(to_jsonb("stage")) = 'array' THEN to_jsonb("stage")->>0 ELSE TRIM(BOTH '"' FROM to_jsonb("stage")::text) END, ''), 'Statussiz')`
+	dimension := "stage"
+	missingLabel := "Statussiz"
+	if kind == crmAnalyticsLeadSource {
+		dimension = "source"
+		missingLabel = "Source belgilanmagan"
+	} else if kind == crmAnalyticsLeadPipeline {
+		dimension = "pipeline"
+		missingLabel = "Pipeline belgilanmagan"
+	}
+	// CRM select fields are commonly Postgres text[] but can be scalar in older
+	// projects. Converting to jsonb lets one expression support both shapes.
+	dimensionExpression := fmt.Sprintf(
+		`COALESCE(NULLIF(CASE WHEN jsonb_typeof(to_jsonb("%s")) = 'array' THEN to_jsonb("%s")->>0 ELSE TRIM(BOTH '"' FROM to_jsonb("%s")::text) END, ''), '%s')`,
+		dimension,
+		dimension,
+		dimension,
+		missingLabel,
+	)
 	return crmAnalyticsPlan{
-		kind: crmAnalyticsLeadStatus,
-		sql: `SELECT ` + stageExpression + ` AS status, COUNT(*) AS count
+		kind: kind,
+		sql: `SELECT ` + dimensionExpression + ` AS dimension, COUNT(*) AS count
 FROM "deals"
 WHERE ` + where + `
 GROUP BY 1
@@ -179,7 +200,11 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 		case "ru":
 			return fmt.Sprintf("%s пришло %d лидов.", plan.periodLabel, count), nil
 		case "en":
-			return fmt.Sprintf("%s, %d leads came in.", plan.periodLabel, count), nil
+			noun := "leads"
+			if count == 1 {
+				noun = "lead"
+			}
+			return fmt.Sprintf("%s, %d %s came in.", plan.periodLabel, count, noun), nil
 		default:
 			return fmt.Sprintf("%s %d ta lid keldi.", plan.periodLabel, count), nil
 		}
@@ -192,22 +217,38 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 		if !ok {
 			return "", fmt.Errorf("status query returned an invalid count")
 		}
-		status := strings.TrimSpace(fmt.Sprintf("%v", row["status"]))
-		if status == "" || status == "<nil>" {
-			status = "Statussiz"
+		dimension := strings.TrimSpace(fmt.Sprintf("%v", row["dimension"]))
+		if dimension == "" || dimension == "<nil>" {
+			dimension = "Belgilanmagan"
 		}
 		total += count
-		lines = append(lines, fmt.Sprintf("- %s — %d", status, count))
+		lines = append(lines, fmt.Sprintf("- %s — %d", dimension, count))
 	}
 
 	header := ""
+	dimensionName := "status"
+	if plan.kind == crmAnalyticsLeadSource {
+		dimensionName = "source"
+	} else if plan.kind == crmAnalyticsLeadPipeline {
+		dimensionName = "pipeline"
+	}
 	switch plan.language {
 	case "ru":
-		header = fmt.Sprintf("%s пришло %d лидов. Сейчас они на этапах:", plan.periodLabel, total)
+		russianDimension := map[string]string{"status": "по текущим статусам", "source": "по источникам", "pipeline": "по воронкам"}[dimensionName]
+		header = fmt.Sprintf("%s пришло %d лидов, %s:", plan.periodLabel, total, russianDimension)
 	case "en":
-		header = fmt.Sprintf("%s, %d leads came in. Their current stages are:", plan.periodLabel, total)
+		noun := "leads"
+		if total == 1 {
+			noun = "lead"
+		}
+		englishDimension := map[string]string{"status": "current status", "source": "source", "pipeline": "pipeline"}[dimensionName]
+		header = fmt.Sprintf("%s, %d %s came in, grouped by %s:", plan.periodLabel, total, noun, englishDimension)
 	default:
-		header = fmt.Sprintf("%s kelgan %d ta lid hozir quyidagi statuslarda:", plan.periodLabel, total)
+		if dimensionName == "status" {
+			header = fmt.Sprintf("%s kelgan %d ta lid hozir quyidagi statuslarda:", plan.periodLabel, total)
+		} else {
+			header = fmt.Sprintf("%s kelgan %d ta lid %s bo‘yicha:", plan.periodLabel, total, dimensionName)
+		}
 	}
 	if len(lines) == 0 {
 		return header + "\n- Ma’lumot yo‘q", nil
@@ -273,7 +314,7 @@ func detectCRMRequestLanguage(value string) string {
 	if containsAnyFold(value, "вчера", "сегодня", "лид", "статус", "этап", "сколько", "приш") {
 		return "ru"
 	}
-	if containsAnyFold(value, "yesterday", "today", "lead", "status", "stage", "how many", "came", "arrived") {
+	if containsAnyFold(value, "yesterday", "today", "lead", "how many", "came", "arrived") {
 		return "en"
 	}
 	return "uz"

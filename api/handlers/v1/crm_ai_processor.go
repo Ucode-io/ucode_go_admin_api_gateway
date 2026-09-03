@@ -219,6 +219,8 @@ func commonCRMFieldAliases(slug string) []string {
 	switch slug {
 	case "amount":
 		return []string{"budget", "byudjet", "summa", "бюджет", "сумма"}
+	case "contacts_id":
+		return []string{"phone", "phone number", "mobile", "telefon", "телефон", "contact", "kontakt"}
 	default:
 		return nil
 	}
