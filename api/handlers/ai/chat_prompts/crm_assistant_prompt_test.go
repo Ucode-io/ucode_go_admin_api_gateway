@@ -15,7 +15,8 @@ func TestBuildRelativeDateHintResolvesUzbekYesterdayInCRMTimezone(t *testing.T) 
 	for _, expected := range []string{
 		"requested_period=yesterday",
 		"local_date=2026-09-02",
-		"[2026-09-02T00:00:00+05:00, 2026-09-03T00:00:00+05:00)",
+		"local_wall_interval=[2026-09-02 00:00:00, 2026-09-03 00:00:00)",
+		"offset_interval=[2026-09-02T00:00:00+05:00, 2026-09-03T00:00:00+05:00)",
 	} {
 		if !strings.Contains(hint, expected) {
 			t.Fatalf("relative date hint %q does not contain %q", hint, expected)

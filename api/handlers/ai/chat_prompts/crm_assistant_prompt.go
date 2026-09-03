@@ -43,6 +43,10 @@ DATABASE:
 - Read queries execute immediately. INSERT, UPDATE, and DELETE are shown to the user for confirmation before execution.
 - For the first query set needs_more_data=true. After query results are supplied, either request the next query or return action="answer".
 - Base relative dates such as "today" on page_context.now and page_context.timezone.
+- On the deals page, Uzbek "lid", English "lead", and Russian "лид" mean a row in the deals table unless the user explicitly names another table.
+- "Lid keldi", "lead came/arrived", and "лид пришёл" mean deals created during that period: count by deals.created_at across every stage and pipeline. Do not use start_date, updated_at, due_date, or a stage filter unless the user explicitly asks for one.
+- Treat the server-resolved relative-date block as authoritative. Choose its local-wall interval for a timestamp without time zone column and its offset interval for a timestamp with time zone column. Do not change its day or timezone.
+- Do not expose SQL, timestamps, timezone offsets, or technical query intervals in the final answer unless the user asks. Prefer a direct answer such as "Kecha 12 ta lid keldi."
 
 Answer in the same language as the user. Keep operational confirmations short.`
 
@@ -107,9 +111,11 @@ func buildRelativeDateHint(message, nowText, timezone string) string {
 	end := start.AddDate(0, 0, 1)
 
 	return fmt.Sprintf(
-		"requested_period=%s\nlocal_date=%s\nuse_half_open_interval=[%s, %s)\nUse this exact interval for timestamp filters and keep the same relative-period wording in the final answer.\n",
+		"requested_period=%s\nlocal_date=%s\nlocal_wall_interval=[%s, %s)\noffset_interval=[%s, %s)\nFor timestamp without time zone use local_wall_interval. For timestamp with time zone use offset_interval. Keep the same relative-period wording in the final answer without printing these technical intervals.\n",
 		period,
 		start.Format("2006-01-02"),
+		start.Format("2006-01-02 15:04:05"),
+		end.Format("2006-01-02 15:04:05"),
 		start.Format(time.RFC3339),
 		end.Format(time.RFC3339),
 	)
