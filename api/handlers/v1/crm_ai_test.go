@@ -50,6 +50,22 @@ func TestCRMRequestRequiresLiveLookupUnderstandsInformalLanguageAndFollowUps(t *
 			request: models.CRMAssistantRequest{Message: "rahmat, zo‘r bo‘ldi"},
 			want:    false,
 		},
+		{
+			name: "implicit current page entity",
+			request: models.CRMAssistantRequest{
+				Message:     "kechagi oqimdan kelganlani telini ber",
+				PageContext: models.CRMAssistantPageContext{Table: "deals"},
+			},
+			want: true,
+		},
+		{
+			name: "field settings without saying card",
+			request: models.CRMAssistantRequest{
+				Message:     "source korinadigon qiber budgetni yashir",
+				PageContext: models.CRMAssistantPageContext{Table: "deals"},
+			},
+			want: false,
+		},
 	}
 
 	for _, test := range tests {

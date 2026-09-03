@@ -164,11 +164,11 @@ func crmRequestRequiresLiveLookup(req models.CRMAssistantRequest) bool {
 	// "nomerlarini ham ber".
 	if !containsAnyFold(current,
 		"nechta", "neshta", "qancha", "soni", "sanab", "hisobla",
-		"qaysi", "kim", "nima", "ro‘yxat", "ro'yxat", "royxat", "list",
-		"nomer", "raqam", "telefon", "phone", "mobile", "number", "aloqa",
+		"qaysi", "kim", "ro‘yxat", "ro'yxat", "royxat", "list",
+		"nomer", "raqam", "telefon", "tel", "phone", "mobile", "number", "aloqa", "kontakt", "contact",
 		"status", "stage", "bosqich", "source", "manba", "pipeline", "voronka",
 		"budget", "byudjet", "summa", "eng katta", "eng kichik", "oxirgi", "so‘nggi", "so'nggi",
-		"ber", "tashavor", "top", "find", "show me", "how many", "count", "latest",
+		"ber", "tashavor", "chiqar", "ko‘rsat", "ko'rsat", "korsat", "top", "find", "show me", "how many", "count", "latest",
 		"сколько", "какой", "какие", "кто", "список", "номер", "телефон", "статус", "этап",
 		"источник", "воронк", "бюджет", "сумм", "найд", "покажи", "последн",
 	) {
@@ -184,13 +184,19 @@ func crmRequestRequiresLiveLookup(req models.CRMAssistantRequest) bool {
 		}
 	}
 
-	return containsAnyFold(contextText,
+	if containsAnyFold(contextText,
 		"lid", "lead", "лид",
 		"deal", "сделк",
 		"contact", "kontakt", "контакт",
 		"mijoz", "client", "klient", "клиент",
 		"task", "vazifa", "задач",
 		"company", "kompaniya", "компан",
+	) {
+		return true
+	}
+
+	return containsAnyFold(strings.ToLower(strings.TrimSpace(req.PageContext.Table)),
+		"deals", "contacts", "companies", "tasks",
 	)
 }
 
@@ -198,12 +204,14 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 	hasFieldContext := containsAnyFold(message,
 		"kartoch", "card", "field", "maydon", "column", "ustun", "поле", "карточ", "колон",
 	)
-	hasVisibilityIntent := containsAnyFold(message,
-		"ko‘rin", "ko'rin", "korin", "ko‘rsat", "ko'rsat", "korsat", "yashir",
-		"show", "hide", "visible", "visibility", "tartib", "order", "joyla",
-		"покажи", "скрой", "видим", "порядок",
+	hasExplicitConfigurationIntent := containsAnyFold(message,
+		"ko‘rin", "ko'rin", "korin", "yashir", "hide", "visible", "visibility",
+		"tartib", "order", "joyla", "скрой", "видим", "порядок",
 	)
-	return hasFieldContext && hasVisibilityIntent
+	hasGenericShowIntent := containsAnyFold(message,
+		"ko‘rsat", "ko'rsat", "korsat", "show", "покажи",
+	)
+	return hasExplicitConfigurationIntent || (hasFieldContext && hasGenericShowIntent)
 }
 
 func crmReplyIsClarification(reply string) bool {

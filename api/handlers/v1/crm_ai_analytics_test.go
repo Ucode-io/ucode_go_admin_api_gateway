@@ -115,6 +115,48 @@ func TestBuildCommonCRMAnalyticsPlanListsYesterdayLeadPhones(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMAnalyticsPlanUnderstandsPhoneFollowUpFromHistory(t *testing.T) {
+	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+		Message: "nomerlarini ham ber",
+		History: []models.CRMAssistantMessage{
+			{Role: "user", Content: "kechagi kelgan lidla qaysi statusda"},
+			{Role: "assistant", Content: "Kecha kelgan 12 ta lid hozir turli statuslarda."},
+		},
+		PageContext: models.CRMAssistantPageContext{
+			Table:    "deals",
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}, crmAnalyticsTestSchema())
+	if !ok || plan.kind != crmAnalyticsLeadPhones {
+		t.Fatalf("expected history-aware phone-list plan, got %#v, ok=%v", plan, ok)
+	}
+	if plan.periodLabel != "Kecha" {
+		t.Fatalf("got period %q, want Kecha", plan.periodLabel)
+	}
+}
+
+func TestBuildCommonCRMAnalyticsPlanUsesDealsPageAsImplicitLeadContext(t *testing.T) {
+	tests := []string{
+		"kecha tushgan klientlarni aloqa raqamlari kerak",
+		"kechagi oqimdan kelganlani telini ber",
+		"bu hafta nechta tushdi",
+	}
+	for _, message := range tests {
+		request := models.CRMAssistantRequest{
+			Message: message,
+			PageContext: models.CRMAssistantPageContext{
+				Table:    "deals",
+				Now:      "2026-09-03T05:00:00Z",
+				Timezone: "Asia/Tashkent",
+			},
+		}
+		if _, ok := buildCommonCRMAnalyticsPlan(request, crmAnalyticsTestSchema()); !ok {
+			t.Fatalf("expected implicit deals-page plan for %q", message)
+		}
+	}
+}
+
 func TestBuildCommonCRMAnalyticsPlanSupportsLanguagesAndToday(t *testing.T) {
 	tests := []struct {
 		name     string

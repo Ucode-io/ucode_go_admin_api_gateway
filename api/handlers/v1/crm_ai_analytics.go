@@ -58,7 +58,7 @@ func buildCommonCRMAnalyticsPlan(
 	schema []models.TableSchema,
 ) (crmAnalyticsPlan, bool) {
 	current := strings.ToLower(strings.TrimSpace(req.Message))
-	if !containsAnyFold(current, "lid", "lead", "лид") {
+	if crmRequestLooksLikeFieldSettings(current) || !requestHasDealContext(req) {
 		return crmAnalyticsPlan{}, false
 	}
 
@@ -75,7 +75,7 @@ func buildCommonCRMAnalyticsPlan(
 
 	kind := crmAnalyticsKind("")
 	switch {
-	case containsAnyFold(current, "nomer", "raqam", "telefon", "phone", "mobile", "number", "номер", "телефон"):
+	case containsAnyFold(current, "nomer", "raqam", "telefon", "tel", "aloqa", "kontakt", "contact", "phone", "mobile", "number", "номер", "телефон", "контакт"):
 		kind = crmAnalyticsLeadPhones
 	case containsAnyFold(current, "source", "manba", "источник"):
 		kind = crmAnalyticsLeadSource
@@ -84,7 +84,7 @@ func buildCommonCRMAnalyticsPlan(
 	case containsAnyFold(current, "status", "stage", "bosqich", "статус", "этап"):
 		kind = crmAnalyticsLeadStatus
 	case containsAnyFold(current, "nechta", "neshta", "qancha", "how many", "count", "сколько", "soni") &&
-		containsAnyFold(current, "kel", "kegan", "yangi", "came", "arriv", "new", "приш", "нов"):
+		containsAnyFold(current, "kel", "kegan", "tush", "kir", "qo‘shil", "qo'shil", "qoshil", "yangi", "came", "arriv", "entered", "added", "new", "приш", "поступ", "добав", "нов"):
 		kind = crmAnalyticsLeadCount
 	default:
 		return crmAnalyticsPlan{}, false
@@ -153,6 +153,22 @@ ORDER BY 2 DESC`,
 		periodLabel: periodLabel,
 		language:    language,
 	}, true
+}
+
+func requestHasDealContext(req models.CRMAssistantRequest) bool {
+	if containsAnyFold(strings.ToLower(req.Message), "lid", "lead", "лид", "deal", "сделк", "mijoz", "client", "klient", "клиент") {
+		return true
+	}
+	if strings.EqualFold(strings.TrimSpace(req.PageContext.Table), "deals") {
+		return true
+	}
+	for index := len(req.History) - 1; index >= 0; index-- {
+		if strings.EqualFold(strings.TrimSpace(req.History[index].Role), "user") &&
+			containsAnyFold(strings.ToLower(req.History[index].Content), "lid", "lead", "лид", "deal", "сделк", "mijoz", "client", "klient", "клиент") {
+			return true
+		}
+	}
+	return false
 }
 
 func resolveCRMRelativePeriod(req models.CRMAssistantRequest) (time.Time, time.Time, string, string, bool) {
