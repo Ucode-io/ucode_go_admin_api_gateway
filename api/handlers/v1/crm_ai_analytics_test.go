@@ -253,6 +253,42 @@ func TestBuildCommonCRMAnalyticsPlanSupportsWeekAndMonthPeriods(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMAnalyticsPlanSupportsNamedMonths(t *testing.T) {
+	tests := []struct {
+		message string
+		label   string
+		start   string
+		end     string
+	}{
+		{message: "avgustda qaysi source eng ko‘p lid olib kelgan", label: "Avgust oyida", start: "2026-08-01 00:00:00", end: "2026-09-01 00:00:00"},
+		{message: "2025 yil dekabrda nechta lid kelgan", label: "Dekabr oyida 2025", start: "2025-12-01 00:00:00", end: "2026-01-01 00:00:00"},
+		{message: "how many leads came in August", label: "In August", start: "2026-08-01 00:00:00", end: "2026-09-01 00:00:00"},
+		{message: "сколько лидов пришло в августе", label: "В августе", start: "2026-08-01 00:00:00", end: "2026-09-01 00:00:00"},
+	}
+	for _, test := range tests {
+		plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+			Message: test.message,
+			PageContext: models.CRMAssistantPageContext{
+				Table:    "deals",
+				Now:      "2026-09-03T05:00:00Z",
+				Timezone: "Asia/Tashkent",
+			},
+		}, crmAnalyticsTestSchema())
+		if !ok {
+			t.Fatalf("expected named-month plan for %q", test.message)
+		}
+		if plan.periodLabel != test.label || plan.params[0] != test.start || plan.params[1] != test.end {
+			t.Fatalf("unexpected named-month plan: label=%q params=%v", plan.periodLabel, plan.params)
+		}
+	}
+}
+
+func TestFindCRMMonthDoesNotTreatMaydonAsMay(t *testing.T) {
+	if _, ok := findCRMMonth("lid kartochkasidagi maydonni ko‘rsat"); ok {
+		t.Fatal("maydon must not be interpreted as the month May")
+	}
+}
+
 func TestBuildCommonCRMAnalyticsPlanFallsBackForUnmatchedQuestions(t *testing.T) {
 	tests := []models.CRMAssistantRequest{
 		{

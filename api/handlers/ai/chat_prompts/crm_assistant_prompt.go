@@ -2,6 +2,7 @@ package chat_prompts
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -129,7 +130,20 @@ func buildRelativeDateHint(message, nowText, timezone string) string {
 		start = today
 		end = today.AddDate(0, 0, 1)
 	default:
-		return ""
+		month, found := findPromptMonth(lowerMessage)
+		if !found {
+			return ""
+		}
+		year := findPromptYear(lowerMessage)
+		if year == 0 {
+			year = localNow.Year()
+			if month > localNow.Month() {
+				year--
+			}
+		}
+		period = "named_month"
+		start = time.Date(year, month, 1, 0, 0, 0, 0, location)
+		end = start.AddDate(0, 1, 0)
 	}
 
 	return fmt.Sprintf(
@@ -146,6 +160,53 @@ func buildRelativeDateHint(message, nowText, timezone string) string {
 func startOfPromptWeek(day time.Time) time.Time {
 	daysSinceMonday := (int(day.Weekday()) + 6) % 7
 	return day.AddDate(0, 0, -daysSinceMonday)
+}
+
+func findPromptMonth(text string) (time.Month, bool) {
+	aliases := []struct {
+		month    time.Month
+		prefixes []string
+	}{
+		{time.January, []string{"yanvar", "january", "январ"}},
+		{time.February, []string{"fevral", "february", "феврал"}},
+		{time.March, []string{"mart", "march", "март"}},
+		{time.April, []string{"aprel", "april", "апрел"}},
+		{time.May, []string{"may", "май"}},
+		{time.June, []string{"iyun", "june", "июн"}},
+		{time.July, []string{"iyul", "july", "июл"}},
+		{time.August, []string{"avgust", "august", "август"}},
+		{time.September, []string{"sentabr", "september", "сентябр"}},
+		{time.October, []string{"oktabr", "october", "октябр"}},
+		{time.November, []string{"noyabr", "november", "ноябр"}},
+		{time.December, []string{"dekabr", "december", "декабр"}},
+	}
+	words := strings.Fields(strings.NewReplacer(
+		".", " ", ",", " ", "?", " ", "!", " ", ":", " ", ";", " ",
+		"(", " ", ")", " ", "[", " ", "]", " ", "{", " ", "}", " ",
+	).Replace(strings.ToLower(text)))
+	for _, word := range words {
+		for _, candidate := range aliases {
+			for _, prefix := range candidate.prefixes {
+				if strings.HasPrefix(word, prefix) {
+					if prefix == "may" && word != "may" && !strings.HasPrefix(word, "mayda") && !strings.HasPrefix(word, "mayning") {
+						continue
+					}
+					return candidate.month, true
+				}
+			}
+		}
+	}
+	return 0, false
+}
+
+func findPromptYear(text string) int {
+	for index := 0; index+4 <= len(text); index++ {
+		year, err := strconv.Atoi(text[index : index+4])
+		if err == nil && year >= 2000 && year <= 2100 {
+			return year
+		}
+	}
+	return 0
 }
 
 func containsAny(value string, candidates ...string) bool {

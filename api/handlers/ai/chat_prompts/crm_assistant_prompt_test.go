@@ -36,8 +36,8 @@ func TestBuildRelativeDateHintResolvesRussianToday(t *testing.T) {
 	}
 }
 
-func TestBuildRelativeDateHintIgnoresAbsoluteQuestion(t *testing.T) {
-	if hint := buildRelativeDateHint("Sentabr oyida nechta lid keldi?", "2026-09-03T04:45:00Z", "Asia/Tashkent"); hint != "" {
+func TestBuildRelativeDateHintIgnoresQuestionWithoutPeriod(t *testing.T) {
+	if hint := buildRelativeDateHint("Eng katta budgetli deal qaysi?", "2026-09-03T04:45:00Z", "Asia/Tashkent"); hint != "" {
 		t.Fatalf("unexpected relative date hint: %q", hint)
 	}
 }
@@ -60,5 +60,24 @@ func TestBuildRelativeDateHintResolvesWeekAndMonthRanges(t *testing.T) {
 		if !strings.Contains(hint, "requested_period="+test.period) || !strings.Contains(hint, "local_wall_interval="+test.interval) {
 			t.Fatalf("unexpected hint for %q: %q", test.message, hint)
 		}
+	}
+}
+
+func TestBuildRelativeDateHintResolvesNamedMonth(t *testing.T) {
+	hint := buildRelativeDateHint("avgustda qaysi source eng ko‘p lid olib kelgan", "2026-09-03T04:45:00Z", "Asia/Tashkent")
+	if !strings.Contains(hint, "requested_period=named_month") ||
+		!strings.Contains(hint, "local_wall_interval=[2026-08-01 00:00:00, 2026-09-01 00:00:00)") {
+		t.Fatalf("unexpected named-month hint: %q", hint)
+	}
+
+	previousYear := buildRelativeDateHint("2025 yil dekabrda nechta lid kelgan", "2026-09-03T04:45:00Z", "Asia/Tashkent")
+	if !strings.Contains(previousYear, "local_wall_interval=[2025-12-01 00:00:00, 2026-01-01 00:00:00)") {
+		t.Fatalf("unexpected explicit-year hint: %q", previousYear)
+	}
+}
+
+func TestBuildRelativeDateHintDoesNotTreatMaydonAsMay(t *testing.T) {
+	if hint := buildRelativeDateHint("lid kartochkasidagi maydonni ko‘rsat", "2026-09-03T04:45:00Z", "Asia/Tashkent"); hint != "" {
+		t.Fatalf("unexpected May hint for maydon: %q", hint)
 	}
 }

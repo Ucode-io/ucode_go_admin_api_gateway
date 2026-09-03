@@ -243,6 +243,9 @@ func resolveCRMRelativePeriod(req models.CRMAssistantRequest) (time.Time, time.T
 		if period != "" {
 			return start, end, labels[language][period], language, true
 		}
+		if start, end, label, found := resolveCRMNamedMonth(text, localNow, language); found {
+			return start, end, label, language, true
+		}
 	}
 	return time.Time{}, time.Time{}, "", "", false
 }
@@ -250,6 +253,85 @@ func resolveCRMRelativePeriod(req models.CRMAssistantRequest) (time.Time, time.T
 func startOfCRMWeek(day time.Time) time.Time {
 	daysSinceMonday := (int(day.Weekday()) + 6) % 7
 	return day.AddDate(0, 0, -daysSinceMonday)
+}
+
+func resolveCRMNamedMonth(text string, localNow time.Time, language string) (time.Time, time.Time, string, bool) {
+	month, ok := findCRMMonth(text)
+	if !ok {
+		return time.Time{}, time.Time{}, "", false
+	}
+	year := findCRMYear(text)
+	if year == 0 {
+		year = localNow.Year()
+		if month > localNow.Month() {
+			year--
+		}
+	}
+	start := time.Date(year, month, 1, 0, 0, 0, 0, localNow.Location())
+	end := start.AddDate(0, 1, 0)
+
+	uzbekMonths := [...]string{"", "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"}
+	englishMonths := [...]string{"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
+	russianMonths := [...]string{"", "январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре"}
+	label := uzbekMonths[month] + " oyida"
+	if language == "en" {
+		label = "In " + englishMonths[month]
+	} else if language == "ru" {
+		label = "В " + russianMonths[month]
+	}
+	if findCRMYear(text) != 0 {
+		label += fmt.Sprintf(" %d", year)
+	}
+	return start, end, label, true
+}
+
+func findCRMMonth(text string) (time.Month, bool) {
+	aliases := []struct {
+		month    time.Month
+		prefixes []string
+	}{
+		{time.January, []string{"yanvar", "january", "январ"}},
+		{time.February, []string{"fevral", "february", "феврал"}},
+		{time.March, []string{"mart", "march", "март"}},
+		{time.April, []string{"aprel", "april", "апрел"}},
+		{time.May, []string{"may", "май"}},
+		{time.June, []string{"iyun", "june", "июн"}},
+		{time.July, []string{"iyul", "july", "июл"}},
+		{time.August, []string{"avgust", "august", "август"}},
+		{time.September, []string{"sentabr", "september", "сентябр"}},
+		{time.October, []string{"oktabr", "october", "октябр"}},
+		{time.November, []string{"noyabr", "november", "ноябр"}},
+		{time.December, []string{"dekabr", "december", "декабр"}},
+	}
+	words := strings.Fields(strings.NewReplacer(
+		".", " ", ",", " ", "?", " ", "!", " ", ":", " ", ";", " ",
+		"(", " ", ")", " ", "[", " ", "]", " ", "{", " ", "}", " ",
+	).Replace(strings.ToLower(text)))
+	for _, word := range words {
+		for _, candidate := range aliases {
+			for _, prefix := range candidate.prefixes {
+				if strings.HasPrefix(word, prefix) {
+					// Avoid treating Uzbek words such as "maydon" as the month May.
+					if prefix == "may" && word != "may" && !strings.HasPrefix(word, "mayda") && !strings.HasPrefix(word, "mayning") {
+						continue
+					}
+					return candidate.month, true
+				}
+			}
+		}
+	}
+	return 0, false
+}
+
+func findCRMYear(text string) int {
+	for index := 0; index+4 <= len(text); index++ {
+		candidate := text[index : index+4]
+		year, err := strconv.Atoi(candidate)
+		if err == nil && year >= 2000 && year <= 2100 {
+			return year
+		}
+	}
+	return 0
 }
 
 func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, error) {
