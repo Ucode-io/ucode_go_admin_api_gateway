@@ -97,6 +97,24 @@ func TestBuildCommonCRMAnalyticsPlanGroupsBySourceAndPipeline(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMAnalyticsPlanListsYesterdayLeadPhones(t *testing.T) {
+	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+		Message: "kechigi kegan lidlani nomerini tashavor",
+		PageContext: models.CRMAssistantPageContext{
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}, crmAnalyticsTestSchema())
+	if !ok || plan.kind != crmAnalyticsLeadPhones {
+		t.Fatalf("expected phone-list plan, got %#v, ok=%v", plan, ok)
+	}
+	for _, expected := range []string{`LEFT JOIN "contacts"`, `c."phone"`, `d."created_at"`, "LIMIT 50"} {
+		if !strings.Contains(plan.sql, expected) {
+			t.Fatalf("phone SQL %q does not contain %q", plan.sql, expected)
+		}
+	}
+}
+
 func TestBuildCommonCRMAnalyticsPlanSupportsLanguagesAndToday(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -126,6 +144,68 @@ func TestBuildCommonCRMAnalyticsPlanSupportsLanguagesAndToday(t *testing.T) {
 			}
 			if got := plan.params[0]; got != test.start {
 				t.Fatalf("got start %v, want %v", got, test.start)
+			}
+		})
+	}
+}
+
+func TestBuildCommonCRMAnalyticsPlanUsesCurrentWeekInsteadOfYesterdayHistory(t *testing.T) {
+	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+		Message: "bu hafta neshta lid keldi",
+		History: []models.CRMAssistantMessage{
+			{Role: "user", Content: "kecha neshta lid keldi"},
+			{Role: "assistant", Content: "Kecha 12 ta lid keldi."},
+		},
+		PageContext: models.CRMAssistantPageContext{
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}, crmAnalyticsTestSchema())
+	if !ok {
+		t.Fatal("expected current-week analytics plan")
+	}
+	if got, want := plan.periodLabel, "Bu hafta"; got != want {
+		t.Fatalf("got label %q, want %q", got, want)
+	}
+	if got, want := plan.params[0], "2026-08-31 00:00:00"; got != want {
+		t.Fatalf("got start %v, want %v", got, want)
+	}
+	if got, want := plan.params[1], "2026-09-07 00:00:00"; got != want {
+		t.Fatalf("got end %v, want %v", got, want)
+	}
+}
+
+func TestBuildCommonCRMAnalyticsPlanSupportsWeekAndMonthPeriods(t *testing.T) {
+	tests := []struct {
+		message string
+		label   string
+		start   string
+		end     string
+	}{
+		{message: "o‘tgan hafta nechta lid keldi", label: "O‘tgan hafta", start: "2026-08-24 00:00:00", end: "2026-08-31 00:00:00"},
+		{message: "avvalgi hafta qancha lid kegan", label: "O‘tgan hafta", start: "2026-08-24 00:00:00", end: "2026-08-31 00:00:00"},
+		{message: "otkan hafta qancha lid kegan", label: "O‘tgan hafta", start: "2026-08-24 00:00:00", end: "2026-08-31 00:00:00"},
+		{message: "how many leads came in this week", label: "This week", start: "2026-08-31 00:00:00", end: "2026-09-07 00:00:00"},
+		{message: "сколько лидов пришло на прошлой неделе", label: "На прошлой неделе", start: "2026-08-24 00:00:00", end: "2026-08-31 00:00:00"},
+		{message: "bu oy nechta lid keldi", label: "Bu oy", start: "2026-09-01 00:00:00", end: "2026-10-01 00:00:00"},
+		{message: "o'tgan oy nechta lid keldi", label: "O‘tgan oy", start: "2026-08-01 00:00:00", end: "2026-09-01 00:00:00"},
+		{message: "oldingi oyda qancha lid kegan", label: "O‘tgan oy", start: "2026-08-01 00:00:00", end: "2026-09-01 00:00:00"},
+		{message: "otkan oyda qancha lid kegan", label: "O‘tgan oy", start: "2026-08-01 00:00:00", end: "2026-09-01 00:00:00"},
+	}
+	for _, test := range tests {
+		t.Run(test.message, func(t *testing.T) {
+			plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+				Message: test.message,
+				PageContext: models.CRMAssistantPageContext{
+					Now:      "2026-09-03T05:00:00Z",
+					Timezone: "Asia/Tashkent",
+				},
+			}, crmAnalyticsTestSchema())
+			if !ok {
+				t.Fatal("expected period analytics plan")
+			}
+			if plan.periodLabel != test.label || plan.params[0] != test.start || plan.params[1] != test.end {
+				t.Fatalf("unexpected period plan: label=%q params=%v", plan.periodLabel, plan.params)
 			}
 		})
 	}
@@ -223,5 +303,17 @@ func TestFormatCommonCRMAnalyticsReplies(t *testing.T) {
 	}})
 	if err != nil || !strings.Contains(sourceReply, "source bo‘yicha") || !strings.Contains(sourceReply, "target — 8") {
 		t.Fatalf("unexpected source reply %q, err=%v", sourceReply, err)
+	}
+
+	phoneReply, err := formatCommonCRMAnalyticsReply(crmAnalyticsPlan{
+		kind:        crmAnalyticsLeadPhones,
+		periodLabel: "Kecha",
+		language:    "uz",
+	}, map[string]any{"rows": []map[string]any{
+		{"lead_name": "Test lead", "phone": "+998900000000"},
+		{"lead_name": "No phone", "phone": nil},
+	}})
+	if err != nil || !strings.Contains(phoneReply, "telefon raqamlari") || !strings.Contains(phoneReply, "Test lead — +998900000000") || !strings.Contains(phoneReply, "telefon raqami ko‘rsatilmagan") {
+		t.Fatalf("unexpected phone reply %q, err=%v", phoneReply, err)
 	}
 }

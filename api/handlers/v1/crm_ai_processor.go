@@ -43,12 +43,13 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	history := crmAssistantHistory(req.History)
 	schemaText := formatSchemaForSQL(schema)
 	dataContext := ""
+	hasSuccessfulRead := false
 
 	for iteration := 0; iteration < maxCRMAssistantIterations; iteration++ {
 		if err := p.Check(); err != nil {
 			return nil, err
 		}
-		if iteration == maxCRMAssistantIterations-1 && dataContext != "" {
+		if iteration == maxCRMAssistantIterations-1 && hasSuccessfulRead {
 			dataContext += "\n\n[SYSTEM: Final step. Return action=answer using the fetched data. Do not request another query.]"
 		}
 
@@ -70,6 +71,18 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 
 		switch plan.Action {
 		case "answer", "schema":
+			// The language model may understand a very informal request correctly but
+			// still try to answer from conversation context. Live CRM facts must never
+			// be guessed: require an actual successful database read first. A genuine
+			// clarification question is allowed when the request is ambiguous.
+			if crmRequestRequiresLiveLookup(req) && !hasSuccessfulRead && !crmReplyIsClarification(plan.Reply) {
+				dataContext = appendDataContext(
+					dataContext,
+					"Mandatory live CRM lookup",
+					"[SYSTEM: Do not answer from memory or infer that records are absent. Interpret the user's informal, misspelled, or mixed-language wording semantically and execute a safe query against the supplied CRM schema now.]",
+				)
+				continue
+			}
 			return &crmAssistantResult{reply: plan.Reply}, nil
 
 		case "client_action":
@@ -130,6 +143,7 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 				label = fmt.Sprintf("CRM query %d", iteration+1)
 			}
 			dataContext = appendDataContext(dataContext, label, string(encoded))
+			hasSuccessfulRead = true
 
 		default:
 			return nil, fmt.Errorf("unsupported CRM assistant action %q", plan.Action)
@@ -137,6 +151,63 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	}
 
 	return nil, fmt.Errorf("CRM assistant exceeded %d iterations", maxCRMAssistantIterations)
+}
+
+func crmRequestRequiresLiveLookup(req models.CRMAssistantRequest) bool {
+	current := strings.ToLower(strings.TrimSpace(req.Message))
+	if current == "" || crmRequestLooksLikeFieldSettings(current) {
+		return false
+	}
+
+	// The current message must contain a data-oriented intent. Entity context may
+	// come from the immediately preceding user request for follow-ups such as
+	// "nomerlarini ham ber".
+	if !containsAnyFold(current,
+		"nechta", "neshta", "qancha", "soni", "sanab", "hisobla",
+		"qaysi", "kim", "nima", "ro‘yxat", "ro'yxat", "royxat", "list",
+		"nomer", "raqam", "telefon", "phone", "mobile", "number", "aloqa",
+		"status", "stage", "bosqich", "source", "manba", "pipeline", "voronka",
+		"budget", "byudjet", "summa", "eng katta", "eng kichik", "oxirgi", "so‘nggi", "so'nggi",
+		"ber", "tashavor", "top", "find", "show me", "how many", "count", "latest",
+		"сколько", "какой", "какие", "кто", "список", "номер", "телефон", "статус", "этап",
+		"источник", "воронк", "бюджет", "сумм", "найд", "покажи", "последн",
+	) {
+		return false
+	}
+
+	contextText := current
+	userMessages := 0
+	for index := len(req.History) - 1; index >= 0 && userMessages < 4; index-- {
+		if strings.EqualFold(strings.TrimSpace(req.History[index].Role), "user") {
+			contextText += "\n" + strings.ToLower(req.History[index].Content)
+			userMessages++
+		}
+	}
+
+	return containsAnyFold(contextText,
+		"lid", "lead", "лид",
+		"deal", "сделк",
+		"contact", "kontakt", "контакт",
+		"mijoz", "client", "klient", "клиент",
+		"task", "vazifa", "задач",
+		"company", "kompaniya", "компан",
+	)
+}
+
+func crmRequestLooksLikeFieldSettings(message string) bool {
+	hasFieldContext := containsAnyFold(message,
+		"kartoch", "card", "field", "maydon", "column", "ustun", "поле", "карточ", "колон",
+	)
+	hasVisibilityIntent := containsAnyFold(message,
+		"ko‘rin", "ko'rin", "korin", "ko‘rsat", "ko'rsat", "korsat", "yashir",
+		"show", "hide", "visible", "visibility", "tartib", "order", "joyla",
+		"покажи", "скрой", "видим", "порядок",
+	)
+	return hasFieldContext && hasVisibilityIntent
+}
+
+func crmReplyIsClarification(reply string) bool {
+	return strings.Contains(strings.TrimSpace(reply), "?")
 }
 
 func crmAssistantHistory(messages []models.CRMAssistantMessage) []models.ChatMessage {

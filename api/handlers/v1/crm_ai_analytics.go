@@ -18,6 +18,7 @@ const (
 	crmAnalyticsLeadStatus   crmAnalyticsKind = "lead_status"
 	crmAnalyticsLeadSource   crmAnalyticsKind = "lead_source"
 	crmAnalyticsLeadPipeline crmAnalyticsKind = "lead_pipeline"
+	crmAnalyticsLeadPhones   crmAnalyticsKind = "lead_phones"
 )
 
 type crmAnalyticsPlan struct {
@@ -67,13 +68,15 @@ func buildCommonCRMAnalyticsPlan(
 		}
 	}
 
-	start, end, periodLabel, language, ok := resolveCRMRelativeDay(req)
+	start, end, periodLabel, language, ok := resolveCRMRelativePeriod(req)
 	if !ok {
 		return crmAnalyticsPlan{}, false
 	}
 
 	kind := crmAnalyticsKind("")
 	switch {
+	case containsAnyFold(current, "nomer", "raqam", "telefon", "phone", "mobile", "number", "номер", "телефон"):
+		kind = crmAnalyticsLeadPhones
 	case containsAnyFold(current, "source", "manba", "источник"):
 		kind = crmAnalyticsLeadSource
 	case containsAnyFold(current, "pipeline", "voronka", "воронк"):
@@ -98,6 +101,23 @@ func buildCommonCRMAnalyticsPlan(
 		return crmAnalyticsPlan{
 			kind:        kind,
 			sql:         `SELECT COUNT(*) AS count FROM "deals" WHERE ` + where,
+			params:      params,
+			periodLabel: periodLabel,
+			language:    language,
+		}, true
+	}
+	if kind == crmAnalyticsLeadPhones {
+		contactIDExpression := `CASE WHEN jsonb_typeof(to_jsonb(d."contacts_id")) = 'array' THEN to_jsonb(d."contacts_id")->>0 ELSE TRIM(BOTH '"' FROM to_jsonb(d."contacts_id")::text) END`
+		return crmAnalyticsPlan{
+			kind: kind,
+			sql: `SELECT COALESCE(NULLIF(d."name", ''), 'Nomsiz lid') AS lead_name,
+NULLIF(TRIM(BOTH '"' FROM to_jsonb(c."phone")::text), '') AS phone
+FROM "deals" d
+LEFT JOIN "contacts" c ON c."guid"::text = ` + contactIDExpression + `
+WHERE d."created_at" >= $1::timestamp AND d."created_at" < $2::timestamp
+  AND d."deleted_at" IS NULL
+ORDER BY d."created_at" DESC
+LIMIT 50`,
 			params:      params,
 			periodLabel: periodLabel,
 			language:    language,
@@ -135,7 +155,7 @@ ORDER BY 2 DESC`,
 	}, true
 }
 
-func resolveCRMRelativeDay(req models.CRMAssistantRequest) (time.Time, time.Time, string, string, bool) {
+func resolveCRMRelativePeriod(req models.CRMAssistantRequest) (time.Time, time.Time, string, string, bool) {
 	texts := []string{strings.ToLower(req.Message)}
 	for index := len(req.History) - 1; index >= 0; index-- {
 		if req.History[index].Role == "user" {
@@ -143,26 +163,7 @@ func resolveCRMRelativeDay(req models.CRMAssistantRequest) (time.Time, time.Time
 		}
 	}
 
-	offset := 0
-	period := ""
 	language := detectCRMRequestLanguage(strings.ToLower(req.Message))
-	for _, text := range texts {
-		switch {
-		case containsAnyFold(text, "kecha", "kechagi", "kechigi", "yesterday", "вчера"):
-			offset = -1
-			period = "yesterday"
-		case containsAnyFold(text, "bugun", "today", "сегодня"):
-			offset = 0
-			period = "today"
-		}
-		if period != "" {
-			break
-		}
-	}
-	if period == "" {
-		return time.Time{}, time.Time{}, "", "", false
-	}
-
 	now, err := time.Parse(time.RFC3339, strings.TrimSpace(req.PageContext.Now))
 	if err != nil {
 		return time.Time{}, time.Time{}, "", "", false
@@ -172,15 +173,67 @@ func resolveCRMRelativeDay(req models.CRMAssistantRequest) (time.Time, time.Time
 		location = requestedLocation
 	}
 	localNow := now.In(location)
-	start := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, location).AddDate(0, 0, offset)
-	end := start.AddDate(0, 0, 1)
+	today := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, location)
 
 	labels := map[string]map[string]string{
-		"uz": {"today": "Bugun", "yesterday": "Kecha"},
-		"ru": {"today": "Сегодня", "yesterday": "Вчера"},
-		"en": {"today": "Today", "yesterday": "Yesterday"},
+		"uz": {
+			"today": "Bugun", "yesterday": "Kecha",
+			"this_week": "Bu hafta", "last_week": "O‘tgan hafta",
+			"this_month": "Bu oy", "last_month": "O‘tgan oy",
+		},
+		"ru": {
+			"today": "Сегодня", "yesterday": "Вчера",
+			"this_week": "На этой неделе", "last_week": "На прошлой неделе",
+			"this_month": "В этом месяце", "last_month": "В прошлом месяце",
+		},
+		"en": {
+			"today": "Today", "yesterday": "Yesterday",
+			"this_week": "This week", "last_week": "Last week",
+			"this_month": "This month", "last_month": "Last month",
+		},
 	}
-	return start, end, labels[language][period], language, true
+
+	// The current message is checked first. History is consulted only for real
+	// follow-ups that omit a period, so "bu hafta" can never inherit "kecha".
+	for _, text := range texts {
+		period := ""
+		var start, end time.Time
+		switch {
+		case containsAnyFold(text, "o‘tgan hafta", "o'tgan hafta", "o’tgan hafta", "otgan hafta", "o‘tkan hafta", "o'tkan hafta", "o’tkan hafta", "otkan hafta", "utgan hafta", "avvalgi hafta", "oldingi hafta", "last week", "previous week", "прошлой недел", "прошлую недел", "предыдущей недел", "неделю назад"):
+			period = "last_week"
+			start = startOfCRMWeek(today).AddDate(0, 0, -7)
+			end = start.AddDate(0, 0, 7)
+		case containsAnyFold(text, "bu hafta", "shu hafta", "ushbu hafta", "haftada", "this week", "current week", "этой недел", "эту недел", "текущей недел"):
+			period = "this_week"
+			start = startOfCRMWeek(today)
+			end = start.AddDate(0, 0, 7)
+		case containsAnyFold(text, "o‘tgan oy", "o'tgan oy", "o’tgan oy", "otgan oy", "o‘tkan oy", "o'tkan oy", "o’tkan oy", "otkan oy", "utgan oy", "avvalgi oy", "oldingi oy", "last month", "previous month", "прошлом месяц", "прошлый месяц", "предыдущем месяц"):
+			period = "last_month"
+			end = time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, location)
+			start = end.AddDate(0, -1, 0)
+		case containsAnyFold(text, "bu oy", "shu oy", "ushbu oy", "oyda", "this month", "current month", "этом месяц", "этот месяц", "текущем месяц"):
+			period = "this_month"
+			start = time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, location)
+			end = start.AddDate(0, 1, 0)
+		case containsAnyFold(text, "kecha", "kechagi", "kechigi", "yesterday", "вчера"):
+			period = "yesterday"
+			start = today.AddDate(0, 0, -1)
+			end = today
+		case containsAnyFold(text, "bugun", "today", "сегодня"):
+			period = "today"
+			start = today
+			end = today.AddDate(0, 0, 1)
+		}
+		if period != "" {
+			return start, end, labels[language][period], language, true
+		}
+	}
+	return time.Time{}, time.Time{}, "", "", false
+}
+
+func startOfCRMWeek(day time.Time) time.Time {
+	daysSinceMonday := (int(day.Weekday()) + 6) % 7
+	return day.AddDate(0, 0, -daysSinceMonday)
 }
 
 func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, error) {
@@ -209,6 +262,48 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 		default:
 			return fmt.Sprintf("%s %d ta lid keldi.", plan.periodLabel, count), nil
 		}
+	}
+	if plan.kind == crmAnalyticsLeadPhones {
+		lines := make([]string, 0, len(rows))
+		for _, row := range rows {
+			name := strings.TrimSpace(fmt.Sprintf("%v", row["lead_name"]))
+			phone := strings.TrimSpace(fmt.Sprintf("%v", row["phone"]))
+			if name == "" || name == "<nil>" {
+				name = "Nomsiz lid"
+			}
+			if phone == "" || phone == "<nil>" {
+				switch plan.language {
+				case "ru":
+					phone = "номер не указан"
+				case "en":
+					phone = "phone not provided"
+				default:
+					phone = "telefon raqami ko‘rsatilmagan"
+				}
+			}
+			lines = append(lines, fmt.Sprintf("- %s — %s", name, phone))
+		}
+
+		header := ""
+		switch plan.language {
+		case "ru":
+			header = plan.periodLabel + " пришли лиды со следующими номерами:"
+		case "en":
+			header = plan.periodLabel + ", the incoming leads have these phone numbers:"
+		default:
+			header = plan.periodLabel + " kelgan lidlarning telefon raqamlari:"
+		}
+		if len(lines) == 0 {
+			switch plan.language {
+			case "ru":
+				return plan.periodLabel + " лидов не было.", nil
+			case "en":
+				return plan.periodLabel + ", no leads came in.", nil
+			default:
+				return plan.periodLabel + " lid kelmagan.", nil
+			}
+		}
+		return header + "\n" + strings.Join(lines, "\n"), nil
 	}
 
 	lines := make([]string, 0, len(rows))

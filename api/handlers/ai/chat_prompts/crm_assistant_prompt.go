@@ -42,9 +42,14 @@ DATABASE:
 - Do not add RETURNING to mutations; the gateway adds it.
 - Read queries execute immediately. INSERT, UPDATE, and DELETE are shown to the user for confirmation before execution.
 - For the first query set needs_more_data=true. After query results are supplied, either request the next query or return action="answer".
+- Understand requests by meaning, not by exact keywords. Treat informal conversational Uzbek, transliteration, omitted suffixes, ordinary spelling mistakes, and mixed Uzbek/Russian/English as normal input. Use recent conversation turns to resolve pronouns and short follow-ups.
+- For every request asking for live CRM facts, records, counts, lists, statuses, field values, or analytics, action="answer" is forbidden until at least one relevant database query result has been supplied. Never invent a number and never claim that records were not found without querying the CRM. If the meaning is genuinely ambiguous, ask one concise clarification question instead.
 - Base relative dates such as "today" on page_context.now and page_context.timezone.
+- Understand casual Uzbek period wording and common typos: "kechigi/kechagi" means yesterday when discussing incoming leads; "bu/shu hafta", "o'tgan/otgan/o'tkan/otkan/avvalgi/oldingi hafta", "bu/shu oy", and "o'tgan/otgan/o'tkan/otkan/avvalgi/oldingi oy" are date ranges, not lead statuses. Russian and English equivalents have the same meaning.
+- An explicit period in the current message always overrides earlier conversation history. Never answer a current week/month question using a previous yesterday/today interval.
 - On the deals page, Uzbek "lid", English "lead", and Russian "лид" mean a row in the deals table unless the user explicitly names another table.
 - "Lid keldi", "lead came/arrived", and "лид пришёл" mean deals created during that period: count by deals.created_at across every stage and pipeline. Do not use start_date, updated_at, due_date, or a stage filter unless the user explicitly asks for one.
+- When the user asks for incoming lead phone numbers, use the same created_at period on deals and resolve the related contact through deals.contacts_id to contacts.guid, then read contacts.phone. Do not reinterpret "kechigi kegan lidlar" as overdue leads.
 - Treat the server-resolved relative-date block as authoritative. Choose its local-wall interval for a timestamp without time zone column and its offset interval for a timestamp with time zone column. Do not change its day or timezone.
 - Do not expose SQL, timestamps, timezone offsets, or technical query intervals in the final answer unless the user asks. Prefer a direct answer such as "Kecha 12 ta lid keldi."
 
@@ -86,18 +91,6 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 
 func buildRelativeDateHint(message, nowText, timezone string) string {
 	lowerMessage := strings.ToLower(message)
-	period := ""
-	dayOffset := 0
-	switch {
-	case containsAny(lowerMessage, "kecha", "yesterday", "вчера"):
-		period = "yesterday"
-		dayOffset = -1
-	case containsAny(lowerMessage, "bugun", "today", "сегодня"):
-		period = "today"
-	default:
-		return ""
-	}
-
 	now, err := time.Parse(time.RFC3339, strings.TrimSpace(nowText))
 	if err != nil {
 		return ""
@@ -107,8 +100,37 @@ func buildRelativeDateHint(message, nowText, timezone string) string {
 		location = requestedLocation
 	}
 	localNow := now.In(location)
-	start := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, location).AddDate(0, 0, dayOffset)
-	end := start.AddDate(0, 0, 1)
+	today := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, location)
+	period := ""
+	var start, end time.Time
+	switch {
+	case containsAny(lowerMessage, "o‘tgan hafta", "o'tgan hafta", "o’tgan hafta", "otgan hafta", "o‘tkan hafta", "o'tkan hafta", "o’tkan hafta", "otkan hafta", "utgan hafta", "avvalgi hafta", "oldingi hafta", "last week", "previous week", "прошлой недел", "прошлую недел", "предыдущей недел"):
+		period = "last_week"
+		start = startOfPromptWeek(today).AddDate(0, 0, -7)
+		end = start.AddDate(0, 0, 7)
+	case containsAny(lowerMessage, "bu hafta", "shu hafta", "ushbu hafta", "this week", "current week", "этой недел", "эту недел", "текущей недел"):
+		period = "this_week"
+		start = startOfPromptWeek(today)
+		end = start.AddDate(0, 0, 7)
+	case containsAny(lowerMessage, "o‘tgan oy", "o'tgan oy", "o’tgan oy", "otgan oy", "o‘tkan oy", "o'tkan oy", "o’tkan oy", "otkan oy", "utgan oy", "avvalgi oy", "oldingi oy", "last month", "previous month", "прошлом месяц", "предыдущем месяц"):
+		period = "last_month"
+		end = time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, location)
+		start = end.AddDate(0, -1, 0)
+	case containsAny(lowerMessage, "bu oy", "shu oy", "ushbu oy", "this month", "current month", "этом месяц", "текущем месяц"):
+		period = "this_month"
+		start = time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, location)
+		end = start.AddDate(0, 1, 0)
+	case containsAny(lowerMessage, "kecha", "kechagi", "kechigi", "yesterday", "вчера"):
+		period = "yesterday"
+		start = today.AddDate(0, 0, -1)
+		end = today
+	case containsAny(lowerMessage, "bugun", "today", "сегодня"):
+		period = "today"
+		start = today
+		end = today.AddDate(0, 0, 1)
+	default:
+		return ""
+	}
 
 	return fmt.Sprintf(
 		"requested_period=%s\nlocal_date=%s\nlocal_wall_interval=[%s, %s)\noffset_interval=[%s, %s)\nFor timestamp without time zone use local_wall_interval. For timestamp with time zone use offset_interval. Keep the same relative-period wording in the final answer without printing these technical intervals.\n",
@@ -119,6 +141,11 @@ func buildRelativeDateHint(message, nowText, timezone string) string {
 		start.Format(time.RFC3339),
 		end.Format(time.RFC3339),
 	)
+}
+
+func startOfPromptWeek(day time.Time) time.Time {
+	daysSinceMonday := (int(day.Weekday()) + 6) % 7
+	return day.AddDate(0, 0, -daysSinceMonday)
 }
 
 func containsAny(value string, candidates ...string) bool {

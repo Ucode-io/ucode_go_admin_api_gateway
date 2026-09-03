@@ -11,6 +11,65 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func TestCRMRequestRequiresLiveLookupUnderstandsInformalLanguageAndFollowUps(t *testing.T) {
+	tests := []struct {
+		name    string
+		request models.CRMAssistantRequest
+		want    bool
+	}{
+		{
+			name:    "informal phone request",
+			request: models.CRMAssistantRequest{Message: "kechigi kegan lidlani nomerini tashavor"},
+			want:    true,
+		},
+		{
+			name:    "client synonym",
+			request: models.CRMAssistantRequest{Message: "kecha tushgan klientlarni aloqa raqamlari kerak"},
+			want:    true,
+		},
+		{
+			name: "short follow up",
+			request: models.CRMAssistantRequest{
+				Message: "nomerlarini ham ber",
+				History: []models.CRMAssistantMessage{{Role: "user", Content: "kecha kelgan lidlar qaysi statusda"}},
+			},
+			want: true,
+		},
+		{
+			name:    "analytical superlative",
+			request: models.CRMAssistantRequest{Message: "eng katta budgetli deal qaysi"},
+			want:    true,
+		},
+		{
+			name:    "field settings are not data lookup",
+			request: models.CRMAssistantRequest{Message: "lid kartochkasida source ko‘rinadigan qil"},
+			want:    false,
+		},
+		{
+			name:    "ordinary conversation",
+			request: models.CRMAssistantRequest{Message: "rahmat, zo‘r bo‘ldi"},
+			want:    false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := crmRequestRequiresLiveLookup(test.request); got != test.want {
+				t.Fatalf("got %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestCRMReplyIsClarification(t *testing.T) {
+	if !crmReplyIsClarification("Qaysi davrni nazarda tutdingiz?") {
+		t.Fatal("expected clarification question")
+	}
+	if crmReplyIsClarification("Kechikkan lidlar topilmadi.") {
+		t.Fatal("a guessed no-results answer must not bypass the live lookup guard")
+	}
+}
+
 func TestNormalizeCRMClientActionsResolvesLabelsAndConflicts(t *testing.T) {
 	schema := []models.TableSchema{{
 		Slug: "deals",
