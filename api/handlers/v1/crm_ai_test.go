@@ -1,10 +1,14 @@
 package v1
 
 import (
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
 	"ucode/ucode_go_api_gateway/api/models"
+	auth "ucode/ucode_go_api_gateway/genproto/auth_service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func TestNormalizeCRMClientActionsResolvesLabelsAndConflicts(t *testing.T) {
@@ -52,5 +56,41 @@ func TestNormalizePreferenceFields(t *testing.T) {
 	want := []string{"source", "budget"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v, want %#v", got, want)
+	}
+}
+
+func TestGetAiChatUserIDUsesCRMContextWithoutWritingError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Set("user_id", "crm-user-id")
+
+	userID, err := (&HandlerV1{}).getAiChatUserID(context)
+	if err != nil {
+		t.Fatalf("getAiChatUserID returned an error: %v", err)
+	}
+	if userID != "crm-user-id" {
+		t.Fatalf("got user ID %q, want %q", userID, "crm-user-id")
+	}
+	if recorder.Body.Len() != 0 {
+		t.Fatalf("identity lookup unexpectedly wrote an HTTP response: %s", recorder.Body.String())
+	}
+}
+
+func TestGetAiChatUserIDUsesClientAuthFallback(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Set("Auth", &auth.V2HasAccessUserRes{UserIdAuth: "auth-user-id"})
+
+	userID, err := (&HandlerV1{}).getAiChatUserID(context)
+	if err != nil {
+		t.Fatalf("getAiChatUserID returned an error: %v", err)
+	}
+	if userID != "auth-user-id" {
+		t.Fatalf("got user ID %q, want %q", userID, "auth-user-id")
+	}
+	if recorder.Body.Len() != 0 {
+		t.Fatalf("identity lookup unexpectedly wrote an HTTP response: %s", recorder.Body.String())
 	}
 }
