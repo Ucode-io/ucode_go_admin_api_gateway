@@ -26,6 +26,10 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	agent *openai.OpenAIAgent,
 	req models.CRMAssistantRequest,
 ) (*crmAssistantResult, error) {
+	if result, handled := buildCommonCRMPipelineAction(req, p.resourceEnvId); handled {
+		return result, nil
+	}
+
 	// Common lead analytics only use conventional deal system fields. Run them
 	// before the much heavier project-schema fetch so routine dashboard questions
 	// stay fast even if a metadata service is temporarily slow.
@@ -94,6 +98,14 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 					continue
 				}
 			}
+			if crmRequestLooksLikeMutation(message) && !crmReplyIsClarification(plan.Reply) {
+				dataContext = appendDataContext(
+					dataContext,
+					"Mandatory CRM mutation",
+					"[SYSTEM: The user asked to change CRM state. Do not answer with instructions or claim completion. Prepare the requested pipeline_action or a safe INSERT/UPDATE/DELETE now; ask one concise clarification only if a required business value is genuinely missing.]",
+				)
+				continue
+			}
 			// The language model may understand a very informal request correctly but
 			// still try to answer from conversation context. Live CRM facts must never
 			// be guessed: require an actual successful database read first. A genuine
@@ -135,6 +147,18 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 			}
 			return &crmAssistantResult{reply: plan.Reply, clientActions: actions}, nil
 
+		case "pipeline_action":
+			pending, normalizeErr := newCRMPipelinePendingAction(req.Message, plan.PipelineAction, p.resourceEnvId)
+			if normalizeErr != nil {
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected pipeline action %d", iteration+1),
+					fmt.Sprintf("[SYSTEM: The pipeline action was incomplete or invalid: %v. Correct it from the user's request. Ask one concise clarification only if a required name is genuinely missing.]", normalizeErr),
+				)
+				continue
+			}
+			return &crmAssistantResult{reply: pending.Description, pendingAction: pending}, nil
+
 		case "query":
 			if crmLeadPeriodQueryRequiresCreatedAt(req) && !crmSQLUsesCreatedAt(plan.SQL) {
 				dataContext = appendDataContext(
@@ -154,6 +178,14 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 				continue
 			}
 			if IsMutation(sqlType) {
+				if !crmSQLMutationHasRestrictiveWhere(plan.SQL, sqlType) {
+					dataContext = appendDataContext(
+						dataContext,
+						fmt.Sprintf("Rejected unsafe mutation %d", iteration+1),
+						"[SYSTEM: UPDATE and DELETE must have a restrictive WHERE clause targeting only the intended record(s). Query exact candidates first if needed, then produce a corrected mutation.]",
+					)
+					continue
+				}
 				pending, pendingErr := p.handleSQLMutation(ctx, &models.DatabaseActionRequest{
 					Action:         "query",
 					SQL:            plan.SQL,
@@ -265,6 +297,30 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 	return hasExplicitConfigurationIntent || (hasFieldContext && hasGenericShowIntent) || hasVisualReferenceIntent
 }
 
+func crmRequestLooksLikeMutation(message string) bool {
+	message = strings.ToLower(strings.TrimSpace(message))
+	if message == "" {
+		return false
+	}
+	hasEntity := containsAnyFold(message,
+		"pipeline", "pipleline", "voronka", "воронк",
+		"stage", "bosqich", "этап",
+		"lid", "lead", "лид", "deal", "сделк",
+		"contact", "kontakt", "контакт", "company", "kompaniya", "компан",
+		"task", "vazifa", "задач",
+	)
+	if !hasEntity {
+		return false
+	}
+	return containsAnyFold(message,
+		"create", "generate", "add ", "insert", "new pipeline", "new lead", "new deal",
+		"yarat", "qo‘sh", "qo'sh", "qosh", "ochib ber", "ochvor",
+		"update", "change", "edit", "rename", "move", "set ", "delete", "remove",
+		"o‘zgart", "o'zgart", "ozgart", "almashtir", "ko‘chir", "ko'chir", "kochir", "o‘chir", "o'chir", "ochir",
+		"созда", "добав", "измен", "обнов", "переимен", "перемест", "удал",
+	)
+}
+
 func crmReplyIsClarification(reply string) bool {
 	return strings.Contains(strings.TrimSpace(reply), "?")
 }
@@ -311,6 +367,26 @@ func crmSQLUsesCreatedAt(sql string) bool {
 	filterSQL := lowerSQL[whereIndex:]
 	return strings.Contains(filterSQL, "created_at") &&
 		!containsAnyFold(filterSQL, "start_date", "due_date", "updated_at")
+}
+
+func crmSQLMutationHasRestrictiveWhere(sql string, sqlType SQLType) bool {
+	if sqlType != SQLTypeUpdate && sqlType != SQLTypeDelete {
+		return true
+	}
+	statement := strings.ToLower(stripSQLComments(sql))
+	if strings.HasPrefix(strings.TrimSpace(statement), "with") {
+		keyword := " " + string(sqlType) + " "
+		if mutationIndex := strings.LastIndex(statement, keyword); mutationIndex >= 0 {
+			statement = statement[mutationIndex+1:]
+		}
+	}
+	whereIndex := strings.Index(statement, "where")
+	if whereIndex < 0 {
+		return false
+	}
+	filter := strings.TrimSpace(statement[whereIndex+len("where"):])
+	filter = strings.TrimSuffix(filter, ";")
+	return filter != "" && filter != "true" && filter != "1=1" && filter != "1 = 1"
 }
 
 func crmAssistantHistory(messages []models.CRMAssistantMessage) []models.ChatMessage {

@@ -130,6 +130,67 @@ func TestCRMMutationCancelMessageUsesRequestLanguage(t *testing.T) {
 	}
 }
 
+func TestCRMRequestLooksLikeMutationAcrossLanguages(t *testing.T) {
+	tests := map[string]bool{
+		`Generate new pipeline "Enterprise" with stages`: true,
+		`yangi lid qo‘shib ber`:                          true,
+		`Ksjdd dealni Proposal stagega ko‘chir`:          true,
+		`Создай новую воронку продаж`:                    true,
+		`bu hafta stage bo‘yicha nechta lid keldi`:       false,
+		`pipeline bo‘yicha foizlarini ko‘rsat`:           false,
+	}
+	for message, want := range tests {
+		if got := crmRequestLooksLikeMutation(message); got != want {
+			t.Fatalf("message %q: got %v, want %v", message, got, want)
+		}
+	}
+}
+
+func TestBuildCommonCRMPipelineActionParsesExactMultilineRequest(t *testing.T) {
+	request := models.CRMAssistantRequest{
+		Message: `Generate new pipleline "Enterprise", with stages
+- New Lead
+- Meet
+- Proposal
+- Contract
+- Payment`,
+	}
+	result, ok := buildCommonCRMPipelineAction(request, "resource-env")
+	if !ok || result.pendingAction == nil {
+		t.Fatalf("expected pending pipeline action, got %#v, ok=%v", result, ok)
+	}
+	if result.pendingAction.Action != "client_pipeline" {
+		t.Fatalf("action = %q", result.pendingAction.Action)
+	}
+	action, err := decodeStoredCRMPipelineAction(result.pendingAction.Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if action.PipelineName != "Enterprise" || len(action.Stages) != 5 {
+		t.Fatalf("unexpected parsed action: %#v", action)
+	}
+	if action.Stages[0].Name != "New Lead" || action.Stages[4].Name != "Payment" {
+		t.Fatalf("unexpected stage order: %#v", action.Stages)
+	}
+	if action.Stages[4].Group != "won" || action.Stages[4].Probability != 100 {
+		t.Fatalf("final payment stage was not normalized as won: %#v", action.Stages[4])
+	}
+}
+
+func TestNormalizeCRMPipelineActionRejectsDuplicateStages(t *testing.T) {
+	_, err := normalizeCRMPipelineAction(models.CRMPipelineAction{
+		Operation:    "create_pipeline",
+		PipelineName: "Enterprise",
+		Stages: []models.CRMPipelineStageInput{
+			{Name: "New Lead"},
+			{Name: "new lead"},
+		},
+	})
+	if err == nil {
+		t.Fatal("duplicate stages must be rejected")
+	}
+}
+
 func TestDetectCRMRequestLanguageHandlesMixedCRMVocabulary(t *testing.T) {
 	tests := map[string]string{
 		"Ksjdd deal budgetini o‘zgartir": "uz",
@@ -175,6 +236,27 @@ func TestCRMSQLUsesCreatedAt(t *testing.T) {
 	}
 	if crmSQLUsesCreatedAt(`SELECT "created_at" FROM "deals" WHERE "start_date" >= $1`) {
 		t.Fatal("selecting created_at must not bypass a start_date filter")
+	}
+}
+
+func TestCRMSQLMutationRequiresRestrictiveWhere(t *testing.T) {
+	tests := []struct {
+		sql     string
+		sqlType SQLType
+		want    bool
+	}{
+		{`INSERT INTO deals (name) VALUES ($1)`, SQLTypeInsert, true},
+		{`UPDATE deals SET amount = $1 WHERE guid = $2`, SQLTypeUpdate, true},
+		{`DELETE FROM deals WHERE guid = $1`, SQLTypeDelete, true},
+		{`UPDATE deals SET amount = 0`, SQLTypeUpdate, false},
+		{`DELETE FROM deals WHERE true`, SQLTypeDelete, false},
+		{`WITH target AS (SELECT guid FROM deals WHERE name = $1) DELETE FROM deals WHERE guid IN (SELECT guid FROM target)`, SQLTypeDelete, true},
+		{`WITH target AS (SELECT guid FROM deals WHERE name = $1) DELETE FROM deals`, SQLTypeDelete, false},
+	}
+	for _, test := range tests {
+		if got := crmSQLMutationHasRestrictiveWhere(test.sql, test.sqlType); got != test.want {
+			t.Fatalf("sql %q: got %v, want %v", test.sql, got, test.want)
+		}
 	}
 }
 

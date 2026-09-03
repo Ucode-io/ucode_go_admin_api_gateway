@@ -162,6 +162,28 @@ func (h *HandlerV1) ConfirmCRMAssistantAction(c *gin.Context) {
 		h.HandleResponse(c, status_http.OK, models.CRMAssistantResponse{Reply: reply})
 		return
 	}
+	if stored.Action.Action == "client_pipeline" {
+		pipelineAction, decodeErr := decodeStoredCRMPipelineAction(stored.Action.Data)
+		if decodeErr != nil {
+			h.log.Error("crm ai: stored pipeline action is invalid", logger.Error(decodeErr))
+			h.HandleResponse(c, status_http.InternalServerError, "stored pipeline action is invalid")
+			return
+		}
+		_, _ = h.centralRedis.Del(c.Request.Context(), key).Result()
+		reply := stored.Action.SuccessMessage
+		if strings.TrimSpace(reply) == "" {
+			reply = "Pipeline va bosqichlar yangilandi."
+		}
+		h.HandleResponse(c, status_http.OK, models.CRMAssistantResponse{
+			Reply: reply,
+			ClientActions: []models.CRMClientAction{{
+				Type:           "manage_pipeline",
+				Table:          "deals",
+				PipelineAction: pipelineAction,
+			}},
+		})
+		return
+	}
 
 	service, resourceEnvID, err := h.getAiChatServices(c)
 	if err != nil {
@@ -181,7 +203,10 @@ func (h *HandlerV1) ConfirmCRMAssistantAction(c *gin.Context) {
 	if strings.TrimSpace(reply) == "" {
 		reply = "Amal bajarildi."
 	}
-	h.HandleResponse(c, status_http.OK, models.CRMAssistantResponse{Reply: reply})
+	h.HandleResponse(c, status_http.OK, models.CRMAssistantResponse{
+		Reply:         reply,
+		ClientActions: []models.CRMClientAction{{Type: "refresh_crm_data", Table: "*"}},
+	})
 }
 
 func (h *HandlerV1) GetCRMFieldPreferences(c *gin.Context) {

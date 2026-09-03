@@ -330,6 +330,25 @@ func TestBuildCommonCRMAnalyticsPlanFallsBackForUnmatchedQuestions(t *testing.T)
 	}
 }
 
+func TestBuildCommonCRMAnalyticsPlanNeverHijacksMutationsFromEarlierPeriodHistory(t *testing.T) {
+	request := models.CRMAssistantRequest{
+		Message: "Generate new pipeline \"Enterprise\", with stages\n- New Lead\n- Meet\n- Proposal\n- Contract\n- Payment",
+		History: []models.CRMAssistantMessage{
+			{Role: "user", Content: "bu hafta nechta lid keldi"},
+			{Role: "assistant", Content: "Bu hafta 14 ta lid keldi."},
+		},
+		PageContext: models.CRMAssistantPageContext{
+			Table:    "deals",
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}
+
+	if plan, ok := buildCommonCRMAnalyticsPlan(request, crmAnalyticsTestSchema()); ok {
+		t.Fatalf("pipeline mutation was hijacked as analytics: %#v", plan)
+	}
+}
+
 func TestBuildCommonCRMAnalyticsPlanSupportsSystemFieldsMissingFromSchemaList(t *testing.T) {
 	request := models.CRMAssistantRequest{
 		Message: "kecha nechta lid keldi",

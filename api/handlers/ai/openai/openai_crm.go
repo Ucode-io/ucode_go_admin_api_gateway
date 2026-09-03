@@ -36,16 +36,42 @@ func (a *OpenAIAgent) CRMQuery(ctx context.Context, in models.CRMAssistantInput)
 
 func crmAssistantTool() chatTool {
 	stringArray := map[string]any{"type": "array", "items": map[string]any{"type": "string"}}
+	pipelineStage := map[string]any{
+		"type":     "object",
+		"required": []string{"name"},
+		"properties": map[string]any{
+			"name":        map[string]any{"type": "string"},
+			"group":       map[string]any{"type": "string", "enum": []string{"todo", "won", "lost"}},
+			"color":       map[string]any{"type": "string"},
+			"probability": map[string]any{"type": "integer", "minimum": 0, "maximum": 100},
+		},
+	}
+	pipelineAction := map[string]any{
+		"type":     "object",
+		"required": []string{"operation", "pipeline_name"},
+		"properties": map[string]any{
+			"operation":         map[string]any{"type": "string", "enum": []string{"create_pipeline", "rename_pipeline", "delete_pipeline", "add_stage", "update_stage", "delete_stage", "reorder_stages"}},
+			"pipeline_name":     map[string]any{"type": "string"},
+			"new_pipeline_name": map[string]any{"type": "string"},
+			"stage_name":        map[string]any{"type": "string"},
+			"new_stage_name":    map[string]any{"type": "string"},
+			"stage_group":       map[string]any{"type": "string", "enum": []string{"todo", "won", "lost"}},
+			"color":             map[string]any{"type": "string"},
+			"probability":       map[string]any{"type": "integer", "minimum": 0, "maximum": 100},
+			"position":          map[string]any{"type": "integer", "minimum": 1},
+			"stages":            map[string]any{"type": "array", "items": pipelineStage},
+		},
+	}
 	return chatTool{
 		Type: "function",
 		Function: functionDef{
 			Name:        "respond_crm_assistant",
-			Description: "Return the next safe CRM database step, final answer, or card field visibility action.",
+			Description: "Return the next safe CRM database step, pipeline/stage operation, final answer, or card field visibility action.",
 			Parameters: map[string]any{
 				"type":     "object",
 				"required": []string{"action", "needs_more_data", "reply"},
 				"properties": map[string]any{
-					"action":          map[string]any{"type": "string", "enum": []string{"query", "answer", "client_action", "schema"}},
+					"action":          map[string]any{"type": "string", "enum": []string{"query", "pipeline_action", "answer", "client_action", "schema"}},
 					"sql":             map[string]any{"type": "string"},
 					"sql_params":      map[string]any{"type": "array", "items": map[string]any{}},
 					"needs_more_data": map[string]any{"type": "boolean"},
@@ -53,6 +79,7 @@ func crmAssistantTool() chatTool {
 					"reply":           map[string]any{"type": "string"},
 					"success_message": map[string]any{"type": "string"},
 					"cancel_message":  map[string]any{"type": "string"},
+					"pipeline_action": pipelineAction,
 					"client_actions": map[string]any{
 						"type": "array",
 						"items": map[string]any{

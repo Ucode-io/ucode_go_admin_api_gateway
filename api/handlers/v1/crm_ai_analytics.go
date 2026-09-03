@@ -59,7 +59,7 @@ func buildCommonCRMAnalyticsPlan(
 	schema []models.TableSchema,
 ) (crmAnalyticsPlan, bool) {
 	current := strings.ToLower(strings.TrimSpace(req.Message))
-	if crmRequestLooksLikeFieldSettings(current) || !requestHasDealContext(req) {
+	if crmRequestLooksLikeFieldSettings(current) || crmRequestLooksLikeMutation(current) || !requestHasDealContext(req) {
 		return crmAnalyticsPlan{}, false
 	}
 

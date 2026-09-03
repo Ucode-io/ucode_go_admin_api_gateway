@@ -112,6 +112,21 @@ func TestCRMAssistantPromptFormatsGroupedAnalyticsAsMarkdownTable(t *testing.T) 
 	}
 }
 
+func TestCRMAssistantPromptCoversCRMEntityMutations(t *testing.T) {
+	for _, expected := range []string{
+		`action="pipeline_action"`,
+		`create_pipeline`,
+		`reorder_stages`,
+		`A request to create a new lead/deal means INSERT into deals`,
+		`Never run UPDATE or DELETE without a restrictive WHERE clause`,
+		`Never inherit an old date period for a current mutation command`,
+	} {
+		if !strings.Contains(PromptCRMAssistant, expected) {
+			t.Fatalf("CRM assistant prompt is missing mutation rule %q", expected)
+		}
+	}
+}
+
 func TestBuildCRMAssistantMessageIncludesCurrentRenderableCardFields(t *testing.T) {
 	message := BuildCRMAssistantMessage(models.CRMAssistantInput{
 		Message: "cardni shunaqa qiber",

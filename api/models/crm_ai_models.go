@@ -7,13 +7,14 @@ type (
 	}
 
 	CRMAssistantPageContext struct {
-		Path         string                `json:"path,omitempty"`
-		Table        string                `json:"table,omitempty"`
-		Timezone     string                `json:"timezone,omitempty"`
-		Now          string                `json:"now,omitempty"`
-		HiddenFields []string              `json:"hidden_fields,omitempty"`
-		FieldOrder   []string              `json:"field_order,omitempty"`
-		CardFields   []CRMCardFieldContext `json:"card_fields,omitempty"`
+		Path             string                `json:"path,omitempty"`
+		Table            string                `json:"table,omitempty"`
+		Timezone         string                `json:"timezone,omitempty"`
+		Now              string                `json:"now,omitempty"`
+		HiddenFields     []string              `json:"hidden_fields,omitempty"`
+		FieldOrder       []string              `json:"field_order,omitempty"`
+		CardFields       []CRMCardFieldContext `json:"card_fields,omitempty"`
+		SelectedPipeline string                `json:"selected_pipeline,omitempty"`
 	}
 
 	CRMCardFieldContext struct {
@@ -29,23 +30,45 @@ type (
 	}
 
 	CRMClientAction struct {
-		Type       string   `json:"type"`
-		Table      string   `json:"table"`
-		ShowFields []string `json:"show_fields,omitempty"`
-		HideFields []string `json:"hide_fields,omitempty"`
-		FieldOrder []string `json:"field_order,omitempty"`
+		Type           string             `json:"type"`
+		Table          string             `json:"table"`
+		ShowFields     []string           `json:"show_fields,omitempty"`
+		HideFields     []string           `json:"hide_fields,omitempty"`
+		FieldOrder     []string           `json:"field_order,omitempty"`
+		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
+	}
+
+	CRMPipelineStageInput struct {
+		Name        string `json:"name"`
+		Group       string `json:"group,omitempty"`
+		Color       string `json:"color,omitempty"`
+		Probability int    `json:"probability,omitempty"`
+	}
+
+	CRMPipelineAction struct {
+		Operation       string                  `json:"operation"`
+		PipelineName    string                  `json:"pipeline_name"`
+		NewPipelineName string                  `json:"new_pipeline_name,omitempty"`
+		StageName       string                  `json:"stage_name,omitempty"`
+		NewStageName    string                  `json:"new_stage_name,omitempty"`
+		StageGroup      string                  `json:"stage_group,omitempty"`
+		Color           string                  `json:"color,omitempty"`
+		Probability     *int                    `json:"probability,omitempty"`
+		Position        int                     `json:"position,omitempty"`
+		Stages          []CRMPipelineStageInput `json:"stages,omitempty"`
 	}
 
 	CRMAssistantPlan struct {
-		Action         string            `json:"action"`
-		SQL            string            `json:"sql,omitempty"`
-		SQLParams      []any             `json:"sql_params,omitempty"`
-		NeedsMoreData  bool              `json:"needs_more_data"`
-		QueryPlan      string            `json:"query_plan,omitempty"`
-		Reply          string            `json:"reply,omitempty"`
-		SuccessMessage string            `json:"success_message,omitempty"`
-		CancelMessage  string            `json:"cancel_message,omitempty"`
-		ClientActions  []CRMClientAction `json:"client_actions,omitempty"`
+		Action         string             `json:"action"`
+		SQL            string             `json:"sql,omitempty"`
+		SQLParams      []any              `json:"sql_params,omitempty"`
+		NeedsMoreData  bool               `json:"needs_more_data"`
+		QueryPlan      string             `json:"query_plan,omitempty"`
+		Reply          string             `json:"reply,omitempty"`
+		SuccessMessage string             `json:"success_message,omitempty"`
+		CancelMessage  string             `json:"cancel_message,omitempty"`
+		ClientActions  []CRMClientAction  `json:"client_actions,omitempty"`
+		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
 	}
 
 	CRMAssistantInput struct {

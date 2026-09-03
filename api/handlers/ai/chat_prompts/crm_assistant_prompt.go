@@ -25,6 +25,18 @@ Allowed outputs:
 3. Configure card fields:
 {"action":"client_action","needs_more_data":false,"reply":"...","client_actions":[{"type":"set_card_field_visibility","table":"deals","show_fields":["source"],"hide_fields":["budget"],"field_order":[]}]}
 
+4. Manage pipelines and their stages:
+{"action":"pipeline_action","needs_more_data":false,"reply":"...","pipeline_action":{"operation":"create_pipeline","pipeline_name":"Enterprise","stages":[{"name":"New Lead","group":"todo","probability":10},{"name":"Payment","group":"won","probability":100}]}}
+
+PIPELINES AND STAGES:
+- Creating, renaming, deleting, or restructuring a pipeline/stage must use action="pipeline_action", never SQL and never analytics.
+- Supported operations are create_pipeline, rename_pipeline, delete_pipeline, add_stage, update_stage, delete_stage, and reorder_stages.
+- For create_pipeline, preserve every stage name and its order from the request in pipeline_action.stages. If the user gives no stages, use a useful default flow: New lead, In progress, Won, Lost; do not ask them to enumerate obvious defaults.
+- Use group="todo" for active stages, group="won" for successful closing stages, and group="lost" for failed closing stages. Infer Payment/Paid/Won/Sold as won and Lost/Rejected/Unqualified as lost. Probability must be 0..100.
+- For reorder_stages, send the full requested ordered stage list. For update_stage include stage_name and only the requested new values. For add_stage use stage_name plus optional group/color/probability/position.
+- Pipeline and stage mutations always require confirmation. The application performs the canonical pipeline-table, stage-table, deal-option, and generated status-field synchronization after confirmation.
+- Words such as "stages", "status", or "pipeline" inside a create/update/delete request are mutation entities, not requests for grouped analytics. Never inherit an old date period for a current mutation command.
+
 FIELD SETTINGS:
 - When the user asks to show, hide, or reorder fields on a card/table, use action="client_action". Do not write SQL.
 - Use only exact table and field slugs from the supplied schema.
@@ -45,6 +57,11 @@ DATABASE:
 - Do not add LIMIT to SELECT; the gateway enforces it.
 - Do not add RETURNING to mutations; the gateway adds it.
 - Read queries execute immediately. INSERT, UPDATE, and DELETE are shown to the user for confirmation before execution.
+- A request to create a new lead/deal means INSERT into deals. Requests to create contacts, companies, and tasks likewise use their exact schema tables. Do not answer with instructions when the requested mutation can be prepared.
+- Before updating or deleting an ambiguously named record, SELECT exact candidates and use the returned guid in the mutation. Never run UPDATE or DELETE without a restrictive WHERE clause. Never mutate unrelated rows.
+- Create all explicitly supplied related values in one safe mutation when the schema permits it. Never invent a missing identity, phone number, amount, assignee, or unrelated business value; ask one short clarification only when a required value truly cannot be inferred.
+- Moving a deal means updating its exact pipeline/stage fields using the supplied schema. Preserve every unrelated deal value.
+- After preparing INSERT/UPDATE/DELETE, reply with a short concrete confirmation describing what will change; never claim it already happened before confirmation.
 - For the first query set needs_more_data=true. After query results are supplied, either request the next query or return action="answer".
 - Understand requests by meaning, not by exact keywords. Treat informal conversational Uzbek, transliteration, omitted suffixes, ordinary spelling mistakes, and mixed Uzbek/Russian/English as normal input. Use recent conversation turns to resolve pronouns and short follow-ups.
 - For every request asking for live CRM facts, records, counts, lists, statuses, field values, or analytics, action="answer" is forbidden until at least one relevant database query result has been supplied. Never invent a number and never claim that records were not found without querying the CRM. If the meaning is genuinely ambiguous, ask one concise clarification question instead.
@@ -66,7 +83,7 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 	sb.WriteString("User request:\n")
 	sb.WriteString(in.Message)
 	sb.WriteString("\n\nPage context:\n")
-	fmt.Fprintf(&sb, "path=%s\ntable=%s\ntimezone=%s\nnow=%s\nhidden_fields=%s\nfield_order=%s\ncard_fields=%s\n",
+	fmt.Fprintf(&sb, "path=%s\ntable=%s\ntimezone=%s\nnow=%s\nhidden_fields=%s\nfield_order=%s\ncard_fields=%s\nselected_pipeline=%s\n",
 		in.PageContext.Path,
 		in.PageContext.Table,
 		in.PageContext.Timezone,
@@ -74,6 +91,7 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 		strings.Join(in.PageContext.HiddenFields, ","),
 		strings.Join(in.PageContext.FieldOrder, ","),
 		formatCRMCardFields(in.PageContext.CardFields),
+		in.PageContext.SelectedPipeline,
 	)
 	if dateHint := buildRelativeDateHint(in.Message, in.PageContext.Now, in.PageContext.Timezone); dateHint != "" {
 		sb.WriteString("\nServer-resolved relative date:\n")
