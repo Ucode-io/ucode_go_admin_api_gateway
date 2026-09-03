@@ -38,7 +38,10 @@ func (p *ChatProcessor) runCommonCRMAnalytics(
 
 	data, err := p.executeSQLQuery(ctx, plan.sql, plan.params, p.resourceEnvId)
 	if err != nil {
-		return nil, true, fmt.Errorf("execute common CRM analytics: %w", err)
+		// Older/custom deal tables may not contain the conventional system
+		// columns. Fall back to the schema-aware agent instead of failing the
+		// whole request when the optimized query is not applicable.
+		return nil, false, nil
 	}
 	reply, err := formatCommonCRMAnalyticsReply(plan, data)
 	if err != nil {
@@ -56,8 +59,8 @@ func buildCommonCRMAnalyticsPlan(
 		return crmAnalyticsPlan{}, false
 	}
 
-	deals, ok := findCRMSchemaTable(schema, "deals")
-	if !ok || !hasCRMSchemaField(deals, "created_at") {
+	_, ok := findCRMSchemaTable(schema, "deals")
+	if !ok {
 		return crmAnalyticsPlan{}, false
 	}
 
@@ -68,7 +71,7 @@ func buildCommonCRMAnalyticsPlan(
 
 	kind := crmAnalyticsKind("")
 	switch {
-	case containsAnyFold(current, "status", "stage", "bosqich", "статус", "этап") && hasCRMSchemaField(deals, "stage"):
+	case containsAnyFold(current, "status", "stage", "bosqich", "статус", "этап"):
 		kind = crmAnalyticsLeadStatus
 	case containsAnyFold(current, "nechta", "neshta", "qancha", "how many", "count", "сколько", "soni") &&
 		containsAnyFold(current, "kel", "kegan", "yangi", "came", "arriv", "new", "приш", "нов"):
@@ -78,9 +81,7 @@ func buildCommonCRMAnalyticsPlan(
 	}
 
 	where := `"created_at" >= $1::timestamp AND "created_at" < $2::timestamp`
-	if hasCRMSchemaField(deals, "deleted_at") {
-		where += ` AND "deleted_at" IS NULL`
-	}
+	where += ` AND "deleted_at" IS NULL`
 	params := []any{
 		start.Format("2006-01-02 15:04:05"),
 		end.Format("2006-01-02 15:04:05"),
@@ -256,15 +257,6 @@ func findCRMSchemaTable(schema []models.TableSchema, slug string) (models.TableS
 		}
 	}
 	return models.TableSchema{}, false
-}
-
-func hasCRMSchemaField(table models.TableSchema, slug string) bool {
-	for _, field := range table.Fields {
-		if field.Slug == slug {
-			return true
-		}
-	}
-	return false
 }
 
 func containsAnyFold(value string, candidates ...string) bool {

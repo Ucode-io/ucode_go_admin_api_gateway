@@ -39,6 +39,33 @@ func TestNormalizeCRMClientActionsResolvesLabelsAndConflicts(t *testing.T) {
 	}
 }
 
+func TestNormalizeCRMClientActionsResolvesBudgetAliasToAmount(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "source", Label: "Source"},
+			{Slug: "amount", Label: "Сумма"},
+		},
+	}}
+	actions := normalizeCRMClientActions([]models.CRMClientAction{{
+		Type:       "set_card_field_visibility",
+		Table:      "deals",
+		ShowFields: []string{"source"},
+		HideFields: []string{"budget"},
+	}}, schema, "deals")
+
+	want := []models.CRMClientAction{{
+		Type:       "set_card_field_visibility",
+		Table:      "deals",
+		ShowFields: []string{"source"},
+		HideFields: []string{"amount"},
+		FieldOrder: []string{},
+	}}
+	if !reflect.DeepEqual(actions, want) {
+		t.Fatalf("unexpected actions:\n got: %#v\nwant: %#v", actions, want)
+	}
+}
+
 func TestValidateCRMImagesAcceptsInlineScreenshot(t *testing.T) {
 	if err := validateCRMImages([]string{"data:image/png;base64,eA=="}); err != nil {
 		t.Fatalf("valid screenshot rejected: %v", err)

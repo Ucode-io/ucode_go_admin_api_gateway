@@ -82,7 +82,12 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 		case "query":
 			sqlType, validationErr := ValidateAndClassifySQL(plan.SQL)
 			if validationErr != nil {
-				return nil, fmt.Errorf("unsafe CRM query: %w", validationErr)
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected query %d", iteration+1),
+					fmt.Sprintf("The gateway rejected that SQL: %v. Produce a corrected, single safe query using only the supplied schema.", validationErr),
+				)
+				continue
 			}
 			if IsMutation(sqlType) {
 				pending, pendingErr := p.handleSQLMutation(ctx, &models.DatabaseActionRequest{
@@ -105,7 +110,12 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 
 			result, queryErr := p.executeSQLQuery(ctx, EnsureSelectLimit(plan.SQL, defaultSelectLimit), plan.SQLParams, p.resourceEnvId)
 			if queryErr != nil {
-				return nil, queryErr
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Failed query %d", iteration+1),
+					fmt.Sprintf("The database rejected that query: %v. Correct the SQL using the exact schema and try again.", queryErr),
+				)
+				continue
 			}
 			encoded, marshalErr := json.Marshal(result)
 			if marshalErr != nil {
@@ -162,6 +172,9 @@ func normalizeCRMClientActions(
 			if field.Label != "" {
 				aliases[normalizeCRMFieldAlias(field.Label)] = field.Slug
 			}
+			for _, alias := range commonCRMFieldAliases(field.Slug) {
+				aliases[normalizeCRMFieldAlias(alias)] = field.Slug
+			}
 		}
 		tables[table.Slug] = aliases
 	}
@@ -200,6 +213,15 @@ func normalizeCRMClientActions(
 		})
 	}
 	return result
+}
+
+func commonCRMFieldAliases(slug string) []string {
+	switch slug {
+	case "amount":
+		return []string{"budget", "byudjet", "summa", "бюджет", "сумма"}
+	default:
+		return nil
+	}
 }
 
 func resolveCRMFields(fields []string, aliases map[string]string, excluded map[string]struct{}) []string {

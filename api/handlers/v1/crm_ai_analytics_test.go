@@ -127,7 +127,7 @@ func TestBuildCommonCRMAnalyticsPlanFallsBackForUnmatchedQuestions(t *testing.T)
 	}
 }
 
-func TestBuildCommonCRMAnalyticsPlanRequiresSchemaFields(t *testing.T) {
+func TestBuildCommonCRMAnalyticsPlanSupportsSystemFieldsMissingFromSchemaList(t *testing.T) {
 	request := models.CRMAssistantRequest{
 		Message: "kecha nechta lid keldi",
 		PageContext: models.CRMAssistantPageContext{
@@ -135,8 +135,11 @@ func TestBuildCommonCRMAnalyticsPlanRequiresSchemaFields(t *testing.T) {
 			Timezone: "Asia/Tashkent",
 		},
 	}
-	if plan, ok := buildCommonCRMAnalyticsPlan(request, []models.TableSchema{{Slug: "deals"}}); ok {
-		t.Fatalf("unexpected plan without created_at: %#v", plan)
+	if _, ok := buildCommonCRMAnalyticsPlan(request, []models.TableSchema{{Slug: "deals"}}); !ok {
+		t.Fatal("expected conventional deal system fields to be supported")
+	}
+	if plan, ok := buildCommonCRMAnalyticsPlan(request, []models.TableSchema{{Slug: "contacts"}}); ok {
+		t.Fatalf("unexpected plan without deals table: %#v", plan)
 	}
 }
 
