@@ -27,6 +27,9 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	if err != nil {
 		return nil, fmt.Errorf("load CRM schema: %w", err)
 	}
+	if result, handled, analyticsErr := p.runCommonCRMAnalytics(ctx, req, schema); handled {
+		return result, analyticsErr
+	}
 
 	message := strings.TrimSpace(req.Message)
 	if message == "" && len(req.Images) > 0 {
