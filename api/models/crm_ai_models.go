@@ -7,12 +7,18 @@ type (
 	}
 
 	CRMAssistantPageContext struct {
-		Path         string   `json:"path,omitempty"`
-		Table        string   `json:"table,omitempty"`
-		Timezone     string   `json:"timezone,omitempty"`
-		Now          string   `json:"now,omitempty"`
-		HiddenFields []string `json:"hidden_fields,omitempty"`
-		FieldOrder   []string `json:"field_order,omitempty"`
+		Path         string                `json:"path,omitempty"`
+		Table        string                `json:"table,omitempty"`
+		Timezone     string                `json:"timezone,omitempty"`
+		Now          string                `json:"now,omitempty"`
+		HiddenFields []string              `json:"hidden_fields,omitempty"`
+		FieldOrder   []string              `json:"field_order,omitempty"`
+		CardFields   []CRMCardFieldContext `json:"card_fields,omitempty"`
+	}
+
+	CRMCardFieldContext struct {
+		Slug  string `json:"slug"`
+		Label string `json:"label,omitempty"`
 	}
 
 	CRMAssistantRequest struct {

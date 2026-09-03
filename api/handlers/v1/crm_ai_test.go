@@ -3,6 +3,7 @@ package v1
 import (
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 
 	"ucode/ucode_go_api_gateway/api/models"
@@ -83,6 +84,21 @@ func TestCRMReplyIsClarification(t *testing.T) {
 	}
 	if crmReplyIsClarification("Kechikkan lidlar topilmadi.") {
 		t.Fatal("a guessed no-results answer must not bypass the live lookup guard")
+	}
+}
+
+func TestCRMRequestRecognizesScreenshotCardMatchAsFieldSettings(t *testing.T) {
+	message := "lidlarimni cardini shunaqa qiber"
+	if !crmRequestLooksLikeFieldSettings(message) {
+		t.Fatalf("expected %q to be recognized as a field-setting request", message)
+	}
+	request := models.CRMAssistantRequest{
+		Message:     message,
+		Images:      []string{"data:image/jpeg;base64,eA=="},
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}
+	if crmRequestRequiresLiveLookup(request) {
+		t.Fatal("screenshot card matching must not be misclassified as a live analytics lookup")
 	}
 }
 
@@ -299,6 +315,52 @@ func TestNormalizeCRMClientActionsResolvesDealPhoneToContactField(t *testing.T) 
 	}}
 	if !reflect.DeepEqual(actions, want) {
 		t.Fatalf("unexpected actions:\n got: %#v\nwant: %#v", actions, want)
+	}
+}
+
+func TestFormatSchemaForCRMIncludesLabelsAndStatusOptions(t *testing.T) {
+	formatted := formatSchemaForCRM([]models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "pipeline", Label: "Voronka", Type: "MULTISELECT"},
+			{Slug: "pipeline_sales", Label: "Sales Project", Type: "STATUS", Options: []string{"Yangi lid", "Sotildi"}},
+		},
+	}})
+
+	for _, expected := range []string{
+		`pipeline MULTISELECT [label="Voronka"]`,
+		`pipeline_sales STATUS [label="Sales Project"] [options="Yangi lid|Sotildi"]`,
+	} {
+		if !strings.Contains(formatted, expected) {
+			t.Fatalf("formatted schema %q does not contain %q", formatted, expected)
+		}
+	}
+}
+
+func TestExtractSchemaFieldOptionsFindsNestedStatusGroups(t *testing.T) {
+	attributes := map[string]any{
+		"todo": map[string]any{
+			"options": []any{
+				map[string]any{"label_en": "Yangi lid", "value": "new"},
+				map[string]any{"label_en": "Primary contact", "value": "primary"},
+			},
+		},
+		"complete": map[string]any{
+			"options": []any{
+				map[string]any{"label_en": "Sotildi", "value": "won"},
+			},
+		},
+	}
+
+	want := map[string]bool{"Yangi lid": true, "Primary contact": true, "Sotildi": true}
+	got := extractSchemaFieldOptions(attributes)
+	if len(got) != len(want) {
+		t.Fatalf("got %#v, want %d unique options", got, len(want))
+	}
+	for _, option := range got {
+		if !want[option] {
+			t.Fatalf("unexpected extracted option %q from %#v", option, got)
+		}
 	}
 }
 

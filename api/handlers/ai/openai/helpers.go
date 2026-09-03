@@ -50,7 +50,7 @@ func buildContentParts(text string, imageURLs []string) []contentPart {
 		}
 		parts = append(parts, contentPart{
 			Type:     "image_url",
-			ImageURL: &imageURL{URL: dataURI(mimeType, data)},
+			ImageURL: &imageURL{URL: dataURI(mimeType, data), Detail: "high"},
 		})
 	}
 	if text != "" {
@@ -78,7 +78,7 @@ func convertBlocks(blocks []models.ContentBlock) []contentPart {
 			}
 			parts = append(parts, contentPart{
 				Type:     "image_url",
-				ImageURL: &imageURL{URL: dataURI(mimeType, data)},
+				ImageURL: &imageURL{URL: dataURI(mimeType, data), Detail: "high"},
 			})
 		}
 	}

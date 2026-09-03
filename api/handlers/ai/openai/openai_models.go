@@ -28,7 +28,8 @@ type (
 	}
 
 	imageURL struct {
-		URL string `json:"url"`
+		URL    string `json:"url"`
+		Detail string `json:"detail,omitempty"`
 	}
 
 	chatTool struct {

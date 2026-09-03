@@ -3,6 +3,8 @@ package chat_prompts
 import (
 	"strings"
 	"testing"
+
+	"ucode/ucode_go_api_gateway/api/models"
 )
 
 func TestBuildRelativeDateHintResolvesUzbekYesterdayInCRMTimezone(t *testing.T) {
@@ -79,5 +81,39 @@ func TestBuildRelativeDateHintResolvesNamedMonth(t *testing.T) {
 func TestBuildRelativeDateHintDoesNotTreatMaydonAsMay(t *testing.T) {
 	if hint := buildRelativeDateHint("lid kartochkasidagi maydonni ko‘rsat", "2026-09-03T04:45:00Z", "Asia/Tashkent"); hint != "" {
 		t.Fatalf("unexpected May hint for maydon: %q", hint)
+	}
+}
+
+func TestCRMAssistantPromptTreatsReadableCardScreenshotAsCompleteRequest(t *testing.T) {
+	for _, expected := range []string{
+		"cardni shunaqa qiber",
+		"Do not ask the user to repeat fields",
+		"return action=\"client_action\" on the first response",
+		"branching/workflow pill is pipeline",
+		"currency row is amount",
+		"colored-dot status pill is stage",
+		"legacy stage is absent from page_context.card_fields",
+		"duplicate-count badge is an automatic decoration",
+	} {
+		if !strings.Contains(PromptCRMAssistant, expected) {
+			t.Fatalf("CRM assistant prompt is missing screenshot rule %q", expected)
+		}
+	}
+}
+
+func TestBuildCRMAssistantMessageIncludesCurrentRenderableCardFields(t *testing.T) {
+	message := BuildCRMAssistantMessage(models.CRMAssistantInput{
+		Message: "cardni shunaqa qiber",
+		PageContext: models.CRMAssistantPageContext{
+			Table: "deals",
+			CardFields: []models.CRMCardFieldContext{
+				{Slug: "name", Label: "Deal name"},
+				{Slug: "pipeline_sales", Label: "Sales Project"},
+			},
+		},
+	})
+
+	if !strings.Contains(message, `card_fields=name(label="Deal name"),pipeline_sales(label="Sales Project")`) {
+		t.Fatalf("current card fields are missing from assistant message: %q", message)
 	}
 }

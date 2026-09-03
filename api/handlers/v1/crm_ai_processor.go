@@ -44,9 +44,10 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	}
 
 	history := crmAssistantHistory(req.History)
-	schemaText := formatSchemaForSQL(schema)
+	schemaText := formatSchemaForCRM(schema)
 	dataContext := ""
 	hasSuccessfulRead := false
+	screenshotFieldSettings := len(req.Images) > 0 && crmRequestLooksLikeFieldSettings(message)
 
 	for iteration := 0; iteration < maxCRMAssistantIterations; iteration++ {
 		if err := p.Check(); err != nil {
@@ -57,7 +58,7 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 		}
 
 		images := req.Images
-		if iteration > 0 {
+		if iteration > 0 && !screenshotFieldSettings {
 			images = nil
 		}
 		plan, err := agent.CRMQuery(ctx, models.CRMAssistantInput{
@@ -74,6 +75,14 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 
 		switch plan.Action {
 		case "answer", "schema":
+			if screenshotFieldSettings && iteration < 2 {
+				dataContext = appendDataContext(
+					dataContext,
+					"Mandatory screenshot field action",
+					"[SYSTEM: The attached screenshot and the user's first message are sufficient. Inspect the image again, map its visible configurable card rows to the supplied schema, and return action=client_action now. Do not ask the user to enumerate fields that are already visible.]",
+				)
+				continue
+			}
 			// The language model may understand a very informal request correctly but
 			// still try to answer from conversation context. Live CRM facts must never
 			// be guessed: require an actual successful database read first. A genuine
@@ -222,7 +231,11 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 	hasGenericShowIntent := containsAnyFold(message,
 		"ko‘rsat", "ko'rsat", "korsat", "show", "покажи",
 	)
-	return hasExplicitConfigurationIntent || (hasFieldContext && hasGenericShowIntent)
+	hasVisualReferenceIntent := hasFieldContext && containsAnyFold(message,
+		"shunaqa", "manaqa", "huddi shu", "xuddi shu", "shu kabi",
+		"rasmdag", "screenshot", "skrin", "like this", "match this", "как на", "как здесь",
+	)
+	return hasExplicitConfigurationIntent || (hasFieldContext && hasGenericShowIntent) || hasVisualReferenceIntent
 }
 
 func crmReplyIsClarification(reply string) bool {

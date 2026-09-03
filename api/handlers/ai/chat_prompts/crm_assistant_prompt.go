@@ -29,8 +29,11 @@ FIELD SETTINGS:
 - When the user asks to show, hide, or reorder fields on a card/table, use action="client_action". Do not write SQL.
 - Use only exact table and field slugs from the supplied schema.
 - Use page_context.table when the user says "the card" without naming an entity.
-- A screenshot is an authoritative visual reference. Detect visible labels and map them to exact schema slugs.
-- If a screenshot label cannot be matched confidently, ask one concise clarification with action="answer". Never guess a destructive or unrelated field.
+- page_context.card_fields is the authoritative list of fields the current card can render. Prefer it over legacy or inactive generated fields, and hide other entries from that list when matching a screenshot.
+- A screenshot is an authoritative visual reference. An attached screenshot plus wording such as "make my card like this", "cardni shunaqa qiber", or an equivalent phrase is a complete field-setting request. Do not ask the user to repeat fields that can be read or inferred from the image.
+- For a deal card, use both text and standard CRM layout/icon semantics: the primary title row is name; a branching/workflow pill is pipeline; a currency row is amount; and a colored-dot status pill is stage. If the status value appears in the supplied options of a generated per-pipeline STATUS field, use that owning field's exact slug instead of legacy stage. If legacy stage is absent from page_context.card_fields and that list has one STATUS field, use that current STATUS field even when the screenshot is an exemplar with different values. A duplicate-count badge is an automatic decoration, not a configurable field.
+- When asked to match a card screenshot, return action="client_action" on the first response. Put every readable configurable field in show_fields and field_order in visual top-to-bottom order, and put other schema fields in hide_fields so the resulting card matches the reference. Never hide the primary identity/title field.
+- Ask one concise clarification only when the image itself is unreadable or multiple schema fields remain genuinely indistinguishable after using visible values, icons, labels, types, and options. Never ask which fields are shown when the image already makes that clear.
 - show_fields and hide_fields contain only the fields whose visibility must change. field_order is optional and contains the requested leading order.
 - Personal field visibility changes are reversible and must be returned immediately without confirmation.
 
@@ -62,13 +65,14 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 	sb.WriteString("User request:\n")
 	sb.WriteString(in.Message)
 	sb.WriteString("\n\nPage context:\n")
-	fmt.Fprintf(&sb, "path=%s\ntable=%s\ntimezone=%s\nnow=%s\nhidden_fields=%s\nfield_order=%s\n",
+	fmt.Fprintf(&sb, "path=%s\ntable=%s\ntimezone=%s\nnow=%s\nhidden_fields=%s\nfield_order=%s\ncard_fields=%s\n",
 		in.PageContext.Path,
 		in.PageContext.Table,
 		in.PageContext.Timezone,
 		in.PageContext.Now,
 		strings.Join(in.PageContext.HiddenFields, ","),
 		strings.Join(in.PageContext.FieldOrder, ","),
+		formatCRMCardFields(in.PageContext.CardFields),
 	)
 	if dateHint := buildRelativeDateHint(in.Message, in.PageContext.Now, in.PageContext.Timezone); dateHint != "" {
 		sb.WriteString("\nServer-resolved relative date:\n")
@@ -88,6 +92,23 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 	}
 
 	return sb.String()
+}
+
+func formatCRMCardFields(fields []models.CRMCardFieldContext) string {
+	formatted := make([]string, 0, len(fields))
+	for _, field := range fields {
+		slug := strings.TrimSpace(field.Slug)
+		if slug == "" {
+			continue
+		}
+		label := strings.TrimSpace(field.Label)
+		if label == "" || label == slug {
+			formatted = append(formatted, slug)
+			continue
+		}
+		formatted = append(formatted, fmt.Sprintf("%s(label=%s)", slug, strconv.Quote(label)))
+	}
+	return strings.Join(formatted, ",")
 }
 
 func buildRelativeDateHint(message, nowText, timezone string) string {

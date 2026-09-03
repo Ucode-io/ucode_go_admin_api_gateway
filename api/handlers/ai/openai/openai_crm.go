@@ -13,6 +13,12 @@ func (a *OpenAIAgent) CRMQuery(ctx context.Context, in models.CRMAssistantInput)
 	content := chat_prompts.BuildCRMAssistantMessage(in)
 	messages := buildOpenAIMessages(in.History, buildContentParts(content, in.Images))
 	cfg := a.conf.OpenAIAgents.DatabaseAssistant
+	if len(in.Images) > 0 {
+		// Screenshot-backed field configuration needs reliable OCR and UI
+		// understanding. Keep the inexpensive database model for text-only CRM
+		// analytics, and use the stronger inspector model only for visual turns.
+		cfg = a.conf.OpenAIAgents.Inspector
+	}
 
 	raw, usage, err := callTool(ctx, a.conf, cfg, chat_prompts.PromptCRMAssistant, messages, crmAssistantTool())
 	a.tracker.RecordUsage(usage, cfg.Model, "CRM assistant")
