@@ -337,6 +337,86 @@ func TestFormatSchemaForCRMIncludesLabelsAndStatusOptions(t *testing.T) {
 	}
 }
 
+func TestCanonicalDealScreenshotCardActionUsesActiveStatusAndHidesOtherFields(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "name", Type: "SINGLE_LINE"},
+			{Slug: "pipeline", Type: "MULTISELECT"},
+			{Slug: "amount", Type: "NUMBER"},
+			{Slug: "pipeline_sales_project", Type: "STATUS"},
+			{Slug: "pipeline_other", Type: "STATUS"},
+			{Slug: "contacts_id", Type: "LOOKUP"},
+			{Slug: "notes", Type: "MULTI_LINE"},
+		},
+	}}
+	pageContext := models.CRMAssistantPageContext{
+		Table: "deals",
+		CardFields: []models.CRMCardFieldContext{
+			{Slug: "pipeline"},
+			{Slug: "name"},
+			{Slug: "contacts_id"},
+			{Slug: "amount"},
+			{Slug: "pipeline_sales_project"},
+			{Slug: "notes"},
+		},
+	}
+
+	got, ok := canonicalDealScreenshotCardAction(schema, pageContext)
+	if !ok {
+		t.Fatal("expected the active deal status field to produce a canonical screenshot action")
+	}
+	want := models.CRMClientAction{
+		Type:       "set_card_field_visibility",
+		Table:      "deals",
+		ShowFields: []string{"name", "pipeline", "amount", "pipeline_sales_project"},
+		HideFields: []string{"contacts_id", "notes"},
+		FieldOrder: []string{"name", "pipeline", "amount", "pipeline_sales_project"},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("canonical screenshot action = %#v, want %#v", got, want)
+	}
+}
+
+func TestCanonicalDealScreenshotCardActionRejectsAmbiguousActiveStatus(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "pipeline_a", Type: "STATUS"},
+			{Slug: "pipeline_b", Type: "STATUS"},
+		},
+	}}
+	pageContext := models.CRMAssistantPageContext{
+		Table: "deals",
+		CardFields: []models.CRMCardFieldContext{
+			{Slug: "name"},
+			{Slug: "pipeline"},
+			{Slug: "amount"},
+			{Slug: "pipeline_a"},
+			{Slug: "pipeline_b"},
+		},
+	}
+
+	if _, ok := canonicalDealScreenshotCardAction(schema, pageContext); ok {
+		t.Fatal("ambiguous active STATUS fields must not be guessed")
+	}
+}
+
+func TestCRMClientActionsContainCommonDealScreenshotCore(t *testing.T) {
+	actions := []models.CRMClientAction{{
+		Type:       "set_card_field_visibility",
+		Table:      "deals",
+		ShowFields: []string{"pipeline", "contacts_id", "amount"},
+		FieldOrder: []string{"pipeline", "name", "contacts_id", "amount"},
+	}}
+	if !crmClientActionsContainFields(actions, "name", "pipeline", "amount") {
+		t.Fatal("expected the model's partially-correct screenshot mapping to be recognized")
+	}
+	if crmClientActionsContainFields(actions, "name", "pipeline", "amount", "pipeline_sales_project") {
+		t.Fatal("missing active status must not be reported as present")
+	}
+}
+
 func TestExtractSchemaFieldOptionsFindsNestedStatusGroups(t *testing.T) {
 	attributes := map[string]any{
 		"todo": map[string]any{

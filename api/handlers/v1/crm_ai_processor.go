@@ -10,7 +10,10 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 )
 
-const maxCRMAssistantIterations = 6
+const (
+	maxCRMAssistantIterations    = 6
+	canonicalDealScreenshotReply = "Screenshotga mosladim: kartochkada nomi, pipeline, summa va active status qoldirildi."
+)
 
 type crmAssistantResult struct {
 	reply         string
@@ -75,13 +78,21 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 
 		switch plan.Action {
 		case "answer", "schema":
-			if screenshotFieldSettings && iteration < 2 {
-				dataContext = appendDataContext(
-					dataContext,
-					"Mandatory screenshot field action",
-					"[SYSTEM: The attached screenshot and the user's first message are sufficient. Inspect the image again, map its visible configurable card rows to the supplied schema, and return action=client_action now. Do not ask the user to enumerate fields that are already visible.]",
-				)
-				continue
+			if screenshotFieldSettings {
+				if canonical, ok := canonicalDealScreenshotCardAction(schema, req.PageContext); ok && iteration >= 2 {
+					return &crmAssistantResult{
+						reply:         canonicalDealScreenshotReply,
+						clientActions: []models.CRMClientAction{canonical},
+					}, nil
+				}
+				if iteration < 2 {
+					dataContext = appendDataContext(
+						dataContext,
+						"Mandatory screenshot field action",
+						"[SYSTEM: The attached screenshot and the user's first message are sufficient. Inspect the image again, map its visible configurable card rows to the supplied schema, and return action=client_action now. Do not ask the user to enumerate fields that are already visible.]",
+					)
+					continue
+				}
 			}
 			// The language model may understand a very informal request correctly but
 			// still try to answer from conversation context. Live CRM facts must never
@@ -99,6 +110,22 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 
 		case "client_action":
 			actions := normalizeCRMClientActions(plan.ClientActions, schema, req.PageContext.Table)
+			if screenshotFieldSettings {
+				if canonical, ok := canonicalDealScreenshotCardAction(schema, req.PageContext); ok {
+					if crmClientActionsContainFields(actions, "name", "pipeline", "amount") || iteration >= 2 {
+						return &crmAssistantResult{
+							reply:         canonicalDealScreenshotReply,
+							clientActions: []models.CRMClientAction{canonical},
+						}, nil
+					}
+					dataContext = appendDataContext(
+						dataContext,
+						"Rejected screenshot card mapping",
+						fmt.Sprintf("[SYSTEM: Reinspect the screenshot. This deal-card reference contains the standard title, pipeline, amount, and colored-dot status rows. Return action=client_action using the exact order name, pipeline, amount, %s. Do not map the branching pipeline pill to contacts_id, and do not include phone/contact unless a phone or contact row is actually visible.]", canonical.FieldOrder[len(canonical.FieldOrder)-1]),
+					)
+					continue
+				}
+			}
 			if len(actions) == 0 {
 				reply := strings.TrimSpace(plan.Reply)
 				if reply == "" {
@@ -370,6 +397,92 @@ func normalizeCRMClientActions(
 		})
 	}
 	return result
+}
+
+func canonicalDealScreenshotCardAction(
+	schema []models.TableSchema,
+	pageContext models.CRMAssistantPageContext,
+) (models.CRMClientAction, bool) {
+	if strings.TrimSpace(pageContext.Table) != "deals" || len(pageContext.CardFields) == 0 {
+		return models.CRMClientAction{}, false
+	}
+
+	cardFields := make(map[string]struct{}, len(pageContext.CardFields))
+	orderedCardFields := make([]string, 0, len(pageContext.CardFields))
+	for _, field := range pageContext.CardFields {
+		slug := strings.TrimSpace(field.Slug)
+		if slug == "" {
+			continue
+		}
+		if _, duplicate := cardFields[slug]; duplicate {
+			continue
+		}
+		cardFields[slug] = struct{}{}
+		orderedCardFields = append(orderedCardFields, slug)
+	}
+
+	for _, required := range []string{"name", "pipeline", "amount"} {
+		if _, ok := cardFields[required]; !ok {
+			return models.CRMClientAction{}, false
+		}
+	}
+
+	statusFields := make([]string, 0, 1)
+	for _, table := range schema {
+		if table.Slug != "deals" {
+			continue
+		}
+		for _, field := range table.Fields {
+			if !strings.EqualFold(strings.TrimSpace(field.Type), "STATUS") {
+				continue
+			}
+			if _, rendered := cardFields[field.Slug]; rendered {
+				statusFields = append(statusFields, field.Slug)
+			}
+		}
+		break
+	}
+	if len(statusFields) != 1 {
+		return models.CRMClientAction{}, false
+	}
+
+	desired := []string{"name", "pipeline", "amount", statusFields[0]}
+	desiredSet := make(map[string]struct{}, len(desired))
+	for _, field := range desired {
+		desiredSet[field] = struct{}{}
+	}
+	hide := make([]string, 0, len(orderedCardFields)-len(desired))
+	for _, field := range orderedCardFields {
+		if _, keep := desiredSet[field]; !keep {
+			hide = append(hide, field)
+		}
+	}
+
+	return models.CRMClientAction{
+		Type:       "set_card_field_visibility",
+		Table:      "deals",
+		ShowFields: append([]string(nil), desired...),
+		HideFields: hide,
+		FieldOrder: append([]string(nil), desired...),
+	}, true
+}
+
+func crmClientActionsContainFields(actions []models.CRMClientAction, required ...string) bool {
+	present := make(map[string]struct{})
+	for _, action := range actions {
+		if action.Type != "set_card_field_visibility" || action.Table != "deals" {
+			continue
+		}
+		for _, field := range append(append([]string(nil), action.ShowFields...), action.FieldOrder...) {
+			present[field] = struct{}{}
+		}
+	}
+	for _, field := range required {
+		if _, ok := present[field]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func builtInCRMFieldAliases(table string) map[string]string {
