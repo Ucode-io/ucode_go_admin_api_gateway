@@ -86,6 +86,40 @@ func TestCRMReplyIsClarification(t *testing.T) {
 	}
 }
 
+func TestCRMLeadPeriodQueryRequiresCreatedAt(t *testing.T) {
+	tests := []struct {
+		message string
+		want    bool
+	}{
+		{message: "avgustda qaysi source eng ko‘p lid olib kelgan", want: true},
+		{message: "o‘tgan oygi lid oqimida qaysi kun pik bo‘lgan", want: true},
+		{message: "shu oygi leadlar umumiy summasi", want: true},
+		{message: "eng katta budgetli deal qaysi", want: false},
+		{message: "avgustdagi lidlarni start_date bo‘yicha guruhla", want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.message, func(t *testing.T) {
+			request := models.CRMAssistantRequest{Message: test.message}
+			if got := crmLeadPeriodQueryRequiresCreatedAt(request); got != test.want {
+				t.Fatalf("got %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestCRMSQLUsesCreatedAt(t *testing.T) {
+	if !crmSQLUsesCreatedAt(`SELECT COUNT(*) FROM "deals" WHERE d."created_at" >= $1`) {
+		t.Fatal("created_at query was not recognized")
+	}
+	if crmSQLUsesCreatedAt(`SELECT COUNT(*) FROM "deals" WHERE "start_date" >= $1`) {
+		t.Fatal("start_date must not satisfy the creation-time guard")
+	}
+	if crmSQLUsesCreatedAt(`SELECT "created_at" FROM "deals" WHERE "start_date" >= $1`) {
+		t.Fatal("selecting created_at must not bypass a start_date filter")
+	}
+}
+
 func TestNormalizeCRMClientActionsResolvesLabelsAndConflicts(t *testing.T) {
 	schema := []models.TableSchema{{
 		Slug: "deals",

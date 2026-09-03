@@ -97,6 +97,14 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 			return &crmAssistantResult{reply: plan.Reply, clientActions: actions}, nil
 
 		case "query":
+			if crmLeadPeriodQueryRequiresCreatedAt(req) && !crmSQLUsesCreatedAt(plan.SQL) {
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected query %d", iteration+1),
+					"[SYSTEM: This is a time-bounded lead/deal analytics request. Filter the deals table by created_at for the requested period. Do not substitute start_date, due_date, or updated_at. Produce a corrected query now.]",
+				)
+				continue
+			}
 			sqlType, validationErr := ValidateAndClassifySQL(plan.SQL)
 			if validationErr != nil {
 				dataContext = appendDataContext(
@@ -216,6 +224,39 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 
 func crmReplyIsClarification(reply string) bool {
 	return strings.Contains(strings.TrimSpace(reply), "?")
+}
+
+func crmLeadPeriodQueryRequiresCreatedAt(req models.CRMAssistantRequest) bool {
+	message := strings.ToLower(strings.TrimSpace(req.Message))
+	if !containsAnyFold(message, "lid", "lead", "deal", "лид", "сделк") {
+		return false
+	}
+	// Respect an explicit request to analyze a different date dimension.
+	if containsAnyFold(message,
+		"start_date", "start date", "boshlanish san", "дата начал",
+		"due_date", "due date", "deadline", "muddat", "срок",
+		"updated_at", "updated at", "yangilangan", "обновлен",
+	) {
+		return false
+	}
+
+	return containsAnyFold(message,
+		"bugun", "kecha", "kechagi", "kechigi", "hafta", "oy", "today", "yesterday", "week", "month", "сегодня", "вчера", "недел", "месяц",
+		"yanvar", "fevral", "mart", "aprel", "mayda", "may oy", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr",
+		"january", "february", "march", "april", "june", "july", "august", "september", "october", "november", "december",
+		"январ", "феврал", "март", "апрел", "май", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр",
+	)
+}
+
+func crmSQLUsesCreatedAt(sql string) bool {
+	lowerSQL := strings.ToLower(sql)
+	whereIndex := strings.Index(lowerSQL, "where")
+	if whereIndex < 0 {
+		return false
+	}
+	filterSQL := lowerSQL[whereIndex:]
+	return strings.Contains(filterSQL, "created_at") &&
+		!containsAnyFold(filterSQL, "start_date", "due_date", "updated_at")
 }
 
 func crmAssistantHistory(messages []models.CRMAssistantMessage) []models.ChatMessage {
