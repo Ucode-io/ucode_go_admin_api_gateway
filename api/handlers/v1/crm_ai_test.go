@@ -102,6 +102,21 @@ func TestCRMRequestRecognizesScreenshotCardMatchAsFieldSettings(t *testing.T) {
 	}
 }
 
+func TestCRMRequestRecognizesScreenshotReferenceWithoutCardKeyword(t *testing.T) {
+	message := "lidlarimni shunaqa qiber"
+	if !crmRequestLooksLikeFieldSettings(message) {
+		t.Fatalf("expected %q to be recognized as a screenshot field-setting request", message)
+	}
+	request := models.CRMAssistantRequest{
+		Message:     message,
+		Images:      []string{"data:image/jpeg;base64,eA=="},
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}
+	if crmRequestRequiresLiveLookup(request) {
+		t.Fatal("screenshot reference must not be misclassified as a live analytics lookup")
+	}
+}
+
 func TestCRMMutationCancelMessageUsesRequestLanguage(t *testing.T) {
 	tests := map[string]string{
 		"Ksjdd deal budgetini o‘zgartir": "Amal bekor qilindi. Hech narsa o‘zgarmadi.",

@@ -258,7 +258,7 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 	hasGenericShowIntent := containsAnyFold(message,
 		"ko‘rsat", "ko'rsat", "korsat", "show", "покажи",
 	)
-	hasVisualReferenceIntent := hasFieldContext && containsAnyFold(message,
+	hasVisualReferenceIntent := containsAnyFold(message,
 		"shunaqa", "manaqa", "huddi shu", "xuddi shu", "shu kabi",
 		"rasmdag", "screenshot", "skrin", "like this", "match this", "как на", "как здесь",
 	)
