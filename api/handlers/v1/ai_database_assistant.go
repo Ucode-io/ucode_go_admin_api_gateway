@@ -923,8 +923,8 @@ func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context, resourceEnvI
 }
 
 func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId string) ([]models.TableSchema, error) {
-	if p.mcpProjectId == "" {
-		return nil, fmt.Errorf("no backend project associated with this chat")
+	if resourceEnvId == "" {
+		return nil, fmt.Errorf("resource environment id is required")
 	}
 
 	tablesResp, err := p.service.GoObjectBuilderService().Table().GetAll(ctx, &nb.GetAllTablesRequest{

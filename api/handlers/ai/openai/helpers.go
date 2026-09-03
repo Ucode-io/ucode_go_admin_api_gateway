@@ -156,6 +156,18 @@ func wrapMaxTokens(err error, usage models.LLMUsage, stage string) error {
 
 // 30s timeout: generous for slow CDNs, bounded enough to fail fast on dead URLs.
 func fetchImageAsBase64(url string) (data string, mimeType string, err error) {
+	if strings.HasPrefix(url, "data:image/") {
+		header, encoded, ok := strings.Cut(url, ",")
+		if !ok || !strings.HasSuffix(header, ";base64") {
+			return "", "", fmt.Errorf("invalid image data URI")
+		}
+		mimeType = strings.TrimSuffix(strings.TrimPrefix(header, "data:"), ";base64")
+		if _, decodeErr := base64.StdEncoding.DecodeString(encoded); decodeErr != nil {
+			return "", "", fmt.Errorf("decode image data URI: %w", decodeErr)
+		}
+		return encoded, mimeType, nil
+	}
+
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {
