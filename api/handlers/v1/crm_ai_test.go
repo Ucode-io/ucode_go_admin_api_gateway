@@ -148,6 +148,80 @@ func TestNormalizeCRMClientActionsResolvesLabelsAndConflicts(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMFieldSettingsShowHide(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "source", Label: "Source"},
+			{Slug: "amount", Label: "Сумма"},
+		},
+	}}
+	result, ok := buildCommonCRMFieldSettings(models.CRMAssistantRequest{
+		Message:     "source korinadigon qiber keyin budgetni yashir kartochkada",
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}, schema)
+	if !ok || len(result.clientActions) != 1 {
+		t.Fatalf("expected field action, got %#v, ok=%v", result, ok)
+	}
+	action := result.clientActions[0]
+	if !reflect.DeepEqual(action.ShowFields, []string{"source"}) || !reflect.DeepEqual(action.HideFields, []string{"amount"}) {
+		t.Fatalf("unexpected show/hide action: %#v", action)
+	}
+}
+
+func TestBuildCommonCRMFieldSettingsUnderstandsNegativeShowForm(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "source", Label: "Source"},
+			{Slug: "amount", Label: "Сумма"},
+		},
+	}}
+	result, ok := buildCommonCRMFieldSettings(models.CRMAssistantRequest{
+		Message:     "kartochkada source korinsin budgetni korsatma",
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}, schema)
+	if !ok || len(result.clientActions) != 1 {
+		t.Fatalf("expected field action, got %#v, ok=%v", result, ok)
+	}
+	action := result.clientActions[0]
+	if !reflect.DeepEqual(action.ShowFields, []string{"source"}) || !reflect.DeepEqual(action.HideFields, []string{"amount"}) {
+		t.Fatalf("unexpected negative-show action: %#v", action)
+	}
+}
+
+func TestBuildCommonCRMFieldSettingsOrdersPhoneAndSource(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "source", Label: "Source"},
+		},
+	}}
+	result, ok := buildCommonCRMFieldSettings(models.CRMAssistantRequest{
+		Message:     "kartochkada telefonni birinchi source ni ikkinchi qiber",
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}, schema)
+	if !ok || len(result.clientActions) != 1 {
+		t.Fatalf("expected ordered field action, got %#v, ok=%v", result, ok)
+	}
+	action := result.clientActions[0]
+	want := []string{"contacts_id", "source"}
+	if !reflect.DeepEqual(action.FieldOrder, want) || !reflect.DeepEqual(action.ShowFields, want) {
+		t.Fatalf("unexpected ordered field action: %#v", action)
+	}
+}
+
+func TestBuildCommonCRMFieldSettingsLeavesScreenshotsForVisionAgent(t *testing.T) {
+	result, ok := buildCommonCRMFieldSettings(models.CRMAssistantRequest{
+		Message:     "source ni ko‘rsat",
+		Images:      []string{"data:image/png;base64,eA=="},
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}, []models.TableSchema{{Slug: "deals", Fields: []models.FieldSchema{{Slug: "source"}}}})
+	if ok || result != nil {
+		t.Fatal("screenshot-backed settings must be handled by the vision agent")
+	}
+}
+
 func TestNormalizeCRMClientActionsResolvesBudgetAliasToAmount(t *testing.T) {
 	schema := []models.TableSchema{{
 		Slug: "deals",
