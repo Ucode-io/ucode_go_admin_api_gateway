@@ -124,7 +124,7 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 					SQLParams:      plan.SQLParams,
 					Reply:          plan.Reply,
 					SuccessMessage: plan.SuccessMessage,
-					CancelMessage:  plan.CancelMessage,
+					CancelMessage:  crmMutationCancelMessage(req.Message),
 					ResourceEnvID:  p.resourceEnvId,
 				}, sqlType)
 				if pendingErr != nil {
@@ -227,6 +227,17 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 
 func crmReplyIsClarification(reply string) bool {
 	return strings.Contains(strings.TrimSpace(reply), "?")
+}
+
+func crmMutationCancelMessage(message string) string {
+	switch detectCRMRequestLanguage(strings.ToLower(message)) {
+	case "ru":
+		return "Действие отменено. Данные не изменены."
+	case "en":
+		return "Action cancelled. No data was changed."
+	default:
+		return "Amal bekor qilindi. Hech narsa o‘zgarmadi."
+	}
 }
 
 func crmLeadPeriodQueryRequiresCreatedAt(req models.CRMAssistantRequest) bool {

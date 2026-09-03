@@ -86,6 +86,33 @@ func TestCRMReplyIsClarification(t *testing.T) {
 	}
 }
 
+func TestCRMMutationCancelMessageUsesRequestLanguage(t *testing.T) {
+	tests := map[string]string{
+		"Ksjdd deal budgetini o‘zgartir": "Amal bekor qilindi. Hech narsa o‘zgarmadi.",
+		"Update the Ksjdd deal budget":   "Action cancelled. No data was changed.",
+		"Измени бюджет сделки Ksjdd":     "Действие отменено. Данные не изменены.",
+	}
+	for message, want := range tests {
+		if got := crmMutationCancelMessage(message); got != want {
+			t.Fatalf("message %q: got %q, want %q", message, got, want)
+		}
+	}
+}
+
+func TestDetectCRMRequestLanguageHandlesMixedCRMVocabulary(t *testing.T) {
+	tests := map[string]string{
+		"Ksjdd deal budgetini o‘zgartir": "uz",
+		"Update the Ksjdd deal budget":   "en",
+		"Измени бюджет сделки Ksjdd":     "ru",
+		"kecha kelgan лидlar":            "uz",
+	}
+	for message, want := range tests {
+		if got := detectCRMRequestLanguage(message); got != want {
+			t.Fatalf("message %q: got %q, want %q", message, got, want)
+		}
+	}
+}
+
 func TestCRMLeadPeriodQueryRequiresCreatedAt(t *testing.T) {
 	tests := []struct {
 		message string

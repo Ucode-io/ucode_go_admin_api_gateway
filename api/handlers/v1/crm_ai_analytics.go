@@ -505,10 +505,19 @@ func containsAnyFold(value string, candidates ...string) bool {
 }
 
 func detectCRMRequestLanguage(value string) string {
-	if containsAnyFold(value, "вчера", "сегодня", "лид", "статус", "этап", "сколько", "приш") {
+	if containsAnyFold(value,
+		"bugun", "kecha", "nechta", "neshta", "qancha", "qaysi", "hafta", " oy", "oyda",
+		"qiber", "ber", "o‘zgartir", "o'zgartir", "ozgartir", "ko‘rsat", "ko'rsat", "korsat", "yashir", "kel", "tush",
+	) {
+		return "uz"
+	}
+	if containsAnyFold(value, "вчера", "сегодня", "лид", "статус", "этап", "сколько", "приш", "измени", "сделк", "покажи", "скрой") {
 		return "ru"
 	}
-	if containsAnyFold(value, "yesterday", "today", "lead", "how many", "came", "arrived") {
+	if containsAnyFold(value,
+		"yesterday", "today", "lead", "how many", "came", "arrived", "update", "change", "delete", "create",
+		"show", "hide", "first", "second", " the ", "please", "cancel",
+	) {
 		return "en"
 	}
 	return "uz"
