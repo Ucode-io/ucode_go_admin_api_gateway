@@ -61,7 +61,11 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 			return nil, err
 		}
 		if iteration == maxCRMAssistantIterations-1 && hasSuccessfulRead {
-			dataContext += "\n\n[SYSTEM: Final step. Return action=answer using the fetched data. Do not request another query.]"
+			if crmRequestLooksLikeMutation(message) {
+				dataContext += "\n\n[SYSTEM: Final step. Use the fetched guid/data to return action=record_action, action=pipeline_action, or a safe mutation query now. Do not answer with instructions and do not request another read.]"
+			} else {
+				dataContext += "\n\n[SYSTEM: Final step. Return action=answer using the fetched data. Do not request another query.]"
+			}
 		}
 
 		images := req.Images
@@ -102,7 +106,7 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 				dataContext = appendDataContext(
 					dataContext,
 					"Mandatory CRM mutation",
-					"[SYSTEM: The user asked to change CRM state. Do not answer with instructions or claim completion. Prepare the requested pipeline_action or a safe INSERT/UPDATE/DELETE now; ask one concise clarification only if a required business value is genuinely missing.]",
+					"[SYSTEM: The user asked to change CRM state. Do not answer with instructions or claim completion. Prepare the requested record_action, pipeline_action, or a safe INSERT/UPDATE/DELETE now; ask one concise clarification only if a required business value is genuinely missing.]",
 				)
 				continue
 			}
@@ -154,6 +158,18 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 					dataContext,
 					fmt.Sprintf("Rejected pipeline action %d", iteration+1),
 					fmt.Sprintf("[SYSTEM: The pipeline action was incomplete or invalid: %v. Correct it from the user's request. Ask one concise clarification only if a required name is genuinely missing.]", normalizeErr),
+				)
+				continue
+			}
+			return &crmAssistantResult{reply: pending.Description, pendingAction: pending}, nil
+
+		case "record_action":
+			pending, normalizeErr := newCRMRecordPendingAction(req.Message, plan.RecordAction, schema, p.resourceEnvId)
+			if normalizeErr != nil {
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected record action %d", iteration+1),
+					fmt.Sprintf("[SYSTEM: The CRM record action was incomplete or invalid: %v. Correct it using the exact schema. Query an exact record guid before update/delete; ask one concise clarification only if required user data is missing.]", normalizeErr),
 				)
 				continue
 			}

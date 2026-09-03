@@ -62,6 +62,16 @@ func crmAssistantTool() chatTool {
 			"stages":            map[string]any{"type": "array", "items": pipelineStage},
 		},
 	}
+	recordAction := map[string]any{
+		"type":     "object",
+		"required": []string{"operation", "table"},
+		"properties": map[string]any{
+			"operation":   map[string]any{"type": "string", "enum": []string{"create", "update", "delete"}},
+			"table":       map[string]any{"type": "string", "enum": []string{"deals", "contacts", "companies", "tasks"}},
+			"record_guid": map[string]any{"type": "string"},
+			"data":        map[string]any{"type": "object", "additionalProperties": true},
+		},
+	}
 	return chatTool{
 		Type: "function",
 		Function: functionDef{
@@ -71,7 +81,7 @@ func crmAssistantTool() chatTool {
 				"type":     "object",
 				"required": []string{"action", "needs_more_data", "reply"},
 				"properties": map[string]any{
-					"action":          map[string]any{"type": "string", "enum": []string{"query", "pipeline_action", "answer", "client_action", "schema"}},
+					"action":          map[string]any{"type": "string", "enum": []string{"query", "record_action", "pipeline_action", "answer", "client_action", "schema"}},
 					"sql":             map[string]any{"type": "string"},
 					"sql_params":      map[string]any{"type": "array", "items": map[string]any{}},
 					"needs_more_data": map[string]any{"type": "boolean"},
@@ -80,6 +90,7 @@ func crmAssistantTool() chatTool {
 					"success_message": map[string]any{"type": "string"},
 					"cancel_message":  map[string]any{"type": "string"},
 					"pipeline_action": pipelineAction,
+					"record_action":   recordAction,
 					"client_actions": map[string]any{
 						"type": "array",
 						"items": map[string]any{

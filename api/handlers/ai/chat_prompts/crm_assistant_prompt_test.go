@@ -115,6 +115,7 @@ func TestCRMAssistantPromptFormatsGroupedAnalyticsAsMarkdownTable(t *testing.T) 
 func TestCRMAssistantPromptCoversCRMEntityMutations(t *testing.T) {
 	for _, expected := range []string{
 		`action="pipeline_action"`,
+		`action="record_action"`,
 		`create_pipeline`,
 		`reorder_stages`,
 		`A request to create a new lead/deal means INSERT into deals`,

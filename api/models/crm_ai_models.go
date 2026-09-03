@@ -36,6 +36,7 @@ type (
 		HideFields     []string           `json:"hide_fields,omitempty"`
 		FieldOrder     []string           `json:"field_order,omitempty"`
 		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
+		RecordAction   *CRMRecordAction   `json:"record_action,omitempty"`
 	}
 
 	CRMPipelineStageInput struct {
@@ -58,6 +59,13 @@ type (
 		Stages          []CRMPipelineStageInput `json:"stages,omitempty"`
 	}
 
+	CRMRecordAction struct {
+		Operation  string         `json:"operation"`
+		Table      string         `json:"table"`
+		RecordGUID string         `json:"record_guid,omitempty"`
+		Data       map[string]any `json:"data,omitempty"`
+	}
+
 	CRMAssistantPlan struct {
 		Action         string             `json:"action"`
 		SQL            string             `json:"sql,omitempty"`
@@ -69,6 +77,7 @@ type (
 		CancelMessage  string             `json:"cancel_message,omitempty"`
 		ClientActions  []CRMClientAction  `json:"client_actions,omitempty"`
 		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
+		RecordAction   *CRMRecordAction   `json:"record_action,omitempty"`
 	}
 
 	CRMAssistantInput struct {

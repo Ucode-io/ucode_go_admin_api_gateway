@@ -214,6 +214,48 @@ func TestNormalizeCRMPipelineActionRejectsDuplicateStages(t *testing.T) {
 	}
 }
 
+func TestNormalizeCRMRecordActionAllowsExactSchemaFields(t *testing.T) {
+	action, err := normalizeCRMRecordAction(models.CRMRecordAction{
+		Operation: "create",
+		Table:     "deals",
+		Data: map[string]any{
+			"name":     "CODEX test lead",
+			"pipeline": "Enterprise",
+			"stage":    "New Lead",
+			"amount":   12345,
+		},
+	}, []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "name"}, {Slug: "pipeline"}, {Slug: "stage"}, {Slug: "amount"},
+		},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if action.Operation != "create" || action.Table != "deals" || len(action.Data) != 4 {
+		t.Fatalf("unexpected normalized action: %#v", action)
+	}
+}
+
+func TestNormalizeCRMRecordActionRequiresExactGUIDAndSafeFields(t *testing.T) {
+	if _, err := normalizeCRMRecordAction(models.CRMRecordAction{
+		Operation: "update", Table: "deals", Data: map[string]any{"amount": 1},
+	}, nil); err == nil {
+		t.Fatal("update without guid must be rejected")
+	}
+	if _, err := normalizeCRMRecordAction(models.CRMRecordAction{
+		Operation: "update", Table: "deals", RecordGUID: "deal-1", Data: map[string]any{"deleted_at": "now"},
+	}, nil); err == nil {
+		t.Fatal("protected fields must be rejected")
+	}
+	if _, err := normalizeCRMRecordAction(models.CRMRecordAction{
+		Operation: "delete", Table: "deals", RecordGUID: "deal-1", Data: map[string]any{"name": "ignored"},
+	}, nil); err != nil {
+		t.Fatalf("exact delete should be accepted: %v", err)
+	}
+}
+
 func TestDetectCRMRequestLanguageHandlesMixedCRMVocabulary(t *testing.T) {
 	tests := map[string]string{
 		"Ksjdd deal budgetini o‘zgartir": "uz",

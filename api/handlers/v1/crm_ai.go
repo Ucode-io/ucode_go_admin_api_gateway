@@ -184,6 +184,28 @@ func (h *HandlerV1) ConfirmCRMAssistantAction(c *gin.Context) {
 		})
 		return
 	}
+	if stored.Action.Action == "client_record" {
+		recordAction, decodeErr := decodeStoredCRMRecordAction(stored.Action.Data)
+		if decodeErr != nil {
+			h.log.Error("crm ai: stored record action is invalid", logger.Error(decodeErr))
+			h.HandleResponse(c, status_http.InternalServerError, "stored record action is invalid")
+			return
+		}
+		_, _ = h.centralRedis.Del(c.Request.Context(), key).Result()
+		reply := stored.Action.SuccessMessage
+		if strings.TrimSpace(reply) == "" {
+			reply = "CRM yozuvi yangilandi."
+		}
+		h.HandleResponse(c, status_http.OK, models.CRMAssistantResponse{
+			Reply: reply,
+			ClientActions: []models.CRMClientAction{{
+				Type:         "manage_record",
+				Table:        recordAction.Table,
+				RecordAction: recordAction,
+			}},
+		})
+		return
+	}
 
 	service, resourceEnvID, err := h.getAiChatServices(c)
 	if err != nil {
