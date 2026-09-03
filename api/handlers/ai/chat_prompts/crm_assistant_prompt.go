@@ -3,6 +3,7 @@ package chat_prompts
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"ucode/ucode_go_api_gateway/api/models"
 )
@@ -59,6 +60,10 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 		strings.Join(in.PageContext.HiddenFields, ","),
 		strings.Join(in.PageContext.FieldOrder, ","),
 	)
+	if dateHint := buildRelativeDateHint(in.Message, in.PageContext.Now, in.PageContext.Timezone); dateHint != "" {
+		sb.WriteString("\nServer-resolved relative date:\n")
+		sb.WriteString(dateHint)
+	}
 	sb.WriteString("\nDatabase schema:\n")
 	sb.WriteString(in.SchemaText)
 
@@ -73,4 +78,48 @@ func BuildCRMAssistantMessage(in models.CRMAssistantInput) string {
 	}
 
 	return sb.String()
+}
+
+func buildRelativeDateHint(message, nowText, timezone string) string {
+	lowerMessage := strings.ToLower(message)
+	period := ""
+	dayOffset := 0
+	switch {
+	case containsAny(lowerMessage, "kecha", "yesterday", "вчера"):
+		period = "yesterday"
+		dayOffset = -1
+	case containsAny(lowerMessage, "bugun", "today", "сегодня"):
+		period = "today"
+	default:
+		return ""
+	}
+
+	now, err := time.Parse(time.RFC3339, strings.TrimSpace(nowText))
+	if err != nil {
+		return ""
+	}
+	location := now.Location()
+	if requestedLocation, locationErr := time.LoadLocation(strings.TrimSpace(timezone)); locationErr == nil {
+		location = requestedLocation
+	}
+	localNow := now.In(location)
+	start := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, location).AddDate(0, 0, dayOffset)
+	end := start.AddDate(0, 0, 1)
+
+	return fmt.Sprintf(
+		"requested_period=%s\nlocal_date=%s\nuse_half_open_interval=[%s, %s)\nUse this exact interval for timestamp filters and keep the same relative-period wording in the final answer.\n",
+		period,
+		start.Format("2006-01-02"),
+		start.Format(time.RFC3339),
+		end.Format(time.RFC3339),
+	)
+}
+
+func containsAny(value string, candidates ...string) bool {
+	for _, candidate := range candidates {
+		if strings.Contains(value, candidate) {
+			return true
+		}
+	}
+	return false
 }
