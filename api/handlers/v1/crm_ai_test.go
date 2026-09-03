@@ -177,6 +177,29 @@ func TestBuildCommonCRMPipelineActionParsesExactMultilineRequest(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMPipelineActionParsesScreenshotOneLineRequest(t *testing.T) {
+	request := models.CRMAssistantRequest{
+		Message: `Generate new pipleline "CODEX Enterprise", with stages - New Lead - Meet - Proposal - Contract - Payment`,
+	}
+	result, ok := buildCommonCRMPipelineAction(request, "resource-env")
+	if !ok || result.pendingAction == nil {
+		t.Fatalf("expected pending pipeline action, got %#v, ok=%v", result, ok)
+	}
+	action, err := decodeStoredCRMPipelineAction(result.pendingAction.Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"New Lead", "Meet", "Proposal", "Contract", "Payment"}
+	if len(action.Stages) != len(want) {
+		t.Fatalf("stages = %#v", action.Stages)
+	}
+	for index, name := range want {
+		if action.Stages[index].Name != name {
+			t.Fatalf("stage %d = %q, want %q", index, action.Stages[index].Name, name)
+		}
+	}
+}
+
 func TestNormalizeCRMPipelineActionRejectsDuplicateStages(t *testing.T) {
 	_, err := normalizeCRMPipelineAction(models.CRMPipelineAction{
 		Operation:    "create_pipeline",

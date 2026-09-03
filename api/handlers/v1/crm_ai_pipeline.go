@@ -10,6 +10,7 @@ import (
 )
 
 var quotedCRMPipelineName = regexp.MustCompile(`["“”']([^"“”']{1,120})["“”']`)
+var inlineCRMPipelineStageSeparator = regexp.MustCompile(`\s+[-–—•]\s+`)
 
 var crmPipelineStageColors = []string{
 	"#0d9488", "#3b82f6", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444",
@@ -47,6 +48,23 @@ func buildCommonCRMPipelineAction(
 			continue
 		}
 		stages = append(stages, models.CRMPipelineStageInput{Name: line})
+	}
+	if len(lines) == 1 {
+		stageListStart := -1
+		for _, marker := range []string{"stages", "stage:", "bosqichlar", "этапы", "этапами"} {
+			if markerIndex := strings.Index(lower, marker); markerIndex >= 0 {
+				stageListStart = markerIndex + len(marker)
+				break
+			}
+		}
+		if stageListStart >= 0 && stageListStart < len(message) {
+			for _, stageName := range inlineCRMPipelineStageSeparator.Split(strings.TrimSpace(message[stageListStart:]), -1) {
+				stageName = strings.TrimSpace(strings.TrimLeft(stageName, "-*•–—:,"))
+				if stageName != "" {
+					stages = append(stages, models.CRMPipelineStageInput{Name: stageName})
+				}
+			}
+		}
 	}
 	if len(stages) == 0 {
 		return nil, false
