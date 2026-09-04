@@ -36,11 +36,10 @@ func newCRMBatchPendingAction(
 	}
 	for index, item := range record.Records {
 		pipelineRaw, hasPipeline := item["pipeline"]
-		pipelineValue := strings.TrimSpace(fmt.Sprint(pipelineRaw))
-		if !hasPipeline || pipelineRaw == nil || pipelineValue == "" {
+		if !hasPipeline || pipelineRaw == nil || strings.TrimSpace(fmt.Sprint(pipelineRaw)) == "" {
 			item["pipeline"] = pipeline.PipelineName
-		} else if pipelineValue != pipeline.PipelineName {
-			return nil, fmt.Errorf("record %d targets pipeline %q instead of %q", index+1, pipelineValue, pipeline.PipelineName)
+		} else if !crmRecordValueContainsString(pipelineRaw, pipeline.PipelineName) {
+			return nil, fmt.Errorf("record %d targets pipeline %q instead of %q", index+1, fmt.Sprint(pipelineRaw), pipeline.PipelineName)
 		}
 	}
 	normalized := models.CRMBatchAction{PipelineAction: &pipeline, RecordAction: &record}
@@ -66,6 +65,17 @@ func newCRMBatchPendingAction(
 		SuccessMessage:     success,
 		CancelMessage:      crmMutationCancelMessage(request),
 	}, nil
+}
+
+func crmRecordValueContainsString(value any, expected string) bool {
+	switch typed := value.(type) {
+	case []string:
+		return len(typed) == 1 && typed[0] == expected
+	case []any:
+		return len(typed) == 1 && fmt.Sprint(typed[0]) == expected
+	default:
+		return fmt.Sprint(value) == expected
+	}
 }
 
 func decodeStoredCRMBatchAction(data map[string]any) (*models.CRMBatchAction, error) {

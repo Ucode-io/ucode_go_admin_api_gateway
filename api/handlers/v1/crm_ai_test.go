@@ -222,6 +222,37 @@ func TestSpreadsheetImportBypassesStandalonePipelineParser(t *testing.T) {
 	}
 }
 
+func TestSpreadsheetImportBuildsAtomicPipelineAndDeals(t *testing.T) {
+	schema := []models.TableSchema{{Slug: "deals", Fields: []models.FieldSchema{
+		{Slug: "name", Label: "Name", Type: "SINGLE_LINE"},
+		{Slug: "amount", Label: "Amount", Type: "NUMBER"},
+		{Slug: "stage", Label: "Stage", Type: "SINGLE_LINE"},
+		{Slug: "source", Label: "Source", Type: "MULTISELECT"},
+		{Slug: "pipeline", Label: "Pipeline", Type: "MULTISELECT"},
+	}}}
+	req := models.CRMAssistantRequest{Message: "Create a new pipeline \"CODEX Excel\" with stages New Lead, Qualification, Won and import all attached Excel deals\n\nSPREADSHEET_IMPORT_DATA\nrow_count=2\nrows=[{\"Name\":\"Lead 1\",\"Amount\":100,\"Stage\":\"New Lead\",\"Source\":\"Excel\"},{\"Name\":\"Lead 2\",\"Amount\":200,\"Stage\":\"Won\",\"Source\":\"Excel\"}]\nEND_SPREADSHEET_IMPORT_DATA"}
+	result, handled := buildCommonCRMSpreadsheetBatchAction(req, schema, "env")
+	if !handled || result == nil || result.pendingAction == nil {
+		t.Fatalf("expected atomic pending action: handled=%v result=%#v", handled, result)
+	}
+	if result.pendingAction.Action != "client_batch" {
+		t.Fatalf("action = %q", result.pendingAction.Action)
+	}
+	action, err := decodeStoredCRMBatchAction(result.pendingAction.Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(action.PipelineAction.Stages) != 3 || action.PipelineAction.Stages[2].Name != "Won" {
+		t.Fatalf("stages = %#v", action.PipelineAction.Stages)
+	}
+	if len(action.RecordAction.Records) != 2 {
+		t.Fatalf("records = %#v", action.RecordAction.Records)
+	}
+	if !reflect.DeepEqual(action.RecordAction.Records[0]["source"], []any{"Excel"}) && !reflect.DeepEqual(action.RecordAction.Records[0]["source"], []string{"Excel"}) {
+		t.Fatalf("source = %#v", action.RecordAction.Records[0]["source"])
+	}
+}
+
 func TestCRMMutationCancelMessageUsesRequestLanguage(t *testing.T) {
 	tests := map[string]string{
 		"Ksjdd deal budgetini o‘zgartir": "Amal bekor qilindi. Hech narsa o‘zgarmadi.",
