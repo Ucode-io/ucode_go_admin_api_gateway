@@ -125,6 +125,17 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 			return &crmAssistantResult{reply: plan.Reply}, nil
 
 		case "client_action":
+			// Card visibility is the only supported client-side configuration
+			// action. Never let the model reinterpret an analytics request such as
+			// "show the stage counts in a table" as a card-layout change.
+			if !crmRequestLooksLikeFieldSettings(message) {
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected unrelated client action %d", iteration+1),
+					"[SYSTEM: The user did not ask to configure card fields. Do not return client_action. Answer the requested CRM question using a live database query, or prepare the requested CRM mutation.]",
+				)
+				continue
+			}
 			actions := normalizeCRMClientActions(plan.ClientActions, schema, req.PageContext.Table)
 			if screenshotFieldSettings {
 				if canonical, ok := canonicalDealScreenshotCardAction(schema, req.PageContext); ok {

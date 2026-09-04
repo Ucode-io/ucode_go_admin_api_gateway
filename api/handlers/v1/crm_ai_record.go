@@ -59,14 +59,14 @@ func normalizeCRMRecordAction(action models.CRMRecordAction, schema []models.Tab
 		return action, fmt.Errorf("too many record fields")
 	}
 
-	allowedFields := map[string]struct{}{}
+	allowedFields := map[string]models.FieldSchema{}
 	if len(schema) > 0 {
 		table, ok := findCRMSchemaTable(schema, action.Table)
 		if !ok {
 			return action, fmt.Errorf("table %q is not in the project schema", action.Table)
 		}
 		for _, field := range table.Fields {
-			allowedFields[field.Slug] = struct{}{}
+			allowedFields[field.Slug] = field
 		}
 	}
 	protected := map[string]bool{
@@ -80,14 +80,34 @@ func normalizeCRMRecordAction(action models.CRMRecordAction, schema []models.Tab
 			return action, fmt.Errorf("field %q cannot be changed", rawKey)
 		}
 		if len(allowedFields) > 0 {
-			if _, ok := allowedFields[key]; !ok {
+			field, ok := allowedFields[key]
+			if !ok {
 				return action, fmt.Errorf("field %q is not in table %q", key, action.Table)
 			}
+			value = normalizeCRMRecordFieldValue(field, value)
 		}
 		cleaned[key] = value
 	}
 	action.Data = cleaned
 	return action, nil
+}
+
+func normalizeCRMRecordFieldValue(field models.FieldSchema, value any) any {
+	fieldType := strings.ToLower(strings.TrimSpace(field.Type))
+	// Ucode's MULTISELECT columns are PostgreSQL arrays. The item API expects
+	// an array even when the user supplies a single option (for example Source).
+	if strings.Contains(fieldType, "multi") {
+		switch typed := value.(type) {
+		case string:
+			if strings.TrimSpace(typed) == "" {
+				return []string{}
+			}
+			return []string{typed}
+		case nil:
+			return []string{}
+		}
+	}
+	return value
 }
 
 func crmRecordActionMessages(request string, action models.CRMRecordAction) (string, string) {

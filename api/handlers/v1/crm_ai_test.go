@@ -117,6 +117,30 @@ func TestCRMRequestRecognizesScreenshotReferenceWithoutCardKeyword(t *testing.T)
 	}
 }
 
+func TestCRMAnalyticsTableRequestIsNotFieldSettings(t *testing.T) {
+	message := "CODEX pipeline bo'yicha har bir stagedagi lidlar sonini tableda ko'rsat"
+	if crmRequestLooksLikeFieldSettings(message) {
+		t.Fatalf("analytics table request must not be recognized as card settings: %q", message)
+	}
+	request := models.CRMAssistantRequest{
+		Message:     message,
+		PageContext: models.CRMAssistantPageContext{Table: "deals"},
+	}
+	if !crmRequestRequiresLiveLookup(request) {
+		t.Fatal("analytics table request must require a live CRM lookup")
+	}
+}
+
+func TestNormalizeCRMRecordFieldValueWrapsMultiselectScalar(t *testing.T) {
+	got := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "source", Type: "MULTISELECT"}, "codex-e2e")
+	if !reflect.DeepEqual(got, []string{"codex-e2e"}) {
+		t.Fatalf("multiselect scalar = %#v", got)
+	}
+	if got := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "name", Type: "SINGLE_LINE"}, "Acme"); got != "Acme" {
+		t.Fatalf("single line value = %#v", got)
+	}
+}
+
 func TestCRMMutationCancelMessageUsesRequestLanguage(t *testing.T) {
 	tests := map[string]string{
 		"Ksjdd deal budgetini o‘zgartir": "Amal bekor qilindi. Hech narsa o‘zgarmadi.",

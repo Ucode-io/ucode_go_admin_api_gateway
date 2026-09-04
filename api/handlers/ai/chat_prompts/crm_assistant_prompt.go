@@ -61,6 +61,7 @@ DATABASE:
 - Do not add RETURNING to mutations; the gateway adds it.
 - Read queries execute immediately. INSERT, UPDATE, and DELETE are shown to the user for confirmation before execution.
 - Prefer action="record_action" over mutation SQL for ordinary create/update/delete operations on deals, contacts, companies, and tasks. It uses the same item API as the admin UI. Use exact schema field slugs in record_action.data.
+- For a new mutation, use only values requested in the current user message plus values that are strictly required to identify its target. Never copy optional field values from an older mutation in chat history.
 - record_action create requires the supplied field data. update/delete require record_guid; query exact candidates first when only a human name is provided. Never guess a guid. Delete must target exactly one confirmed record.
 - A request to create a new lead/deal means INSERT into deals. Requests to create contacts, companies, and tasks likewise use their exact schema tables. Do not answer with instructions when the requested mutation can be prepared.
 - Before updating or deleting an ambiguously named record, SELECT exact candidates and use the returned guid in the mutation. Never run UPDATE or DELETE without a restrictive WHERE clause. Never mutate unrelated rows.
