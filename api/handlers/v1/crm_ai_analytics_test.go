@@ -121,13 +121,53 @@ func TestBuildCommonCRMAnalyticsPlanListsYesterdayLeadPhones(t *testing.T) {
 			Timezone: "Asia/Tashkent",
 		},
 	}, crmAnalyticsTestSchema())
-	if !ok || plan.kind != crmAnalyticsLeadPhones {
+	if !ok || plan.kind != crmAnalyticsLeadDetails || !plan.includePhone || plan.includeAmount {
 		t.Fatalf("expected phone-list plan, got %#v, ok=%v", plan, ok)
 	}
 	for _, expected := range []string{`LEFT JOIN "contacts"`, `c."phone"`, `d."created_at"`, "LIMIT 50"} {
 		if !strings.Contains(plan.sql, expected) {
 			t.Fatalf("phone SQL %q does not contain %q", plan.sql, expected)
 		}
+	}
+}
+
+func TestBuildCommonCRMAnalyticsPlanListsTodayLeadPhoneAndBudget(t *testing.T) {
+	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+		Message: "bugun kegan lidlani oti bilan nomerini keyin budjetini ber",
+		PageContext: models.CRMAssistantPageContext{
+			Table:    "deals",
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}, crmAnalyticsTestSchema())
+	if !ok || plan.kind != crmAnalyticsLeadDetails || !plan.includePhone || !plan.includeAmount {
+		t.Fatalf("expected phone-and-budget details plan, got %#v, ok=%v", plan, ok)
+	}
+	for _, expected := range []string{`d."name"`, `c."phone"`, `d."amount"`, `d."created_at"`} {
+		if !strings.Contains(plan.sql, expected) {
+			t.Fatalf("details SQL %q does not contain %q", plan.sql, expected)
+		}
+	}
+}
+
+func TestBuildCommonCRMAnalyticsPlanUnderstandsBudgetFollowUpFromHistory(t *testing.T) {
+	plan, ok := buildCommonCRMAnalyticsPlan(models.CRMAssistantRequest{
+		Message: "budjetchi",
+		History: []models.CRMAssistantMessage{
+			{Role: "user", Content: "bugun kegan lidlani oti bilan nomerini ber"},
+			{Role: "assistant", Content: "Bugun kelgan lidlar jadvali."},
+		},
+		PageContext: models.CRMAssistantPageContext{
+			Table:    "deals",
+			Now:      "2026-09-03T05:00:00Z",
+			Timezone: "Asia/Tashkent",
+		},
+	}, crmAnalyticsTestSchema())
+	if !ok || plan.kind != crmAnalyticsLeadDetails || plan.includePhone || !plan.includeAmount {
+		t.Fatalf("expected history-aware budget details plan, got %#v, ok=%v", plan, ok)
+	}
+	if plan.periodLabel != "Bugun" {
+		t.Fatalf("got period %q, want Bugun", plan.periodLabel)
 	}
 }
 
@@ -144,7 +184,7 @@ func TestBuildCommonCRMAnalyticsPlanUnderstandsPhoneFollowUpFromHistory(t *testi
 			Timezone: "Asia/Tashkent",
 		},
 	}, crmAnalyticsTestSchema())
-	if !ok || plan.kind != crmAnalyticsLeadPhones {
+	if !ok || plan.kind != crmAnalyticsLeadDetails || !plan.includePhone {
 		t.Fatalf("expected history-aware phone-list plan, got %#v, ok=%v", plan, ok)
 	}
 	if plan.periodLabel != "Kecha" {
@@ -442,14 +482,30 @@ func TestFormatCommonCRMAnalyticsReplies(t *testing.T) {
 	}
 
 	phoneReply, err := formatCommonCRMAnalyticsReply(crmAnalyticsPlan{
-		kind:        crmAnalyticsLeadPhones,
-		periodLabel: "Kecha",
-		language:    "uz",
+		kind:         crmAnalyticsLeadDetails,
+		periodLabel:  "Kecha",
+		language:     "uz",
+		includePhone: true,
 	}, map[string]any{"rows": []map[string]any{
 		{"lead_name": "Test lead", "phone": "+998900000000"},
 		{"lead_name": "No phone", "phone": nil},
 	}})
-	if err != nil || !strings.Contains(phoneReply, "telefon raqamlari") || !strings.Contains(phoneReply, "Test lead — +998900000000") || !strings.Contains(phoneReply, "telefon raqami ko‘rsatilmagan") {
+	if err != nil || !strings.Contains(phoneReply, "| Lid | Telefon |") || !strings.Contains(phoneReply, "| Test lead | +998900000000 |") || !strings.Contains(phoneReply, "| No phone | — |") {
 		t.Fatalf("unexpected phone reply %q, err=%v", phoneReply, err)
+	}
+
+	fullReply, err := formatCommonCRMAnalyticsReply(crmAnalyticsPlan{
+		kind:          crmAnalyticsLeadDetails,
+		periodLabel:   "Bugun",
+		language:      "uz",
+		includePhone:  true,
+		includeAmount: true,
+	}, map[string]any{"rows": []map[string]any{
+		{"lead_name": "Sunnat", "phone": "+998900000001", "amount": float64(1250000)},
+	}})
+	for _, expected := range []string{"| Lid | Telefon | Budjet |", "| Sunnat | +998900000001 | 1250000 |"} {
+		if err != nil || !strings.Contains(fullReply, expected) {
+			t.Fatalf("full details reply %q does not contain %q, err=%v", fullReply, expected, err)
+		}
 	}
 }

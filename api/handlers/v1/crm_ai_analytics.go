@@ -18,7 +18,7 @@ const (
 	crmAnalyticsLeadStatus   crmAnalyticsKind = "lead_status"
 	crmAnalyticsLeadSource   crmAnalyticsKind = "lead_source"
 	crmAnalyticsLeadPipeline crmAnalyticsKind = "lead_pipeline"
-	crmAnalyticsLeadPhones   crmAnalyticsKind = "lead_phones"
+	crmAnalyticsLeadDetails  crmAnalyticsKind = "lead_details"
 )
 
 type crmAnalyticsPlan struct {
@@ -28,6 +28,8 @@ type crmAnalyticsPlan struct {
 	periodLabel       string
 	language          string
 	includePercentage bool
+	includePhone      bool
+	includeAmount     bool
 }
 
 func (p *ChatProcessor) runCommonCRMAnalytics(
@@ -77,10 +79,12 @@ func buildCommonCRMAnalyticsPlan(
 		"protsent", "prosent", "foiz", "ulush", "percent", "percentage", "%", "процент", "доля",
 	)
 
+	includePhone := containsAnyFold(current, "nomer", "raqam", "telefon", "tel", "aloqa", "kontakt", "contact", "phone", "mobile", "number", "номер", "телефон", "контакт")
+	includeAmount := containsAnyFold(current, "budjet", "byudjet", "budget", "amount", "summa", "narx", "price", "стоимост", "бюджет", "сумм")
 	kind := crmAnalyticsKind("")
 	switch {
-	case containsAnyFold(current, "nomer", "raqam", "telefon", "tel", "aloqa", "kontakt", "contact", "phone", "mobile", "number", "номер", "телефон", "контакт"):
-		kind = crmAnalyticsLeadPhones
+	case includePhone || includeAmount:
+		kind = crmAnalyticsLeadDetails
 	case containsAnyFold(current, "source", "manba", "источник"):
 		kind = crmAnalyticsLeadSource
 	case containsAnyFold(current, "pipeline", "voronka", "воронк"):
@@ -111,14 +115,22 @@ func buildCommonCRMAnalyticsPlan(
 			includePercentage: includePercentage,
 		}, true
 	}
-	if kind == crmAnalyticsLeadPhones {
+	if kind == crmAnalyticsLeadDetails {
 		contactIDExpression := `CASE WHEN jsonb_typeof(to_jsonb(d."contacts_id")) = 'array' THEN to_jsonb(d."contacts_id")->>0 ELSE TRIM(BOTH '"' FROM to_jsonb(d."contacts_id")::text) END`
+		columns := []string{`COALESCE(NULLIF(d."name", ''), 'Nomsiz lid') AS lead_name`}
+		join := ""
+		if includePhone {
+			columns = append(columns, `NULLIF(TRIM(BOTH '"' FROM to_jsonb(c."phone")::text), '') AS phone`)
+			join = `LEFT JOIN "contacts" c ON c."guid"::text = ` + contactIDExpression
+		}
+		if includeAmount {
+			columns = append(columns, `d."amount" AS amount`)
+		}
 		return crmAnalyticsPlan{
 			kind: kind,
-			sql: `SELECT COALESCE(NULLIF(d."name", ''), 'Nomsiz lid') AS lead_name,
-NULLIF(TRIM(BOTH '"' FROM to_jsonb(c."phone")::text), '') AS phone
+			sql: `SELECT ` + strings.Join(columns, ",\n") + `
 FROM "deals" d
-LEFT JOIN "contacts" c ON c."guid"::text = ` + contactIDExpression + `
+` + join + `
 WHERE d."created_at" >= $1::timestamp AND d."created_at" < $2::timestamp
   AND d."deleted_at" IS NULL
 ORDER BY d."created_at" DESC
@@ -127,6 +139,8 @@ LIMIT 50`,
 			periodLabel:       periodLabel,
 			language:          language,
 			includePercentage: includePercentage,
+			includePhone:      includePhone,
+			includeAmount:     includeAmount,
 		}, true
 	}
 
@@ -368,37 +382,51 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 			return fmt.Sprintf("%s %d ta lid keldi.", plan.periodLabel, count), nil
 		}
 	}
-	if plan.kind == crmAnalyticsLeadPhones {
-		lines := make([]string, 0, len(rows))
-		for _, row := range rows {
-			name := strings.TrimSpace(fmt.Sprintf("%v", row["lead_name"]))
-			phone := strings.TrimSpace(fmt.Sprintf("%v", row["phone"]))
-			if name == "" || name == "<nil>" {
-				name = "Nomsiz lid"
+	if plan.kind == crmAnalyticsLeadDetails {
+		headers := []string{"Lid"}
+		alignments := []string{"---"}
+		if plan.includePhone {
+			headers = append(headers, "Telefon")
+			alignments = append(alignments, "---")
+		}
+		if plan.includeAmount {
+			headers = append(headers, "Budjet")
+			alignments = append(alignments, "---:")
+		}
+		if plan.language == "ru" {
+			headers[0] = "Лид"
+			if plan.includePhone {
+				headers[1] = "Телефон"
 			}
-			if phone == "" || phone == "<nil>" {
-				switch plan.language {
-				case "ru":
-					phone = "номер не указан"
-				case "en":
-					phone = "phone not provided"
-				default:
-					phone = "telefon raqami ko‘rsatilmagan"
-				}
+			if plan.includeAmount {
+				headers[len(headers)-1] = "Бюджет"
 			}
-			lines = append(lines, fmt.Sprintf("- %s — %s", name, phone))
+		} else if plan.language == "en" {
+			headers[0] = "Lead"
+			if plan.includePhone {
+				headers[1] = "Phone"
+			}
+			if plan.includeAmount {
+				headers[len(headers)-1] = "Budget"
+			}
 		}
 
-		header := ""
-		switch plan.language {
-		case "ru":
-			header = plan.periodLabel + " пришли лиды со следующими номерами:"
-		case "en":
-			header = plan.periodLabel + ", the incoming leads have these phone numbers:"
-		default:
-			header = plan.periodLabel + " kelgan lidlarning telefon raqamlari:"
+		tableLines := []string{
+			"| " + strings.Join(headers, " | ") + " |",
+			"| " + strings.Join(alignments, " | ") + " |",
 		}
-		if len(lines) == 0 {
+		for _, row := range rows {
+			values := []string{formatCRMAnalyticsCell(row["lead_name"])}
+			if plan.includePhone {
+				values = append(values, formatCRMAnalyticsCell(row["phone"]))
+			}
+			if plan.includeAmount {
+				values = append(values, formatCRMAnalyticsCell(row["amount"]))
+			}
+			tableLines = append(tableLines, "| "+strings.Join(values, " | ")+" |")
+		}
+
+		if len(rows) == 0 {
 			switch plan.language {
 			case "ru":
 				return plan.periodLabel + " лидов не было.", nil
@@ -408,7 +436,13 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 				return plan.periodLabel + " lid kelmagan.", nil
 			}
 		}
-		return header + "\n" + strings.Join(lines, "\n"), nil
+		header := plan.periodLabel + " kelgan lidlar:"
+		if plan.language == "ru" {
+			header = plan.periodLabel + " пришли следующие лиды:"
+		} else if plan.language == "en" {
+			header = plan.periodLabel + ", these leads came in:"
+		}
+		return header + "\n\n" + strings.Join(tableLines, "\n"), nil
 	}
 
 	type dimensionCount struct {
@@ -493,6 +527,23 @@ func formatCommonCRMAnalyticsReply(plan crmAnalyticsPlan, data any) (string, err
 		lines = append(lines, fmt.Sprintf("- %s — %d", item.dimension, item.count))
 	}
 	return header + "\n" + strings.Join(lines, "\n"), nil
+}
+
+func formatCRMAnalyticsCell(value any) string {
+	if value == nil {
+		return "—"
+	}
+	switch number := value.(type) {
+	case float64:
+		return strconv.FormatFloat(number, 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(number), 'f', -1, 32)
+	}
+	text := strings.TrimSpace(fmt.Sprintf("%v", value))
+	if text == "" || text == "<nil>" {
+		return "—"
+	}
+	return strings.ReplaceAll(text, "|", "¦")
 }
 
 func crmAnalyticsRows(data any) ([]map[string]any, error) {
