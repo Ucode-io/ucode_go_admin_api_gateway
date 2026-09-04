@@ -112,6 +112,24 @@ const (
 	KeyUsagePendingPrefix  = "api_usage:pending:"
 	KeyUsageTotalField     = "total"
 
+	// Per-dimension fields in the same pending hash, encoded as
+	// "d|source|method|route|collection". The "total" field above stays
+	// authoritative for billing; these fields only slice it up.
+	KeyUsageDetailPrefix = "d|"
+	KeyUsageDetailSep    = "|"
+
+	// UsageDetailMaxKeys is a hard ceiling on distinct dimension keys held by one
+	// gateway pod between two flushes. Collection names are chosen by the customer,
+	// so without a ceiling the L1 map would be unbounded; everything past it is
+	// folded into UsageDetailOverflowRoute. The map is emptied every flush, so
+	// reaching the ceiling degrades one interval, not the pod.
+	UsageDetailMaxKeys       = 20000
+	UsageDetailOverflowRoute = "other"
+
+	// Request source labels, set per route group at registration time.
+	UsageSourceClient = "client"
+	UsageSourceAdmin  = "admin"
+
 	AnthropicCachingBeta = "prompt-caching-2024-07-31"
 
 	YandexMetricCountersURL = "https://api-metrika.yandex.net/management/v1/counters"

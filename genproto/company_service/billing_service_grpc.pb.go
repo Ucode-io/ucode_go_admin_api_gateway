@@ -64,6 +64,7 @@ type BillingServiceClient interface {
 	UpdateSubscriptionEndDate(ctx context.Context, in *UpdateSubscriptionEndDateReq, opts ...grpc.CallOption) (*UpdateSubscriptionEndDateResp, error)
 	GetPricingLimits(ctx context.Context, in *GetPricingLimitsRequest, opts ...grpc.CallOption) (*GetPricingLimitsResponse, error)
 	LogUsage(ctx context.Context, in *LogUsageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetApiUsageBreakdown(ctx context.Context, in *GetApiUsageBreakdownRequest, opts ...grpc.CallOption) (*GetApiUsageBreakdownResponse, error)
 	GetApiCallMonitoringMetrics(ctx context.Context, in *GetApiCallMonitoringMetricsRequest, opts ...grpc.CallOption) (*GetApiCallMonitoringMetricsResponse, error)
 	RecordAiTokenUsage(ctx context.Context, in *RecordAiTokenUsageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAiTokenUsageMetrics(ctx context.Context, in *GetAiTokenUsageMetricsRequest, opts ...grpc.CallOption) (*GetAiTokenUsageMetricsResponse, error)
@@ -395,6 +396,15 @@ func (c *billingServiceClient) LogUsage(ctx context.Context, in *LogUsageRequest
 	return out, nil
 }
 
+func (c *billingServiceClient) GetApiUsageBreakdown(ctx context.Context, in *GetApiUsageBreakdownRequest, opts ...grpc.CallOption) (*GetApiUsageBreakdownResponse, error) {
+	out := new(GetApiUsageBreakdownResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetApiUsageBreakdown", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *billingServiceClient) GetApiCallMonitoringMetrics(ctx context.Context, in *GetApiCallMonitoringMetricsRequest, opts ...grpc.CallOption) (*GetApiCallMonitoringMetricsResponse, error) {
 	out := new(GetApiCallMonitoringMetricsResponse)
 	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetApiCallMonitoringMetrics", in, out, opts...)
@@ -539,6 +549,7 @@ type BillingServiceServer interface {
 	UpdateSubscriptionEndDate(context.Context, *UpdateSubscriptionEndDateReq) (*UpdateSubscriptionEndDateResp, error)
 	GetPricingLimits(context.Context, *GetPricingLimitsRequest) (*GetPricingLimitsResponse, error)
 	LogUsage(context.Context, *LogUsageRequest) (*emptypb.Empty, error)
+	GetApiUsageBreakdown(context.Context, *GetApiUsageBreakdownRequest) (*GetApiUsageBreakdownResponse, error)
 	GetApiCallMonitoringMetrics(context.Context, *GetApiCallMonitoringMetricsRequest) (*GetApiCallMonitoringMetricsResponse, error)
 	RecordAiTokenUsage(context.Context, *RecordAiTokenUsageRequest) (*emptypb.Empty, error)
 	GetAiTokenUsageMetrics(context.Context, *GetAiTokenUsageMetricsRequest) (*GetAiTokenUsageMetricsResponse, error)
@@ -662,6 +673,9 @@ func (UnimplementedBillingServiceServer) GetPricingLimits(context.Context, *GetP
 }
 func (UnimplementedBillingServiceServer) LogUsage(context.Context, *LogUsageRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogUsage not implemented")
+}
+func (UnimplementedBillingServiceServer) GetApiUsageBreakdown(context.Context, *GetApiUsageBreakdownRequest) (*GetApiUsageBreakdownResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetApiUsageBreakdown not implemented")
 }
 func (UnimplementedBillingServiceServer) GetApiCallMonitoringMetrics(context.Context, *GetApiCallMonitoringMetricsRequest) (*GetApiCallMonitoringMetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetApiCallMonitoringMetrics not implemented")
@@ -1321,6 +1335,24 @@ func _BillingService_LogUsage_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_GetApiUsageBreakdown_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetApiUsageBreakdownRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetApiUsageBreakdown(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/GetApiUsageBreakdown",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetApiUsageBreakdown(ctx, req.(*GetApiUsageBreakdownRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BillingService_GetApiCallMonitoringMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetApiCallMonitoringMetricsRequest)
 	if err := dec(in); err != nil {
@@ -1661,6 +1693,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LogUsage",
 			Handler:    _BillingService_LogUsage_Handler,
+		},
+		{
+			MethodName: "GetApiUsageBreakdown",
+			Handler:    _BillingService_GetApiUsageBreakdown_Handler,
 		},
 		{
 			MethodName: "GetApiCallMonitoringMetrics",
