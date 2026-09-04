@@ -80,11 +80,13 @@ func (c *MetricsConsumer) flushApiUsage(ctx context.Context) {
 	}
 }
 
-// logProjectUsage drains one project's pending hash: the "total" field, which is
-// what billing is measured against, plus the per-dimension fields that slice it
-// up. Both are sent in one call so company-service can write them in one
-// transaction. Counts are only subtracted back out of Redis after a successful
-// write, so a failed tick retries instead of losing data.
+// logProjectUsage drains one project's pending hash: the "total" field, which
+// is what billing is measured against, plus the per-dimension fields that slice
+// it up. Fields are grouped by their time bucket and sent one call per bucket,
+// so each row lands in the interval the requests actually happened in.
+//
+// Counts are only subtracted back out of Redis after a successful write, so a
+// failed bucket retries on the next tick instead of losing data.
 func (c *MetricsConsumer) logProjectUsage(ctx context.Context, key, projectID string) {
 	fields, err := c.rdb.HGetAll(ctx, key).Result()
 	if err != nil || len(fields) == 0 {
@@ -96,45 +98,79 @@ func (c *MetricsConsumer) logProjectUsage(ctx context.Context, key, projectID st
 		return
 	}
 
-	details, sent := collectDetails(fields)
+	var accounted int64
+	for bucket, entries := range groupByBucket(fields) {
+		details, sent := detailRows(bucket, entries)
 
-	_, err = c.companyService.Billing().LogUsage(ctx, &pb.LogUsageRequest{
-		ProjectId: projectID,
-		Count:     total,
-		TimeRange: usageLogTimeRangeSec,
-		DateTime:  time.Now().Truncate(time.Hour).Format("2006-01-02 15:00:00"),
-		Details:   details,
-	})
-	if err != nil {
-		// Leave counts in Redis — will retry on next tick.
-		log.Printf("[MetricsConsumer] LogUsage project=%s: %v", projectID, err)
-		return
+		var count int64
+		for _, n := range sent {
+			count += n
+		}
+		if count <= 0 {
+			continue
+		}
+
+		if _, err := c.companyService.Billing().LogUsage(ctx, &pb.LogUsageRequest{
+			ProjectId: projectID,
+			Count:     count,
+			TimeRange: usageLogTimeRangeSec,
+			DateTime:  hourOf(bucket),
+			Details:   details,
+		}); err != nil {
+			// Leave this bucket in Redis — it will retry on the next tick.
+			log.Printf("[MetricsConsumer] LogUsage project=%s bucket=%s: %v", projectID, bucket, err)
+			continue
+		}
+		accounted += count
+
+		// Subtract exactly what was written. Zeroed fields are left in place on
+		// purpose: deleting them would race with a Tracker flush and drop counts.
+		pipe := c.rdb.Pipeline()
+		for field, n := range sent {
+			pipe.HIncrBy(ctx, key, field, -n)
+		}
+		if _, err := pipe.Exec(ctx); err != nil {
+			log.Printf("[MetricsConsumer] drain project=%s bucket=%s: %v", projectID, bucket, err)
+		}
 	}
 
-	// Subtract exactly what was written. Zeroed fields are left in place on
-	// purpose: deleting them would race with a Tracker flush and drop counts.
-	pipe := c.rdb.Pipeline()
-	pipe.HIncrBy(ctx, key, config.KeyUsageTotalField, -total)
-	for field, count := range sent {
-		pipe.HIncrBy(ctx, key, field, -count)
+	// Counts carrying no dimension fields — a gateway pod from before this
+	// rollout — would otherwise sit in the total forever. Settle them against
+	// the current hour with no breakdown; the breakdown query reports them as
+	// "other" rather than losing them.
+	if remainder := total - accounted; remainder > 0 {
+		if _, err := c.companyService.Billing().LogUsage(ctx, &pb.LogUsageRequest{
+			ProjectId: projectID,
+			Count:     remainder,
+			TimeRange: usageLogTimeRangeSec,
+			DateTime:  time.Now().UTC().Truncate(time.Hour).Format(bucketLayout),
+		}); err != nil {
+			log.Printf("[MetricsConsumer] LogUsage(untagged) project=%s: %v", projectID, err)
+		} else {
+			accounted += remainder
+		}
 	}
-	if _, err = pipe.Exec(ctx); err != nil {
-		log.Printf("[MetricsConsumer] drain project=%s: %v", projectID, err)
+
+	if accounted > 0 {
+		if err := c.rdb.HIncrBy(ctx, key, config.KeyUsageTotalField, -accounted).Err(); err != nil {
+			log.Printf("[MetricsConsumer] drain total project=%s: %v", projectID, err)
+		}
 	}
 }
 
-// collectDetails turns the raw hash fields into wire rows, keeping the biggest
-// buckets and folding the tail into one "other" row. It returns both the rows to
-// send and, keyed by hash field, exactly how much of each was consumed.
-func collectDetails(fields map[string]string) ([]*pb.ApiUsageDetail, map[string]int64) {
-	type entry struct {
-		field  string
-		detail *pb.ApiUsageDetail
-	}
+// bucketEntry is one decoded hash field together with its count.
+type bucketEntry struct {
+	field string
+	usageField
+	count int64
+}
 
-	entries := make([]entry, 0, len(fields))
+// groupByBucket decodes the detail fields and buckets them by time interval.
+func groupByBucket(fields map[string]string) map[string][]bucketEntry {
+	grouped := make(map[string][]bucketEntry)
+
 	for field, raw := range fields {
-		source, method, route, collection, ok := parseUsageField(field)
+		parsed, ok := parseUsageField(field)
 		if !ok {
 			continue
 		}
@@ -142,41 +178,60 @@ func collectDetails(fields map[string]string) ([]*pb.ApiUsageDetail, map[string]
 		if err != nil || count <= 0 {
 			continue
 		}
-		entries = append(entries, entry{
-			field: field,
-			detail: &pb.ApiUsageDetail{
-				Source:     source,
-				Method:     method,
-				Route:      route,
-				Collection: collection,
-				Count:      count,
-			},
+		grouped[parsed.bucket] = append(grouped[parsed.bucket], bucketEntry{
+			field: field, usageField: parsed, count: count,
 		})
 	}
 
-	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].detail.Count > entries[j].detail.Count
-	})
+	return grouped
+}
+
+// detailRows turns one bucket's entries into wire rows, keeping the biggest
+// buckets and folding the tail into a single "other" row so the rows still add
+// up to the bucket total no matter how wide the tail is. It returns both the
+// rows to send and, keyed by hash field, exactly how much of each was consumed.
+func detailRows(bucket string, entries []bucketEntry) ([]*pb.ApiUsageDetail, map[string]int64) {
+	sort.Slice(entries, func(i, j int) bool { return entries[i].count > entries[j].count })
 
 	var (
 		details  = make([]*pb.ApiUsageDetail, 0, len(entries))
 		sent     = make(map[string]int64, len(entries))
 		overflow int64
 	)
+
 	for i, e := range entries {
-		sent[e.field] = e.detail.Count
-		if i < maxDetailRowsPerFlush {
-			details = append(details, e.detail)
+		sent[e.field] = e.count
+		if i >= maxDetailRowsPerFlush {
+			overflow += e.count
 			continue
 		}
-		overflow += e.detail.Count
+		details = append(details, &pb.ApiUsageDetail{
+			Source:     e.source,
+			AuthType:   e.authType,
+			Method:     e.method,
+			Route:      e.route,
+			Collection: e.collection,
+			Count:      e.count,
+			Bucket:     bucket,
+		})
 	}
+
 	if overflow > 0 {
 		details = append(details, &pb.ApiUsageDetail{
-			Route: config.UsageDetailOverflowRoute,
-			Count: overflow,
+			Route:  config.UsageDetailOverflowRoute,
+			Count:  overflow,
+			Bucket: bucket,
 		})
 	}
 
 	return details, sent
+}
+
+// hourOf maps a 15-minute bucket onto the hour billing_usage is keyed by.
+func hourOf(bucket string) string {
+	t, err := time.Parse(bucketLayout, bucket)
+	if err != nil {
+		return time.Now().UTC().Truncate(time.Hour).Format(bucketLayout)
+	}
+	return t.Truncate(time.Hour).Format(bucketLayout)
 }

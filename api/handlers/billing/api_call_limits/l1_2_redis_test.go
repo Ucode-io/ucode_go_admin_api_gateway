@@ -1,35 +1,42 @@
 package apilimits
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"ucode/ucode_go_api_gateway/config"
 )
 
+const testBucket = "2026-09-04 14:30:00"
+
 func TestUsageFieldRoundTrip(t *testing.T) {
 	cases := []usageKey{
-		{source: "client", method: "GET", route: "/v2/items/:collection", collection: "orders"},
-		{source: "admin", method: "POST", route: "/v1/pricing/all", collection: ""},
-		{source: "client", method: "DELETE", route: "/v2/items/:collection", collection: "we|ird"},
+		{source: "client", authType: "api_key", method: "GET", route: "/v2/items/:collection", collection: "orders"},
+		{source: "admin", authType: "bearer", method: "POST", route: "/v1/pricing/all", collection: ""},
+		{source: "client", authType: "", method: "DELETE", route: "/v2/items/:collection", collection: "we|ird"},
 	}
 
 	for _, in := range cases {
-		source, method, route, collection, ok := parseUsageField(in.field())
+		got, ok := parseUsageField(in.field(testBucket))
 		if !ok {
-			t.Fatalf("field %q did not parse", in.field())
+			t.Fatalf("field %q did not parse", in.field(testBucket))
 		}
-		if source != in.source || method != in.method || route != in.route {
-			t.Errorf("round trip lost data: got %q/%q/%q want %q/%q/%q",
-				source, method, route, in.source, in.method, in.route)
+		if got.bucket != testBucket {
+			t.Errorf("bucket: got %q want %q", got.bucket, testBucket)
 		}
-		if want := sanitize(in.collection); collection != want {
-			t.Errorf("collection: got %q want %q", collection, want)
+		if got.source != in.source || got.authType != in.authType ||
+			got.method != in.method || got.route != in.route {
+			t.Errorf("round trip lost data: %+v vs %+v", got, in)
+		}
+		if want := sanitize(in.collection); got.collection != want {
+			t.Errorf("collection: got %q want %q", got.collection, want)
 		}
 	}
 }
 
 func TestParseUsageFieldRejectsTotal(t *testing.T) {
-	if _, _, _, _, ok := parseUsageField(config.KeyUsageTotalField); ok {
+	if _, ok := parseUsageField(config.KeyUsageTotalField); ok {
 		t.Fatal("the total field must not parse as a detail field")
 	}
 }
@@ -40,14 +47,14 @@ func TestTrackerDetailsSumToTotal(t *testing.T) {
 	add := func(collection string, n int) {
 		for i := 0; i < n; i++ {
 			tr.add(usageKey{
-				projectID: "p1", source: "client", method: "GET",
-				route: "/v2/items/:collection", collection: collection,
+				projectID: "p1", source: "client", authType: "api_key",
+				method: "GET", route: "/v2/items/:collection", collection: collection,
 			})
 		}
 	}
 	add("orders", 5)
 	add("users", 3)
-	tr.add(usageKey{projectID: "p2", source: "admin", method: "POST", route: "/v1/fare"})
+	tr.add(usageKey{projectID: "p2", source: "admin", authType: "bearer", method: "POST", route: "/v1/fare"})
 
 	batch := tr.take()
 
@@ -68,18 +75,69 @@ func TestTrackerDetailsSumToTotal(t *testing.T) {
 	}
 }
 
-func TestCollectDetailsFoldsTailIntoOther(t *testing.T) {
-	fields := map[string]string{config.KeyUsageTotalField: "0"}
-	var want int64
+// Auth type must not be collapsed away: the same route reached with a key and
+// with a user token has to stay two separate rows.
+func TestTrackerKeepsAuthTypesApart(t *testing.T) {
+	tr := NewTracker(nil, 0)
+	base := usageKey{projectID: "p1", source: "client", method: "GET", route: "/v2/items/:collection", collection: "deal"}
 
+	byKey := base
+	byKey.authType = config.UsageAuthApiKey
+	byToken := base
+	byToken.authType = config.UsageAuthBearer
+
+	tr.add(byKey)
+	tr.add(byKey)
+	tr.add(byToken)
+
+	batch := tr.take()
+	if len(batch) != 2 {
+		t.Fatalf("expected 2 rows, got %d: %v", len(batch), batch)
+	}
+	if batch[byKey] != 2 || batch[byToken] != 1 {
+		t.Errorf("counts split wrong: key=%d token=%d", batch[byKey], batch[byToken])
+	}
+}
+
+func TestGroupByBucketSplitsIntervals(t *testing.T) {
+	early := usageKey{source: "client", authType: "api_key", method: "GET", route: "/v2/items/:collection", collection: "deal"}
+	late := early
+
+	fields := map[string]string{
+		config.KeyUsageTotalField:          "9",
+		early.field("2026-09-04 14:30:00"): "5",
+		late.field("2026-09-04 14:45:00"):  "4",
+		"garbage":                          "1",
+	}
+
+	grouped := groupByBucket(fields)
+	if len(grouped) != 2 {
+		t.Fatalf("expected 2 buckets, got %d", len(grouped))
+	}
+	if n := grouped["2026-09-04 14:30:00"][0].count; n != 5 {
+		t.Errorf("14:30 bucket: got %d want 5", n)
+	}
+	if n := grouped["2026-09-04 14:45:00"][0].count; n != 4 {
+		t.Errorf("14:45 bucket: got %d want 4", n)
+	}
+}
+
+func TestDetailRowsFoldTailIntoOther(t *testing.T) {
+	var (
+		entries []bucketEntry
+		want    int64
+	)
 	for i := 0; i < maxDetailRowsPerFlush+25; i++ {
-		k := usageKey{source: "client", method: "GET", route: "/v2/items/:collection",
-			collection: string(rune('a'+i%26)) + string(rune('a'+i/26))}
-		fields[k.field()] = "2"
+		k := usageKey{
+			source: "client", authType: "api_key", method: "GET",
+			route: "/v2/items/:collection", collection: fmt.Sprintf("c%d", i),
+		}
+		parsed, _ := parseUsageField(k.field(testBucket))
+		entries = append(entries, bucketEntry{field: k.field(testBucket), usageField: parsed, count: 2})
 		want += 2
 	}
 
-	details, sent := collectDetails(fields)
+	details, sent := detailRows(testBucket, entries)
 
 	if len(details) != maxDetailRowsPerFlush+1 {
 		t.Errorf("rows: got %d want %d", len(details), maxDetailRowsPerFlush+1)
@@ -91,8 +149,23 @@ func TestCollectDetailsFoldsTailIntoOther(t *testing.T) {
 	var got int64
 	for _, d := range details {
 		got += d.GetCount()
+		if d.GetBucket() != testBucket {
+			t.Errorf("row lost its bucket: %q", d.GetBucket())
+		}
 	}
 	if got != want {
 		t.Errorf("folding lost counts: got %d want %d", got, want)
+	}
+}
+
+func TestHourOfTruncatesBucket(t *testing.T) {
+	if got := hourOf("2026-09-04 14:45:00"); got != "2026-09-04 14:00:00" {
+		t.Errorf("hourOf: got %q want %q", got, "2026-09-04 14:00:00")
+	}
+	// An unparseable bucket must still yield a usable hour rather than "".
+	if got := hourOf("nonsense"); got == "" {
+		t.Error("hourOf must fall back to the current hour")
+	} else if _, err := time.Parse(bucketLayout, got); err != nil {
+		t.Errorf("fallback is not a timestamp: %q", got)
 	}
 }
