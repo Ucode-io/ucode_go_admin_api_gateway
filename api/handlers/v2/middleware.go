@@ -246,3 +246,58 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 
 	}
 }
+
+// meteringResolveTimeout bounds the api-key lookup done purely for metering.
+// The invoke proxy is a hot path, so a slow auth-service must never hold a
+// request up: on timeout the call simply goes uncounted.
+const meteringResolveTimeout = 300 * time.Millisecond
+
+// ResolveProjectForMetering fills project_id from the X-API-KEY header when no
+// auth middleware has already done it.
+//
+// The /v2/invoke_function/* routes are a bare proxy with no auth of their own —
+// the function service authenticates them downstream — so the gateway never
+// learned which project a call belonged to and could not count it. This
+// middleware closes that gap without changing who is allowed through: it never
+// rejects, never aborts, and a key it cannot resolve just leaves the request
+// uncounted, exactly as before.
+func (h *HandlerV2) ResolveProjectForMetering() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.GetString("project_id") != "" {
+			c.Next()
+			return
+		}
+
+		appID := c.GetHeader("X-API-KEY")
+		if appID == "" {
+			c.Next()
+			return
+		}
+
+		apikeys := &apb.GetRes{}
+		if cached, ok := h.cache.Get(appID); ok {
+			if err := json.Unmarshal(cached, apikeys); err != nil {
+				apikeys = &apb.GetRes{}
+			}
+		}
+
+		if apikeys.GetProjectId() == "" {
+			ctx, cancel := context.WithTimeout(c.Request.Context(), meteringResolveTimeout)
+			defer cancel()
+
+			resp, err := h.authService.ApiKey().GetEnvID(ctx, &apb.GetReq{Id: appID})
+			if err != nil || resp.GetProjectId() == "" {
+				c.Next()
+				return
+			}
+			apikeys = resp
+
+			if body, err := json.Marshal(apikeys); err == nil {
+				h.cache.Add(appID, body, config.REDIS_TIMEOUT)
+			}
+		}
+
+		c.Set("project_id", apikeys.GetProjectId())
+		c.Next()
+	}
+}
