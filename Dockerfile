@@ -10,9 +10,13 @@ RUN export CGO_ENABLED=0 && \
     export GOOS=linux && \
     go mod vendor && \
     make build && \
+    test -f .meta-ads.env || touch .meta-ads.env && \
+    chmod 0400 .meta-ads.env && \
+    mv .meta-ads.env /meta-ads.env && \
     mv ./bin/ucode_go_admin_api_gateway /
 
 FROM alpine
 COPY --from=builder ucode_go_admin_api_gateway .
+COPY --from=builder /meta-ads.env /meta-ads.env
 
 ENTRYPOINT ["/ucode_go_admin_api_gateway"]

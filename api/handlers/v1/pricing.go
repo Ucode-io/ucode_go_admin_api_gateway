@@ -373,8 +373,8 @@ func (h *HandlerV1) GetCompanyStats(c *gin.Context) {
 
 	h.HandleResponse(c, status_http.OK, models.CompanyStatsResponse{
 		Tokens: models.CompanyTokenStats{
-			Daily:   models.CompanyTokenStat{InputTokens: tokenMetrics.GetTodayInputTokens(), OutputTokens: tokenMetrics.GetTodayOutputTokens(), PlanTokens: dailyPlanTokens, Limit: dailyTokenLimit, LimitReached: dailyLimitReached},
-			Monthly: models.CompanyTokenStat{InputTokens: tokenMetrics.GetMonthlyInputTokens(), OutputTokens: tokenMetrics.GetMonthlyOutputTokens(), PlanTokens: monthlyPlanTokens, Limit: monthlyTokenLimit, LimitReached: monthlyLimitReached},
+			Daily:         models.CompanyTokenStat{InputTokens: tokenMetrics.GetTodayInputTokens(), OutputTokens: tokenMetrics.GetTodayOutputTokens(), PlanTokens: dailyPlanTokens, Limit: dailyTokenLimit, LimitReached: dailyLimitReached},
+			Monthly:       models.CompanyTokenStat{InputTokens: tokenMetrics.GetMonthlyInputTokens(), OutputTokens: tokenMetrics.GetMonthlyOutputTokens(), PlanTokens: monthlyPlanTokens, Limit: monthlyTokenLimit, LimitReached: monthlyLimitReached},
 			PackRemaining: packRemaining,
 			ActiveSource:  activeSource,
 		},
@@ -533,4 +533,110 @@ func (h *HandlerV1) GetPerformanceMetrics(c *gin.Context) {
 		AverageResponseTime: float64(resp.AverageDuration),
 		ErrorRate:           float64(resp.ErrorRate),
 	})
+}
+
+// GetApiUsageBreakdown godoc
+// @Summary API usage breakdown
+// @Description Which requests a project makes most, and how much of the monthly API call quota is left
+// @Tags Billing
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param from query string false "start date, YYYY-MM-DD (default: first day of the current month)"
+// @Param to query string false "end date inclusive, YYYY-MM-DD (default: now)"
+// @Param limit query int false "how many rows to return (default 10)"
+// @Success 200 {object} status_http.Response{data=models.ApiUsageBreakdownResponse} "Usage breakdown"
+// @Failure 401
+// @Router /v1/pricing/api-call/breakdown [get]
+func (h *HandlerV1) GetApiUsageBreakdown(c *gin.Context) {
+	var (
+		ctx       = c.Request.Context()
+		projectId = cast.ToString(c.MustGet("project_id"))
+		limit     = cast.ToInt32(c.DefaultQuery("limit", "10"))
+	)
+
+	breakdown, err := h.companyServices.Billing().GetApiUsageBreakdown(ctx,
+		&company_service.GetApiUsageBreakdownRequest{
+			ProjectId: projectId,
+			From:      c.Query("from"),
+			To:        c.Query("to"),
+			Limit:     limit,
+		},
+	)
+	if err != nil {
+		h.log.Error("[GetApiUsageBreakdown] GetApiUsageBreakdown failed", logger.Error(err))
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	response := models.ApiUsageBreakdownResponse{
+		Used:          breakdown.GetTotal(),
+		Other:         breakdown.GetOther(),
+		From:          c.Query("from"),
+		To:            c.Query("to"),
+		UsedUpdatedAt: time.Now().Truncate(time.Hour).UTC().Format(time.RFC3339),
+		Top:           make([]models.ApiUsageBreakdownRow, 0, len(breakdown.GetRows())),
+		Unlimited:     true,
+	}
+
+	for _, row := range breakdown.GetRows() {
+		var percent float64
+		if breakdown.GetTotal() > 0 {
+			percent = math.Round(float64(row.GetCount())/float64(breakdown.GetTotal())*10000) / 100
+		}
+		response.Top = append(response.Top, models.ApiUsageBreakdownRow{
+			Source:     row.GetSource(),
+			Method:     row.GetMethod(),
+			Route:      row.GetRoute(),
+			Collection: row.GetCollection(),
+			Count:      row.GetCount(),
+			Percent:    percent,
+		})
+	}
+
+	// The limit is read through project.fare_id, which is the pointer the
+	// blocking worker uses. subscription.fare_id drives billing and can drift
+	// from it; reporting that one here would contradict the 402 the client gets.
+	project, err := h.companyServices.Project().GetById(ctx,
+		&company_service.GetProjectByIdRequest{ProjectId: projectId},
+	)
+	if err != nil {
+		h.log.Error("[GetApiUsageBreakdown] GetProjectById failed", logger.Error(err))
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+
+	if fareId := project.GetFareId(); fareId != "" {
+		fare, err := h.companyServices.Billing().GetFare(ctx,
+			&company_service.PrimaryKey{Id: fareId, ProjectId: projectId},
+		)
+		if err != nil {
+			h.log.Error("[GetApiUsageBreakdown] GetFare failed", logger.Error(err))
+		} else {
+			for _, item := range fare.GetFareItemPrices() {
+				if item.GetFareItem().GetType() != config.FARE_REQUEST_PER_MONTH {
+					continue
+				}
+				// A stored "0", like a missing row, means no ceiling at all.
+				if limitValue := cast.ToInt64(item.GetValue()); limitValue > 0 {
+					remaining := limitValue - response.Used
+					if remaining < 0 {
+						remaining = 0
+					}
+					response.Limit = limitValue
+					response.Remaining = &remaining
+					response.Unlimited = false
+				}
+				break
+			}
+		}
+	}
+
+	// Whether the project is being refused right now is a separate snapshot from
+	// the counter above, so it can disagree with remaining > 0 for a few minutes.
+	if val, err := h.centralRedis.Get(ctx, fmt.Sprintf(config.KeyBillingApiLimit, projectId)).Result(); err == nil {
+		response.Blocked = val == "0"
+	}
+
+	h.HandleResponse(c, status_http.OK, response)
 }

@@ -2,10 +2,6 @@ package v1
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"crypto/subtle"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -270,24 +266,6 @@ func facebookLeadValues(fieldData []models.FacebookFieldData) map[string]string 
 }
 
 func (h *HandlerV1) verifyFacebookSignature(header string, body []byte) bool {
-	secret := strings.TrimSpace(h.baseConf.FacebookAppSecret)
-	if secret == "" {
-		return false
-	}
-
-	header = strings.TrimSpace(header)
-	if !strings.HasPrefix(header, config.FacebookSignaturePrefix) {
-		return false
-	}
-
-	provided, err := hex.DecodeString(strings.TrimPrefix(header, config.FacebookSignaturePrefix))
-	if err != nil {
-		return false
-	}
-
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write(body)
-	expected := mac.Sum(nil)
-
-	return subtle.ConstantTimeCompare(provided, expected) == 1
+	secrets := append([]string{h.baseConf.FacebookAppSecret}, h.baseConf.FacebookLegacyAppSecrets...)
+	return verifyMetaWebhookSignature(header, config.FacebookSignaturePrefix, body, secrets...)
 }

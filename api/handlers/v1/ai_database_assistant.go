@@ -923,8 +923,8 @@ func (p *ChatProcessor) getProjectSchemaCached(ctx context.Context, resourceEnvI
 }
 
 func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId string) ([]models.TableSchema, error) {
-	if p.mcpProjectId == "" {
-		return nil, fmt.Errorf("no backend project associated with this chat")
+	if resourceEnvId == "" {
+		return nil, fmt.Errorf("resource environment id is required")
 	}
 
 	tablesResp, err := p.service.GoObjectBuilderService().Table().GetAll(ctx, &nb.GetAllTablesRequest{
@@ -958,9 +958,10 @@ func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId st
 			if err == nil {
 				for _, f := range fieldsResp.GetFields() {
 					fields = append(fields, models.FieldSchema{
-						Slug:  f.GetSlug(),
-						Label: f.GetLabel(),
-						Type:  f.GetType(),
+						Slug:    f.GetSlug(),
+						Label:   f.GetLabel(),
+						Type:    f.GetType(),
+						Options: extractSchemaFieldOptions(f.GetAttributes().AsMap()),
 					})
 				}
 			}
@@ -991,11 +992,19 @@ func (p *ChatProcessor) fetchProjectSchema(ctx context.Context, resourceEnvId st
 // Example output:
 //
 //	Table: tasks (Задачи)
-//	Columns: guid uuid, title text, status text, assigned_to uuid, due_date timestamptz, deleted_at timestamptz
+//	Columns: guid uuid, title text [label="Title"], status text [label="Status"], assigned_to uuid
 //
 //	Table: users (Пользователи)
 //	Columns: guid uuid, name text, email text, deleted_at timestamptz
 func formatSchemaForSQL(tables []models.TableSchema) string {
+	return formatSchema(tables, false)
+}
+
+func formatSchemaForCRM(tables []models.TableSchema) string {
+	return formatSchema(tables, true)
+}
+
+func formatSchema(tables []models.TableSchema, includeOptions bool) string {
 	var sb strings.Builder
 	for _, t := range tables {
 		sb.WriteString("Table: ")
@@ -1013,12 +1022,82 @@ func formatSchemaForSQL(tables []models.TableSchema) string {
 			if colType == "" {
 				colType = "text"
 			}
-			cols = append(cols, fmt.Sprintf("%s %s", f.Slug, colType))
+			column := fmt.Sprintf("%s %s", f.Slug, colType)
+			if f.Label != "" && f.Label != f.Slug {
+				column += fmt.Sprintf(" [label=%s]", strconv.Quote(f.Label))
+			}
+			if includeOptions && len(f.Options) > 0 {
+				column += fmt.Sprintf(" [options=%s]", strconv.Quote(strings.Join(f.Options, "|")))
+			}
+			cols = append(cols, column)
 		}
 		sb.WriteString(strings.Join(cols, ", "))
 		sb.WriteString("\n\n")
 	}
 	return sb.String()
+}
+
+// extractSchemaFieldOptions exposes human-readable option labels to the CRM
+// agent. In particular, it lets vision map a status value visible in a card
+// screenshot to the exact generated per-pipeline field that owns that value.
+func extractSchemaFieldOptions(attributes map[string]any) []string {
+	const maxOptions = 40
+	seen := make(map[string]struct{})
+	options := make([]string, 0)
+
+	var walk func(any)
+	walk = func(value any) {
+		if len(options) >= maxOptions {
+			return
+		}
+		switch typed := value.(type) {
+		case map[string]any:
+			for key, nested := range typed {
+				if strings.EqualFold(key, "options") {
+					items, ok := nested.([]any)
+					if !ok {
+						continue
+					}
+					for _, item := range items {
+						candidate := schemaOptionLabel(item)
+						if candidate == "" {
+							continue
+						}
+						normalized := strings.ToLower(strings.TrimSpace(candidate))
+						if _, exists := seen[normalized]; exists {
+							continue
+						}
+						seen[normalized] = struct{}{}
+						options = append(options, candidate)
+						if len(options) >= maxOptions {
+							return
+						}
+					}
+					continue
+				}
+				walk(nested)
+			}
+		case []any:
+			for _, nested := range typed {
+				walk(nested)
+			}
+		}
+	}
+	walk(attributes)
+	return options
+}
+
+func schemaOptionLabel(value any) string {
+	item, ok := value.(map[string]any)
+	if !ok {
+		return strings.TrimSpace(fmt.Sprint(value))
+	}
+	for _, key := range []string{"label", "label_en", "label_uz", "label_cyr", "label_ru", "name", "value", "slug"} {
+		if label := strings.TrimSpace(fmt.Sprint(item[key])); label != "" && label != "<nil>" {
+			return label
+		}
+	}
+	return ""
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

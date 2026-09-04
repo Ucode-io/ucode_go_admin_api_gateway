@@ -1395,23 +1395,60 @@ func (h *HandlerV1) copyTemplateTableViews(ctx context.Context, sourceService, t
 		}
 	}
 
+	// Views belong to a table via their table_slug. View.GetList filters by
+	// req.MenuId (a non-UUID value is matched against table_slug), NOT req.TableSlug.
+	// The previous call set only TableSlug, so GetList fell through to
+	// `WHERE table_slug = ''` and returned the project's orphan (empty table_slug)
+	// views — then re-created every one of them once per table. With a source that
+	// carried ~1200 orphan views that exploded the target `view` table ~27x (≈32k
+	// inert rows the UI never renders). Scope the fetch to this table via MenuId and
+	// still guard client-side so an orphan or cross-table view is never copied.
 	viewsResp, err := sourceService.GoObjectBuilderService().View().GetList(ctx, &pbo.GetAllViewsRequest{
+		MenuId:    table.GetSlug(),
 		TableSlug: table.GetSlug(),
 		ProjectId: sourceResourceEnvID,
 	})
 	if err != nil {
 		return fmt.Errorf("get views for %s: %w", table.GetSlug(), err)
 	}
+	// Skip views the target already has: Table().Create seeds default TABLE/SECTION
+	// views for every table, so re-copying would duplicate them and the count would
+	// creep up every clone generation. Dedupe on (type, name) within the table.
+	viewSig := func(v *pbo.View) string { return v.GetType() + "\x1f" + v.GetName() }
+	seenViews := make(map[string]bool)
+	if existingViews, exErr := targetService.GoObjectBuilderService().View().GetList(ctx, &pbo.GetAllViewsRequest{
+		MenuId:    table.GetSlug(),
+		TableSlug: table.GetSlug(),
+		ProjectId: targetResourceEnvID,
+	}); exErr != nil {
+		log.Printf("[ugen-template] read target views %s: %v", table.GetSlug(), exErr)
+	} else {
+		for _, v := range existingViews.GetViews() {
+			seenViews[viewSig(v)] = true
+		}
+	}
+	// Views are presentation-only, and a template's source view data can be partly
+	// broken (missing relation/menu refs). Copy best-effort so one bad view never
+	// aborts an otherwise-good clone.
 	for _, view := range viewsResp.GetViews() {
+		if view.GetTableSlug() != table.GetSlug() {
+			continue
+		}
+		if seenViews[viewSig(view)] {
+			continue
+		}
+		seenViews[viewSig(view)] = true
 		viewReq, err := convert[*pbo.View, *pbo.CreateViewRequest](view)
 		if err != nil {
-			return fmt.Errorf("convert view %s: %w", view.GetId(), err)
+			log.Printf("[ugen-template] skip view %s (%s): %v", view.GetId(), table.GetSlug(), err)
+			continue
 		}
 		viewReq.ProjectId = targetResourceEnvID
 		viewReq.EnvId = targetResourceEnvID
 		viewReq.Id = ""
 		if _, err = targetService.GoObjectBuilderService().View().Create(ctx, viewReq); err != nil {
-			return fmt.Errorf("create view %s: %w", view.GetId(), err)
+			log.Printf("[ugen-template] skip view %s (%s): %v", view.GetId(), table.GetSlug(), err)
+			continue
 		}
 	}
 

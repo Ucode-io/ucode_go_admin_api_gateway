@@ -69,7 +69,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// @in header
 	// @name Authorization
 	v1.Use(h.V1.AuthMiddleware(cfg))
-	v1.Use(tracker.ApiCallCountMiddleware())
+	v1.Use(tracker.ApiCallCountMiddleware(config.UsageSourceAdmin))
 	{
 		v1.POST("/menu-settings", h.V1.CreateMenuSettings)
 		v1.PUT("/menu-settings", h.V1.UpdateMenuSettings)
@@ -84,6 +84,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		v1.GET("/pricing/performance", h.V1.GetPerformanceMetrics)
 		v1.GET("/pricing/api-call/api-metrics", h.V1.GetApiMetrics)
 		v1.GET("/pricing/api-call/api-chart", h.V1.GetApiChart)
+		v1.GET("/pricing/api-call/breakdown", h.V1.GetApiUsageBreakdown)
 
 		// MINIO
 		v1.POST("/minio/bucket-size", h.V1.BucketSize)
@@ -174,6 +175,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		v1.POST("/invoke_function", h.V1.InvokeFunction)
 		v1.POST("/invoke_function/:function-path", h.V1.InvokeFunctionByPath)
+
+		crmAI := v1.Group("/crm-ai")
+		{
+			crmAI.POST("/chat", h.V1.CreateCRMAssistantMessage)
+			crmAI.POST("/actions/:action-id/confirm", h.V1.ConfirmCRMAssistantAction)
+			crmAI.GET("/preferences/:table", h.V1.GetCRMFieldPreferences)
+			crmAI.PUT("/preferences/:table", h.V1.UpdateCRMFieldPreferences)
+		}
 
 		// KP (commercial proposal) generation — synchronous HTML via kp-generator-agent.
 		v1.POST("/kp-proposals", h.V1.GenerateKpProposal)
@@ -287,7 +296,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v2 := r.Group("/v2")
 	v2.Use(h.V1.AuthMiddleware(cfg))
-	v2.Use(tracker.ApiCallCountMiddleware())
+	v2.Use(tracker.ApiCallCountMiddleware(config.UsageSourceAdmin))
 	{
 		v2.POST("/object/get-list/:collection", h.V1.GetListV2)
 		v2.PUT("/update-with/:collection", h.V1.UpdateWithParams)
@@ -582,7 +591,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	clientV2 := r.Group("/v2")
 	clientV2.Use(h.V2.AuthMiddleware())
-	clientV2.Use(tracker.ApiCallCountMiddleware())
+	clientV2.Use(tracker.ApiCallCountMiddleware(config.UsageSourceClient))
 	clientV2.Use(tracker.BillingLimitMiddleware())
 	// items group
 	v2Items := clientV2.Group("/items")
@@ -625,7 +634,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v2Version := r.Group("/v2")
 	v2Version.Use(h.V1.AuthMiddleware(cfg))
-	v2Version.Use(tracker.ApiCallCountMiddleware())
+	v2Version.Use(tracker.ApiCallCountMiddleware(config.UsageSourceAdmin))
 	{
 		v2Version.POST("/csv/:collection/download", h.V2.GetListInCSV)
 		v2Version.POST("/send-to-gpt", h.V2.SendToGpt)
@@ -762,6 +771,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	// Public Instagram OAuth callback (no auth - Instagram calls this).
 	r.GET("/v1/instagram/callback", h.V1.InstagramCallback)
+	r.POST("/v1/instagram/deauthorize", h.V1.InstagramDeauthorize)
 
 	facebook := r.Group("/v1/facebook")
 	facebook.Use(h.V1.AuthMiddleware(cfg))
@@ -781,6 +791,14 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		facebook.GET("/integration", h.V1.FacebookIntegration)
 		facebook.DELETE("/integration/:id", h.V1.FacebookDisconnect)
+	}
+
+	metaAds := r.Group("/v1/meta-ads")
+	metaAds.Use(h.V1.AuthMiddleware(cfg))
+	metaAds.Use(tracker.ApiCallCountMiddleware(config.UsageSourceAdmin))
+	{
+		metaAds.GET("/account", h.MetaAds.Account)
+		metaAds.GET("/dashboard", h.MetaAds.Dashboard)
 	}
 
 	// Google Lead Form Ads webhook — public, Google posts leads here (no OAuth).
@@ -898,7 +916,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 	v3 := r.Group("/v3")
 	v3.Use(h.V1.AuthMiddleware(cfg))
-	v3.Use(tracker.ApiCallCountMiddleware())
+	v3.Use(tracker.ApiCallCountMiddleware(config.UsageSourceAdmin))
 	v3Menus := v3.Group("/menus")
 	{
 		v3Menus.GET("", h.V3.GetAllMenus)

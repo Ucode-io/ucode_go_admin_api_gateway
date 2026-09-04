@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"sync/atomic"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -37,13 +36,24 @@ func (t *Tracker) BillingLimitMiddleware() gin.HandlerFunc {
 	}
 }
 
-// ApiCallCountMiddleware increments the per-project L1 counter on every request.
-// Counts are flushed to Redis by Tracker on its flush interval.
-func (t *Tracker) ApiCallCountMiddleware() gin.HandlerFunc {
+// ApiCallCountMiddleware increments the per-project L1 counter on every request,
+// sliced by where the call came from and which route it hit. Counts are flushed
+// to Redis by Tracker on its flush interval.
+//
+// source is fixed per route group at registration time: admin/builder traffic is
+// counted but never blocked, client traffic is both counted and blocked, and
+// telling them apart is what stops a customer's own builder usage from
+// dominating their breakdown.
+func (t *Tracker) ApiCallCountMiddleware(source string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if projectID := c.GetString("project_id"); projectID != "" {
-			counter, _ := t.l1Cache.LoadOrStore(projectID, &atomic.Int64{})
-			counter.(*atomic.Int64).Add(1)
+			t.add(usageKey{
+				projectID:  projectID,
+				source:     source,
+				method:     c.Request.Method,
+				route:      c.FullPath(),
+				collection: c.Param("collection"),
+			})
 		}
 		c.Next()
 	}

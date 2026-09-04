@@ -61,6 +61,7 @@ service BillingService {
 
   rpc GetPricingLimits(GetPricingLimitsRequest) returns (GetPricingLimitsResponse);
   rpc LogUsage(LogUsageRequest) returns (google.protobuf.Empty);
+  rpc GetApiUsageBreakdown(GetApiUsageBreakdownRequest) returns (GetApiUsageBreakdownResponse);
 
   rpc GetApiCallMonitoringMetrics(GetApiCallMonitoringMetricsRequest) returns (GetApiCallMonitoringMetricsResponse);
 
@@ -318,6 +319,39 @@ message LogUsageRequest {
   int64 count = 2;
   int64 time_range = 3;
   string date_time = 4;
+  repeated ApiUsageDetail details = 5;
+}
+
+// ApiUsageDetail is one dimensioned slice of the API call counter. The gateway
+// sends these alongside LogUsageRequest.count, and their sum always equals that
+// count -- both come from the same in-memory tally in the same flush.
+message ApiUsageDetail {
+  string source     = 1; // client | admin
+  string method     = 2; // GET | POST | PUT | DELETE ...
+  string route      = 3; // gin route template, e.g. /v2/items/:collection
+  string collection = 4; // table slug, empty for routes without one
+  int64  count      = 5;
+}
+
+message GetApiUsageBreakdownRequest {
+  string project_id = 1;
+  string from       = 2; // YYYY-MM-DD inclusive; empty = start of current month
+  string to         = 3; // YYYY-MM-DD inclusive; empty = now
+  int32  limit      = 4; // top-N rows, default 10
+}
+
+message ApiUsageBreakdownRow {
+  string source     = 1;
+  string method     = 2;
+  string route      = 3;
+  string collection = 4;
+  int64  count      = 5;
+}
+
+message GetApiUsageBreakdownResponse {
+  repeated ApiUsageBreakdownRow rows = 1;
+  int64 total = 2; // every request in the window, not just the returned rows
+  int64 other = 3; // total - sum(rows)
 }
 
 message MonthlyRequest {

@@ -379,9 +379,10 @@ type (
 
 	// FieldSchema — simplified field info sent to Claude for schema awareness
 	FieldSchema struct {
-		Slug  string `json:"slug"`
-		Label string `json:"label"`
-		Type  string `json:"type"`
+		Slug    string   `json:"slug"`
+		Label   string   `json:"label"`
+		Type    string   `json:"type"`
+		Options []string `json:"options,omitempty"`
 	}
 
 	// TableSchema — simplified table info with fields sent to Claude

@@ -3,10 +3,6 @@ package v1
 import (
 	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"crypto/subtle"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -2210,22 +2206,8 @@ func instagramAttachmentFileName(mediaURL string) string {
 }
 
 func (h *HandlerV1) verifyInstagramSignature(header string, body []byte) bool {
-	secret := strings.TrimSpace(h.baseConf.InstagramClientSecret)
-	if secret == "" {
-		return false
-	}
-	header = strings.TrimSpace(header)
-	if !strings.HasPrefix(header, config.InstagramSignaturePrefix) {
-		return false
-	}
-	provided, err := hex.DecodeString(strings.TrimPrefix(header, config.InstagramSignaturePrefix))
-	if err != nil {
-		return false
-	}
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write(body)
-	expected := mac.Sum(nil)
-	return subtle.ConstantTimeCompare(provided, expected) == 1
+	secrets := append([]string{h.baseConf.InstagramClientSecret}, h.baseConf.InstagramLegacyClientSecrets...)
+	return verifyMetaWebhookSignature(header, config.InstagramSignaturePrefix, body, secrets...)
 }
 
 func isDuplicateError(err error) bool {

@@ -118,3 +118,34 @@ var (
 	PaymentTableLimit    = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeTableLimit, Unit: PaymentUnitTables}
 	PaymentApiCallLimit  = PaymentRequiredData{Type: PaymentRequiredType, Code: PaymentCodeApiCallLimit, Unit: PaymentUnitRequests}
 )
+
+// ApiUsageBreakdownResponse answers "which requests are coming most, and how
+// much of the monthly quota is left".
+//
+// Limit and Remaining are measured against the fare on project.fare_id — the
+// same pointer the blocking worker uses — so this response can never disagree
+// with whether the project is actually being refused.
+type ApiUsageBreakdownResponse struct {
+	Limit     int64  `json:"limit"`
+	Used      int64  `json:"used"`
+	Remaining *int64 `json:"remaining"`
+	Unlimited bool   `json:"unlimited"`
+	Blocked   bool   `json:"blocked"`
+	// UsedUpdatedAt is when the counter behind Used was last written. The
+	// pipeline is asynchronous, so this is typically a few minutes behind now.
+	UsedUpdatedAt string                 `json:"used_updated_at"`
+	From          string                 `json:"from"`
+	To            string                 `json:"to"`
+	Top           []ApiUsageBreakdownRow `json:"top"`
+	// Other is everything in the window the returned rows do not account for.
+	Other int64 `json:"other"`
+}
+
+type ApiUsageBreakdownRow struct {
+	Source     string  `json:"source"`
+	Method     string  `json:"method"`
+	Route      string  `json:"route"`
+	Collection string  `json:"collection"`
+	Count      int64   `json:"count"`
+	Percent    float64 `json:"percent"`
+}

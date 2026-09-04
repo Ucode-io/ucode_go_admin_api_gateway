@@ -153,20 +153,31 @@ func (h *HandlerV1) facebookFetchUser(ctx context.Context, userToken string) (mo
 // facebookDebugToken inspects a user token via Graph debug_token (authenticated
 // with the app token) to learn whether it is still valid and when it expires.
 func (h *HandlerV1) facebookDebugToken(ctx context.Context, userToken string) (models.FacebookTokenDebugData, error) {
-	var resp models.FacebookTokenDebugResponse
-
-	err := h.facebookGraphGet(
-		ctx, "debug_token",
-		url.Values{
-			"input_token":  {userToken},
-			"access_token": {h.baseConf.FacebookAppID + "|" + h.baseConf.FacebookAppSecret},
-		},
-		&resp,
-	)
-	if err != nil {
-		return models.FacebookTokenDebugData{}, err
+	credentials := [][2]string{{h.baseConf.FacebookAppID, h.baseConf.FacebookAppSecret}}
+	if h.baseConf.FacebookLegacyAppID != "" && h.baseConf.FacebookLegacyAppSecret != "" &&
+		(h.baseConf.FacebookLegacyAppID != h.baseConf.FacebookAppID || h.baseConf.FacebookLegacyAppSecret != h.baseConf.FacebookAppSecret) {
+		credentials = append(credentials, [2]string{h.baseConf.FacebookLegacyAppID, h.baseConf.FacebookLegacyAppSecret})
 	}
-	return resp.Data, nil
+
+	var firstErr error
+	for _, credential := range credentials {
+		var resp models.FacebookTokenDebugResponse
+		err := h.facebookGraphGet(
+			ctx, "debug_token",
+			url.Values{
+				"input_token":  {userToken},
+				"access_token": {credential[0] + "|" + credential[1]},
+			},
+			&resp,
+		)
+		if err == nil {
+			return resp.Data, nil
+		}
+		if firstErr == nil {
+			firstErr = err
+		}
+	}
+	return models.FacebookTokenDebugData{}, firstErr
 }
 
 func (h *HandlerV1) facebookListPages(ctx context.Context, userToken string) ([]models.FacebookPage, error) {
@@ -184,6 +195,59 @@ func (h *HandlerV1) facebookListPages(ctx context.Context, userToken string) ([]
 	}
 
 	return list.Data, nil
+}
+
+// facebookWarmMarketingAPI performs the read-only calls used by the CRM's Meta
+// Ads analytics immediately after a user grants access. Besides validating the
+// business_management and ads_read grants, this makes the App Review test path
+// exercise the same Marketing API resources that power the dashboard.
+// Failures are intentionally best-effort: lead/page setup must still succeed for
+// businesses that have no ad account or have not granted advertising access.
+func (h *HandlerV1) facebookWarmMarketingAPI(ctx context.Context, userToken string) {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+
+	var businesses struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	if err := h.facebookGraphGet(ctx, "me/businesses", url.Values{
+		"fields":       {"id,name"},
+		"limit":        {"25"},
+		"access_token": {userToken},
+	}, &businesses); err != nil {
+		h.log.Warn("facebook marketing warm-up: list businesses failed: " + err.Error())
+	}
+
+	var adAccounts struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	if err := h.facebookGraphGet(ctx, "me/adaccounts", url.Values{
+		"fields":       {"id,name,account_status"},
+		"limit":        {"25"},
+		"access_token": {userToken},
+	}, &adAccounts); err != nil {
+		h.log.Warn("facebook marketing warm-up: list ad accounts failed: " + err.Error())
+		return
+	}
+	if len(adAccounts.Data) == 0 || adAccounts.Data[0].ID == "" {
+		return
+	}
+
+	var insights struct {
+		Data []json.RawMessage `json:"data"`
+	}
+	if err := h.facebookGraphGet(ctx, adAccounts.Data[0].ID+"/insights", url.Values{
+		"fields":       {"spend,impressions,reach,clicks,actions"},
+		"date_preset":  {"last_30d"},
+		"level":        {"account"},
+		"access_token": {userToken},
+	}, &insights); err != nil {
+		h.log.Warn("facebook marketing warm-up: fetch account insights failed: " + err.Error())
+	}
 }
 
 func (h *HandlerV1) facebookListForms(ctx context.Context, pageID, pageToken string) ([]models.FacebookForm, error) {
