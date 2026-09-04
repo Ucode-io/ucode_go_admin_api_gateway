@@ -25,6 +25,12 @@ func buildCommonCRMPipelineAction(
 ) (*crmAssistantResult, bool) {
 	message := strings.TrimSpace(req.Message)
 	lower := strings.ToLower(message)
+	// Spreadsheet imports need one atomic batch action (pipeline + rows). Let the
+	// model map the attached headers/rows instead of consuming the request as a
+	// standalone deterministic pipeline mutation.
+	if strings.Contains(lower, "spreadsheet_import_data") {
+		return nil, false
+	}
 	if !containsAnyFold(lower, "pipeline", "pipleline", "voronka", "воронк") ||
 		!containsAnyFold(lower, "create", "generate", "yarat", "qo‘sh", "qo'sh", "qosh", "созда", "добав") {
 		return nil, false

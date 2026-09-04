@@ -215,6 +215,13 @@ func TestCRMBatchCreatesPipelineAndExactSpreadsheetRows(t *testing.T) {
 	}
 }
 
+func TestSpreadsheetImportBypassesStandalonePipelineParser(t *testing.T) {
+	req := models.CRMAssistantRequest{Message: "Create pipeline \"Excel Import\" with stages\n- New\n- Won\n\nSPREADSHEET_IMPORT_DATA\nrow_count=2\nrows=[]\nEND_SPREADSHEET_IMPORT_DATA"}
+	if result, handled := buildCommonCRMPipelineAction(req, "env"); handled || result != nil {
+		t.Fatalf("spreadsheet import must reach the combined batch planner: %#v", result)
+	}
+}
+
 func TestCRMMutationCancelMessageUsesRequestLanguage(t *testing.T) {
 	tests := map[string]string{
 		"Ksjdd deal budgetini o‘zgartir": "Amal bekor qilindi. Hech narsa o‘zgarmadi.",
