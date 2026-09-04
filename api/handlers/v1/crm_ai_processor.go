@@ -323,7 +323,7 @@ func crmRequestRequiresLiveLookup(req models.CRMAssistantRequest) bool {
 
 func crmRequestLooksLikeFieldSettings(message string) bool {
 	hasFieldContext := containsAnyFold(message,
-		"kartoch", "card", "field", "maydon", "column", "ustun", "поле", "карточ", "колон",
+		"kartoch", "card", "field", "maydon", "polya", "pole", "column", "ustun", "поле", "карточ", "колон",
 	)
 	hasExplicitConfigurationIntent := containsAnyFold(message,
 		"ko‘rin", "ko'rin", "korin", "yashir", "hide", "visible", "visibility",
@@ -332,7 +332,8 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 		"скрой", "видим", "порядок", "перв", "втор", "трет",
 	)
 	hasGenericShowIntent := containsAnyFold(message,
-		"ko‘rsat", "ko'rsat", "korsat", "show", "покажи",
+		"ko‘rsat", "ko'rsat", "korsat", "chiqar", "show", "покажи", "отобраз",
+		"qo‘sh", "qo'sh", "qosh", "add", "добав",
 	)
 	hasVisualReferenceIntent := containsAnyFold(message,
 		"shunaqa", "manaqa", "huddi shu", "xuddi shu", "shu kabi",
@@ -629,6 +630,7 @@ func builtInCRMFieldAliases(table string) map[string]string {
 		"телефон":      "contacts_id",
 		"contact":      "contacts_id",
 		"kontakt":      "contacts_id",
+		"контакт":      "contacts_id",
 	}
 }
 
@@ -637,7 +639,7 @@ func commonCRMFieldAliases(slug string) []string {
 	case "amount":
 		return []string{"budget", "byudjet", "summa", "бюджет", "сумма"}
 	case "contacts_id":
-		return []string{"phone", "phone number", "mobile", "telefon", "телефон", "contact", "kontakt"}
+		return []string{"phone", "phone number", "mobile", "telefon", "телефон", "contact", "kontakt", "контакт"}
 	default:
 		return nil
 	}

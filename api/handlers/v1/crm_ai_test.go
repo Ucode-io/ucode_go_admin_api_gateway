@@ -552,6 +552,33 @@ func TestBuildCommonCRMFieldSettingsOrdersPhoneAndSource(t *testing.T) {
 	}
 }
 
+func TestBuildCommonCRMFieldSettingsShowsContactFromMixedUzbekRussianFieldWording(t *testing.T) {
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "contacts_id", Label: "FROM deals TO contacts"},
+		},
+	}}
+
+	for _, message := range []string{
+		"lidga Контакт polyasini chiqarber",
+		"lid kartochkasiga kontakt qoshiber",
+	} {
+		t.Run(message, func(t *testing.T) {
+			result, ok := buildCommonCRMFieldSettings(models.CRMAssistantRequest{
+				Message:     message,
+				PageContext: models.CRMAssistantPageContext{Table: "deals"},
+			}, schema)
+			if !ok || len(result.clientActions) != 1 {
+				t.Fatalf("expected field action, got %#v, ok=%v", result, ok)
+			}
+			if got := result.clientActions[0].ShowFields; !reflect.DeepEqual(got, []string{"contacts_id"}) {
+				t.Fatalf("show fields = %#v, want contacts_id", got)
+			}
+		})
+	}
+}
+
 func TestBuildCommonCRMFieldSettingsLeavesScreenshotsForVisionAgent(t *testing.T) {
 	result, ok := buildCommonCRMFieldSettings(models.CRMAssistantRequest{
 		Message:     "source ni ko‘rsat",

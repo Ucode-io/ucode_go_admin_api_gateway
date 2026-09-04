@@ -50,7 +50,8 @@ func buildCommonCRMFieldSettings(
 	})
 	show := fieldsNearestVerbs(message, mentions, []string{
 		"ko‘rin", "ko'rin", "korin",
-		"ko‘rsat", "ko'rsat", "korsat", "show", "visible", "покажи", "отобраз",
+		"ko‘rsat", "ko'rsat", "korsat", "chiqar", "show", "visible", "покажи", "отобраз",
+		"qo‘sh", "qo'sh", "qosh", "add", "добав",
 	})
 	order := fieldsByOrdinals(message, mentions)
 	if len(hide) == 0 && len(show) == 0 && len(order) == 0 {
