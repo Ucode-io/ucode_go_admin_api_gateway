@@ -142,7 +142,10 @@ type ApiUsageBreakdownResponse struct {
 }
 
 type ApiUsageBreakdownRow struct {
-	Source     string  `json:"source"`
+	Source string `json:"source"`
+	// AuthType is how the caller authenticated: api_key, bearer, or empty for
+	// rows recorded before this dimension existed.
+	AuthType   string  `json:"auth_type"`
 	Method     string  `json:"method"`
 	Route      string  `json:"route"`
 	Collection string  `json:"collection"`

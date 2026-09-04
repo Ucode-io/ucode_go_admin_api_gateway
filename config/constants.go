@@ -130,6 +130,10 @@ const (
 	UsageSourceClient = "client"
 	UsageSourceAdmin  = "admin"
 
+	// How the caller authenticated, derived from the Authorization header.
+	UsageAuthApiKey = "api_key"
+	UsageAuthBearer = "bearer"
+
 	AnthropicCachingBeta = "prompt-caching-2024-07-31"
 
 	YandexMetricCountersURL = "https://api-metrika.yandex.net/management/v1/counters"

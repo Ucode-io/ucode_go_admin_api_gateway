@@ -326,6 +326,8 @@ message ApiUsageDetail {
   string route      = 3; // gin route template, e.g. /v2/items/:collection
   string collection = 4; // table slug, empty for routes without one
   int64  count      = 5;
+  string auth_type  = 6; // api_key | bearer | '' when the caller sent neither
+  string bucket     = 7; // "2006-01-02 15:04:05" start of the 15-minute bucket
 }
 
 message GetApiUsageBreakdownRequest {
@@ -341,6 +343,7 @@ message ApiUsageBreakdownRow {
   string route      = 3;
   string collection = 4;
   int64  count      = 5;
+  string auth_type  = 6;
 }
 
 message GetApiUsageBreakdownResponse {

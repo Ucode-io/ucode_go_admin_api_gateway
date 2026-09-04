@@ -18,31 +18,63 @@ import (
 type usageKey struct {
 	projectID  string
 	source     string // client | admin
+	authType   string // api_key | bearer | "" when the caller sent neither
 	method     string
 	route      string // gin route template, e.g. /v2/items/:collection
 	collection string // table slug, empty when the route has none
 }
 
-// field encodes the key as a Redis hash field: "d|source|method|route|collection".
-// The project id is already in the hash key itself, so it is not repeated here.
-func (k usageKey) field() string {
+// usageBucket is the resolution the breakdown is stored at. The bucket is
+// stamped here, on the 10-second flush, rather than when the counts are drained
+// to Postgres ten minutes later — otherwise a request could be filed under an
+// interval it did not happen in.
+const usageBucket = 15 * time.Minute
+
+// bucketLayout is what Postgres parses back into a timestamp.
+const bucketLayout = "2006-01-02 15:04:05"
+
+// field encodes the key as a Redis hash field:
+// "d|bucket|source|authType|method|route|collection". The project id is already
+// in the hash key itself, so it is not repeated here.
+func (k usageKey) field(bucket string) string {
 	return config.KeyUsageDetailPrefix + strings.Join(
-		[]string{sanitize(k.source), sanitize(k.method), sanitize(k.route), sanitize(k.collection)},
+		[]string{
+			bucket,
+			sanitize(k.source), sanitize(k.authType), sanitize(k.method),
+			sanitize(k.route), sanitize(k.collection),
+		},
 		config.KeyUsageDetailSep,
 	)
 }
 
+// usageField is one decoded detail field.
+type usageField struct {
+	bucket     string
+	source     string
+	authType   string
+	method     string
+	route      string
+	collection string
+}
+
 // parseUsageField reverses field(). Returns ok=false for the "total" field and
 // for anything else that is not a detail field.
-func parseUsageField(f string) (source, method, route, collection string, ok bool) {
+func parseUsageField(f string) (usageField, bool) {
 	if !strings.HasPrefix(f, config.KeyUsageDetailPrefix) {
-		return "", "", "", "", false
+		return usageField{}, false
 	}
 	parts := strings.Split(strings.TrimPrefix(f, config.KeyUsageDetailPrefix), config.KeyUsageDetailSep)
-	if len(parts) != 4 {
-		return "", "", "", "", false
+	if len(parts) != 6 {
+		return usageField{}, false
 	}
-	return parts[0], parts[1], parts[2], parts[3], true
+	return usageField{
+		bucket:     parts[0],
+		source:     parts[1],
+		authType:   parts[2],
+		method:     parts[3],
+		route:      parts[4],
+		collection: parts[5],
+	}, true
 }
 
 // sanitize keeps the separator unambiguous. Slugs and route templates never
@@ -132,6 +164,7 @@ func (t *Tracker) flush() {
 
 	ctx := context.Background()
 	now := time.Now()
+	bucket := now.UTC().Truncate(usageBucket).Format(bucketLayout)
 	pipe := t.rdb.Pipeline()
 
 	// Project totals drive billing; the per-dimension fields only slice them up.
@@ -141,7 +174,7 @@ func (t *Tracker) flush() {
 			continue
 		}
 		totals[k.projectID] += delta
-		pipe.HIncrBy(ctx, fmt.Sprintf(config.KeyUsagePending, k.projectID), k.field(), delta)
+		pipe.HIncrBy(ctx, fmt.Sprintf(config.KeyUsagePending, k.projectID), k.field(bucket), delta)
 	}
 
 	for projectID, delta := range totals {

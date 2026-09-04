@@ -586,6 +586,7 @@ func (h *HandlerV1) GetApiUsageBreakdown(c *gin.Context) {
 		}
 		response.Top = append(response.Top, models.ApiUsageBreakdownRow{
 			Source:     row.GetSource(),
+			AuthType:   row.GetAuthType(),
 			Method:     row.GetMethod(),
 			Route:      row.GetRoute(),
 			Collection: row.GetCollection(),

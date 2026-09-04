@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -50,6 +51,7 @@ func (t *Tracker) ApiCallCountMiddleware(source string) gin.HandlerFunc {
 			t.add(usageKey{
 				projectID:  projectID,
 				source:     source,
+				authType:   authKind(c),
 				method:     c.Request.Method,
 				route:      c.FullPath(),
 				collection: c.Param("collection"),
@@ -57,4 +59,20 @@ func (t *Tracker) ApiCallCountMiddleware(source string) gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+// authKind reports how the caller authenticated. It reads the header directly
+// rather than the "auth" context value, which only some middlewares populate
+// and which never carries the bearer case on the client routes.
+func authKind(c *gin.Context) string {
+	switch scheme := c.GetHeader("Authorization"); {
+	case strings.HasPrefix(scheme, "Bearer"):
+		return config.UsageAuthBearer
+	case strings.HasPrefix(scheme, "API-KEY"):
+		return config.UsageAuthApiKey
+	}
+	if c.GetHeader("X-API-KEY") != "" {
+		return config.UsageAuthApiKey
+	}
+	return ""
 }
