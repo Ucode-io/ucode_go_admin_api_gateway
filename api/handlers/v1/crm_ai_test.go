@@ -129,6 +129,15 @@ func TestCRMAnalyticsTableRequestIsNotFieldSettings(t *testing.T) {
 	if !crmRequestRequiresLiveLookup(request) {
 		t.Fatal("analytics table request must require a live CRM lookup")
 	}
+	schema := []models.TableSchema{{
+		Slug: "deals",
+		Fields: []models.FieldSchema{
+			{Slug: "stage", Label: "Stage"},
+		},
+	}}
+	if result, handled := buildCommonCRMFieldSettings(request, schema); handled || result != nil {
+		t.Fatalf("analytics request must not produce card settings: %#v", result)
+	}
 }
 
 func TestNormalizeCRMRecordFieldValueWrapsMultiselectScalar(t *testing.T) {

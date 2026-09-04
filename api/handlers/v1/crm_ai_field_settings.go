@@ -37,6 +37,9 @@ func buildCommonCRMFieldSettings(
 		return nil, false
 	}
 	message := strings.ToLower(strings.TrimSpace(req.Message))
+	if !crmRequestLooksLikeFieldSettings(message) {
+		return nil, false
+	}
 	mentions := findCRMFieldMentions(message, aliases)
 	if len(mentions) == 0 {
 		return nil, false

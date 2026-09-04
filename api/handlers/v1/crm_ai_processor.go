@@ -312,7 +312,9 @@ func crmRequestLooksLikeFieldSettings(message string) bool {
 	)
 	hasExplicitConfigurationIntent := containsAnyFold(message,
 		"ko‘rin", "ko'rin", "korin", "yashir", "hide", "visible", "visibility",
-		"tartib", "order", "joyla", "скрой", "видим", "порядок",
+		"tartib", "order", "joyla", "birinchi", "ikkinchi", "uchinchi",
+		"1-chi", "2-chi", "3-chi", "first", "second", "third",
+		"скрой", "видим", "порядок", "перв", "втор", "трет",
 	)
 	hasGenericShowIntent := containsAnyFold(message,
 		"ko‘rsat", "ko'rsat", "korsat", "show", "покажи",
