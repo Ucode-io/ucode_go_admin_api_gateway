@@ -206,6 +206,26 @@ func (h *HandlerV1) ConfirmCRMAssistantAction(c *gin.Context) {
 		})
 		return
 	}
+	if stored.Action.Action == "client_batch" {
+		batchAction, decodeErr := decodeStoredCRMBatchAction(stored.Action.Data)
+		if decodeErr != nil {
+			h.log.Error("crm ai: stored batch action is invalid", logger.Error(decodeErr))
+			h.HandleResponse(c, status_http.InternalServerError, "stored batch action is invalid")
+			return
+		}
+		_, _ = h.centralRedis.Del(c.Request.Context(), key).Result()
+		reply := stored.Action.SuccessMessage
+		if strings.TrimSpace(reply) == "" {
+			reply = "Pipeline yaratildi va deal ma’lumotlari import qilindi."
+		}
+		h.HandleResponse(c, status_http.OK, models.CRMAssistantResponse{
+			Reply: reply,
+			ClientActions: []models.CRMClientAction{{
+				Type: "manage_batch", Table: "deals", BatchAction: batchAction,
+			}},
+		})
+		return
+	}
 
 	service, resourceEnvID, err := h.getAiChatServices(c)
 	if err != nil {

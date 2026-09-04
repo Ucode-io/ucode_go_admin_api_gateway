@@ -186,6 +186,18 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 			}
 			return &crmAssistantResult{reply: pending.Description, pendingAction: pending}, nil
 
+		case "batch_action":
+			pending, normalizeErr := newCRMBatchPendingAction(req.Message, plan.BatchAction, schema, p.resourceEnvId)
+			if normalizeErr != nil {
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected batch action %d", iteration+1),
+					fmt.Sprintf("[SYSTEM: The combined pipeline/import action was incomplete or invalid: %v. Return one corrected batch_action containing create_pipeline and bulk deal records. Do not split this user request into separate confirmations.]", normalizeErr),
+				)
+				continue
+			}
+			return &crmAssistantResult{reply: pending.Description, pendingAction: pending}, nil
+
 		case "query":
 			if crmLeadPeriodQueryRequiresCreatedAt(req) && !crmSQLUsesCreatedAt(plan.SQL) {
 				dataContext = appendDataContext(

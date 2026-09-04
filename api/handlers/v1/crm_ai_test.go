@@ -141,12 +141,77 @@ func TestCRMAnalyticsTableRequestIsNotFieldSettings(t *testing.T) {
 }
 
 func TestNormalizeCRMRecordFieldValueWrapsMultiselectScalar(t *testing.T) {
-	got := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "source", Type: "MULTISELECT"}, "codex-e2e")
+	got, err := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "source", Type: "MULTISELECT"}, "codex-e2e")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(got, []string{"codex-e2e"}) {
 		t.Fatalf("multiselect scalar = %#v", got)
 	}
-	if got := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "name", Type: "SINGLE_LINE"}, "Acme"); got != "Acme" {
+	if got, err := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "name", Type: "SINGLE_LINE"}, "Acme"); err != nil || got != "Acme" {
 		t.Fatalf("single line value = %#v", got)
+	}
+}
+
+func TestCRMRecordBulkCreateRequiresExactRequestedCount(t *testing.T) {
+	schema := []models.TableSchema{{Slug: "deals", Fields: []models.FieldSchema{{Slug: "name", Type: "SINGLE_LINE"}}}}
+	action := &models.CRMRecordAction{Operation: "create", Table: "deals", Records: []map[string]any{
+		{"name": "Dummy 1"}, {"name": "Dummy 2"}, {"name": "Dummy 3"}, {"name": "Dummy 4"},
+	}}
+	pending, err := newCRMRecordPendingAction("add dummy data to pipeline Enterprise about 4 leads", action, schema, "env")
+	if err != nil || pending == nil {
+		t.Fatalf("expected valid bulk action: pending=%#v err=%v", pending, err)
+	}
+	action.Records = action.Records[:1]
+	if _, err := newCRMRecordPendingAction("add dummy data to pipeline Enterprise about 4 leads", action, schema, "env"); err == nil {
+		t.Fatal("bulk create with wrong record count must be rejected")
+	}
+}
+
+func TestCRMRecordScalarFieldRejectsMultipleValues(t *testing.T) {
+	if _, err := normalizeCRMRecordFieldValue(models.FieldSchema{Slug: "name", Type: "SINGLE_LINE"}, []any{"Dummy 1", "Dummy 2"}); err == nil {
+		t.Fatal("scalar array must be rejected")
+	}
+}
+
+func TestCRMBatchCreatesPipelineAndExactSpreadsheetRows(t *testing.T) {
+	schema := []models.TableSchema{{Slug: "deals", Fields: []models.FieldSchema{
+		{Slug: "name", Type: "SINGLE_LINE"},
+		{Slug: "pipeline", Type: "SINGLE_LINE"},
+		{Slug: "stage", Type: "SINGLE_LINE"},
+		{Slug: "amount", Type: "NUMBER"},
+	}}}
+	action := &models.CRMBatchAction{
+		PipelineAction: &models.CRMPipelineAction{
+			Operation: "create_pipeline", PipelineName: "CODEX Excel",
+			Stages: []models.CRMPipelineStageInput{{Name: "New"}, {Name: "Won", Group: "won"}},
+		},
+		RecordAction: &models.CRMRecordAction{
+			Operation: "create", Table: "deals",
+			Records: []map[string]any{
+				{"name": "Row 1", "stage": "New", "amount": 100},
+				{"name": "Row 2", "stage": "Won", "amount": 200},
+			},
+		},
+	}
+	pending, err := newCRMBatchPendingAction("Excel ichidagi 2 ta deal uchun yangi pipeline yarat", action, schema, "env")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pending.Action != "client_batch" {
+		t.Fatalf("pending action = %q", pending.Action)
+	}
+	decoded, err := decodeStoredCRMBatchAction(pending.Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := len(decoded.RecordAction.Records); got != 2 {
+		t.Fatalf("records = %d", got)
+	}
+	for index, record := range decoded.RecordAction.Records {
+		if record["pipeline"] != "CODEX Excel" {
+			t.Fatalf("record %d pipeline = %#v", index+1, record["pipeline"])
+		}
 	}
 }
 

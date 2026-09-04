@@ -37,6 +37,7 @@ type (
 		FieldOrder     []string           `json:"field_order,omitempty"`
 		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
 		RecordAction   *CRMRecordAction   `json:"record_action,omitempty"`
+		BatchAction    *CRMBatchAction    `json:"batch_action,omitempty"`
 	}
 
 	CRMPipelineStageInput struct {
@@ -60,10 +61,16 @@ type (
 	}
 
 	CRMRecordAction struct {
-		Operation  string         `json:"operation"`
-		Table      string         `json:"table"`
-		RecordGUID string         `json:"record_guid,omitempty"`
-		Data       map[string]any `json:"data,omitempty"`
+		Operation  string           `json:"operation"`
+		Table      string           `json:"table"`
+		RecordGUID string           `json:"record_guid,omitempty"`
+		Data       map[string]any   `json:"data,omitempty"`
+		Records    []map[string]any `json:"records,omitempty"`
+	}
+
+	CRMBatchAction struct {
+		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
+		RecordAction   *CRMRecordAction   `json:"record_action,omitempty"`
 	}
 
 	CRMAssistantPlan struct {
@@ -78,6 +85,7 @@ type (
 		ClientActions  []CRMClientAction  `json:"client_actions,omitempty"`
 		PipelineAction *CRMPipelineAction `json:"pipeline_action,omitempty"`
 		RecordAction   *CRMRecordAction   `json:"record_action,omitempty"`
+		BatchAction    *CRMBatchAction    `json:"batch_action,omitempty"`
 	}
 
 	CRMAssistantInput struct {

@@ -70,18 +70,32 @@ func crmAssistantTool() chatTool {
 			"table":       map[string]any{"type": "string", "enum": []string{"deals", "contacts", "companies", "tasks"}},
 			"record_guid": map[string]any{"type": "string"},
 			"data":        map[string]any{"type": "object", "additionalProperties": true},
+			"records": map[string]any{
+				"type":     "array",
+				"minItems": 1,
+				"maxItems": 50,
+				"items":    map[string]any{"type": "object", "additionalProperties": true},
+			},
+		},
+	}
+	batchAction := map[string]any{
+		"type":     "object",
+		"required": []string{"pipeline_action", "record_action"},
+		"properties": map[string]any{
+			"pipeline_action": pipelineAction,
+			"record_action":   recordAction,
 		},
 	}
 	return chatTool{
 		Type: "function",
 		Function: functionDef{
 			Name:        "respond_crm_assistant",
-			Description: "Return the next safe CRM database step, pipeline/stage operation, final answer, or card field visibility action.",
+			Description: "Return the next safe CRM database step, pipeline/stage operation, combined import, final answer, or card field visibility action.",
 			Parameters: map[string]any{
 				"type":     "object",
 				"required": []string{"action", "needs_more_data", "reply"},
 				"properties": map[string]any{
-					"action":          map[string]any{"type": "string", "enum": []string{"query", "record_action", "pipeline_action", "answer", "client_action", "schema"}},
+					"action":          map[string]any{"type": "string", "enum": []string{"query", "record_action", "pipeline_action", "batch_action", "answer", "client_action", "schema"}},
 					"sql":             map[string]any{"type": "string"},
 					"sql_params":      map[string]any{"type": "array", "items": map[string]any{}},
 					"needs_more_data": map[string]any{"type": "boolean"},
@@ -91,6 +105,7 @@ func crmAssistantTool() chatTool {
 					"cancel_message":  map[string]any{"type": "string"},
 					"pipeline_action": pipelineAction,
 					"record_action":   recordAction,
+					"batch_action":    batchAction,
 					"client_actions": map[string]any{
 						"type": "array",
 						"items": map[string]any{
