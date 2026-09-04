@@ -41,6 +41,9 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 	if err != nil {
 		return nil, fmt.Errorf("load CRM schema: %w", err)
 	}
+	if result, handled := buildCommonCRMSpreadsheetBatchAction(req, schema, p.resourceEnvId); handled {
+		return result, nil
+	}
 	if result, handled := buildCommonCRMFieldSettings(req, schema); handled {
 		return result, nil
 	}
@@ -181,6 +184,18 @@ func (p *ChatProcessor) runCRMAssistantFlow(
 					dataContext,
 					fmt.Sprintf("Rejected record action %d", iteration+1),
 					fmt.Sprintf("[SYSTEM: The CRM record action was incomplete or invalid: %v. Correct it using the exact schema. Query an exact record guid before update/delete; ask one concise clarification only if required user data is missing.]", normalizeErr),
+				)
+				continue
+			}
+			return &crmAssistantResult{reply: pending.Description, pendingAction: pending}, nil
+
+		case "batch_action":
+			pending, normalizeErr := newCRMBatchPendingAction(req.Message, plan.BatchAction, schema, p.resourceEnvId)
+			if normalizeErr != nil {
+				dataContext = appendDataContext(
+					dataContext,
+					fmt.Sprintf("Rejected batch action %d", iteration+1),
+					fmt.Sprintf("[SYSTEM: The combined pipeline/import action was incomplete or invalid: %v. Return one corrected batch_action containing create_pipeline and bulk deal records. Do not split this user request into separate confirmations.]", normalizeErr),
 				)
 				continue
 			}
