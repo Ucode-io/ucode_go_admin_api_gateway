@@ -123,6 +123,8 @@ func (h *HandlerV1) AdminAuthMiddleware() gin.HandlerFunc {
 				})
 				c.Set("environment_id", apiKey.GetEnvironmentId())
 				c.Set("project_id", apiKey.GetProjectId())
+				c.Set("actor_id", apiKey.GetId())
+				c.Set("actor_name", apiKey.GetName())
 			default:
 				err := errors.New("error invalid authorization method")
 				h.log.Error("--AuthMiddleware--", logger.Error(err))

@@ -52,6 +52,8 @@ func (t *Tracker) ApiCallCountMiddleware(source string) gin.HandlerFunc {
 				projectID:  projectID,
 				source:     source,
 				authType:   authKind(c),
+				actorID:    actorID(c),
+				actorName:  c.GetString("actor_name"),
 				method:     c.Request.Method,
 				route:      c.FullPath(),
 				collection: c.Param("collection"),
@@ -75,4 +77,15 @@ func authKind(c *gin.Context) string {
 		return config.UsageAuthApiKey
 	}
 	return ""
+}
+
+// actorID reports who signed the request: the api_keys record id when a key was
+// used, the user id when a token was. Never the credential itself — the value in
+// X-API-KEY is the secret, and these rows are read back by a project-facing
+// endpoint.
+func actorID(c *gin.Context) string {
+	if id := c.GetString("actor_id"); id != "" {
+		return id
+	}
+	return c.GetString("user_id")
 }

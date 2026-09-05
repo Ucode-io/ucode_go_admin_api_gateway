@@ -328,6 +328,10 @@ message ApiUsageDetail {
   int64  count      = 5;
   string auth_type  = 6; // api_key | bearer | '' when the caller sent neither
   string bucket     = 7; // "2006-01-02 15:04:05" start of the 15-minute bucket
+  // Which key or user signed the request. Never the credential itself: for a key
+  // this is the api_keys record id, not the app_id the client sends.
+  string actor_id   = 8;
+  string actor_name = 9;
 }
 
 message GetApiUsageBreakdownRequest {
@@ -335,6 +339,18 @@ message GetApiUsageBreakdownRequest {
   string from       = 2; // YYYY-MM-DD inclusive; empty = start of current month
   string to         = 3; // YYYY-MM-DD inclusive; empty = now
   int32  limit      = 4; // top-N rows, default 10
+
+  // Filters narrow the window before grouping, which is what makes drill-down
+  // work: click a route, pass it back as a filter, group by something else.
+  string source     = 5;
+  string auth_type  = 6;
+  string method     = 7;
+  string route      = 8;
+  string collection = 9;
+  string actor_id   = 10;
+
+  // route (default) | collection | actor | method | time
+  string group_by   = 11;
 }
 
 message ApiUsageBreakdownRow {
@@ -344,12 +360,16 @@ message ApiUsageBreakdownRow {
   string collection = 4;
   int64  count      = 5;
   string auth_type  = 6;
+  string actor_id   = 7;
+  string actor_name = 8;
+  string bucket     = 9; // filled when group_by = time
 }
 
 message GetApiUsageBreakdownResponse {
   repeated ApiUsageBreakdownRow rows = 1;
-  int64 total = 2; // every request in the window, not just the returned rows
-  int64 other = 3; // total - sum(rows)
+  int64 total = 2; // every request in the window, project-wide, ignoring filters
+  int64 other = 3; // whatever the returned rows do not account for
+  int64 matched = 4; // requests matching the filters; equals total when none are set
 }
 
 message MonthlyRequest {

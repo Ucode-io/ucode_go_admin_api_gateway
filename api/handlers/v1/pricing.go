@@ -555,14 +555,23 @@ func (h *HandlerV1) GetApiUsageBreakdown(c *gin.Context) {
 		limit     = cast.ToInt32(c.DefaultQuery("limit", "10"))
 	)
 
-	breakdown, err := h.companyServices.Billing().GetApiUsageBreakdown(ctx,
-		&company_service.GetApiUsageBreakdownRequest{
-			ProjectId: projectId,
-			From:      c.Query("from"),
-			To:        c.Query("to"),
-			Limit:     limit,
-		},
-	)
+	filters := company_service.GetApiUsageBreakdownRequest{
+		ProjectId:  projectId,
+		From:       c.Query("from"),
+		To:         c.Query("to"),
+		Limit:      limit,
+		Source:     c.Query("source"),
+		AuthType:   c.Query("auth_type"),
+		ActorId:    c.Query("actor_id"),
+		Method:     c.Query("method"),
+		Route:      c.Query("route"),
+		Collection: c.Query("collection"),
+		GroupBy:    c.Query("group_by"),
+	}
+	filtered := filters.Source != "" || filters.AuthType != "" || filters.ActorId != "" ||
+		filters.Method != "" || filters.Route != "" || filters.Collection != ""
+
+	breakdown, err := h.companyServices.Billing().GetApiUsageBreakdown(ctx, &filters)
 	if err != nil {
 		h.log.Error("[GetApiUsageBreakdown] GetApiUsageBreakdown failed", logger.Error(err))
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
@@ -572,6 +581,8 @@ func (h *HandlerV1) GetApiUsageBreakdown(c *gin.Context) {
 	response := models.ApiUsageBreakdownResponse{
 		Used:          breakdown.GetTotal(),
 		Other:         breakdown.GetOther(),
+		Matched:       breakdown.GetMatched(),
+		GroupBy:       filters.GroupBy,
 		From:          c.Query("from"),
 		To:            c.Query("to"),
 		UsedUpdatedAt: time.Now().Truncate(time.Hour).UTC().Format(time.RFC3339),
@@ -579,14 +590,28 @@ func (h *HandlerV1) GetApiUsageBreakdown(c *gin.Context) {
 		Unlimited:     true,
 	}
 
+	// Percentages are read against whatever the rows were drawn from: the whole
+	// project when unfiltered, the filtered subset once the caller drills in.
+	basis := breakdown.GetTotal()
+	if filtered {
+		basis = breakdown.GetMatched()
+	}
+
+	if response.GroupBy == "" {
+		response.GroupBy = "route"
+	}
+
 	for _, row := range breakdown.GetRows() {
 		var percent float64
-		if breakdown.GetTotal() > 0 {
-			percent = math.Round(float64(row.GetCount())/float64(breakdown.GetTotal())*10000) / 100
+		if basis > 0 {
+			percent = math.Round(float64(row.GetCount())/float64(basis)*10000) / 100
 		}
 		response.Top = append(response.Top, models.ApiUsageBreakdownRow{
 			Source:     row.GetSource(),
 			AuthType:   row.GetAuthType(),
+			ActorID:    row.GetActorId(),
+			ActorName:  row.GetActorName(),
+			Bucket:     row.GetBucket(),
 			Method:     row.GetMethod(),
 			Route:      row.GetRoute(),
 			Collection: row.GetCollection(),

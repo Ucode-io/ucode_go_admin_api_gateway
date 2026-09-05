@@ -211,6 +211,8 @@ func (h *HandlerV1) AuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
+			c.Set("actor_id", apikeys.GetId())
+			c.Set("actor_name", apikeys.GetName())
 			c.Set("resource", string(resourceBody))
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
@@ -436,6 +438,8 @@ func (h *HandlerV1) SlimAuthMiddleware(cfg config.BaseConfig) gin.HandlerFunc {
 				c.Set("resource_id", resource.GetResource().GetId())
 				c.Set("environment_id", apikeys.GetEnvironmentId())
 				c.Set("project_id", apikeys.GetProjectId())
+				c.Set("actor_id", apikeys.GetId())
+				c.Set("actor_name", apikeys.GetName())
 				c.Set("resource", string(resourceBody))
 			default:
 				if !strings.Contains(c.Request.URL.Path, "api") {
@@ -608,6 +612,8 @@ func (h *HandlerV1) RedirectAuthMiddleware(cfg config.BaseConfig) gin.HandlerFun
 		c.Set("resource_id", resource.GetResource().GetId())
 		c.Set("environment_id", apikeys.GetEnvironmentId())
 		c.Set("project_id", apikeys.GetProjectId())
+		c.Set("actor_id", apikeys.GetId())
+		c.Set("actor_name", apikeys.GetName())
 
 		c.Set("Auth", res)
 		// c.Set(, h.cfg.UcodeNamespace)
