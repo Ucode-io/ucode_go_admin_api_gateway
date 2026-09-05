@@ -19,6 +19,8 @@ type usageKey struct {
 	projectID  string
 	source     string // client | admin
 	authType   string // api_key | bearer | "" when the caller sent neither
+	actorID    string // api_keys record id, or user id for bearer — never a credential
+	actorName  string // display copy, e.g. "Mobile App"; empty for bearer
 	method     string
 	route      string // gin route template, e.g. /v2/items/:collection
 	collection string // table slug, empty when the route has none
@@ -40,8 +42,9 @@ func (k usageKey) field(bucket string) string {
 	return config.KeyUsageDetailPrefix + strings.Join(
 		[]string{
 			bucket,
-			sanitize(k.source), sanitize(k.authType), sanitize(k.method),
-			sanitize(k.route), sanitize(k.collection),
+			sanitize(k.source), sanitize(k.authType),
+			sanitize(k.actorID), sanitize(k.actorName),
+			sanitize(k.method), sanitize(k.route), sanitize(k.collection),
 		},
 		config.KeyUsageDetailSep,
 	)
@@ -52,6 +55,8 @@ type usageField struct {
 	bucket     string
 	source     string
 	authType   string
+	actorID    string
+	actorName  string
 	method     string
 	route      string
 	collection string
@@ -64,16 +69,18 @@ func parseUsageField(f string) (usageField, bool) {
 		return usageField{}, false
 	}
 	parts := strings.Split(strings.TrimPrefix(f, config.KeyUsageDetailPrefix), config.KeyUsageDetailSep)
-	if len(parts) != 6 {
+	if len(parts) != 8 {
 		return usageField{}, false
 	}
 	return usageField{
 		bucket:     parts[0],
 		source:     parts[1],
 		authType:   parts[2],
-		method:     parts[3],
-		route:      parts[4],
-		collection: parts[5],
+		actorID:    parts[3],
+		actorName:  parts[4],
+		method:     parts[5],
+		route:      parts[6],
+		collection: parts[7],
 	}, true
 }
 

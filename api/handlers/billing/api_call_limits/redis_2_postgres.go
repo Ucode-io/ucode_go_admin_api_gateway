@@ -208,6 +208,8 @@ func detailRows(bucket string, entries []bucketEntry) ([]*pb.ApiUsageDetail, map
 		details = append(details, &pb.ApiUsageDetail{
 			Source:     e.source,
 			AuthType:   e.authType,
+			ActorId:    e.actorID,
+			ActorName:  e.actorName,
 			Method:     e.method,
 			Route:      e.route,
 			Collection: e.collection,

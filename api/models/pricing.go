@@ -137,18 +137,31 @@ type ApiUsageBreakdownResponse struct {
 	From          string                 `json:"from"`
 	To            string                 `json:"to"`
 	Top           []ApiUsageBreakdownRow `json:"top"`
-	// Other is everything in the window the returned rows do not account for.
+	// Other is everything the returned rows do not account for. Without filters
+	// that is measured against Used, so Top + Other == Used; with filters it is
+	// measured against Matched instead.
 	Other int64 `json:"other"`
+	// Matched is how many requests the filters selected. Equals Used when no
+	// filter is set, minus anything recorded before the breakdown existed.
+	Matched int64 `json:"matched"`
+	// GroupBy echoes which grouping produced Top.
+	GroupBy string `json:"group_by"`
 }
 
 type ApiUsageBreakdownRow struct {
 	Source string `json:"source"`
 	// AuthType is how the caller authenticated: api_key, bearer, or empty for
 	// rows recorded before this dimension existed.
-	AuthType   string  `json:"auth_type"`
-	Method     string  `json:"method"`
-	Route      string  `json:"route"`
-	Collection string  `json:"collection"`
-	Count      int64   `json:"count"`
-	Percent    float64 `json:"percent"`
+	AuthType   string `json:"auth_type"`
+	Method     string `json:"method"`
+	Route      string `json:"route"`
+	Collection string `json:"collection"`
+	// ActorID is the api_keys record id, or the user id for bearer traffic.
+	// Never a credential.
+	ActorID   string `json:"actor_id"`
+	ActorName string `json:"actor_name"`
+	// Bucket is the 15-minute interval, filled only when group_by=time.
+	Bucket  string  `json:"bucket"`
+	Count   int64   `json:"count"`
+	Percent float64 `json:"percent"`
 }

@@ -2,6 +2,7 @@ package apilimits
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,8 +13,8 @@ const testBucket = "2026-09-04 14:30:00"
 
 func TestUsageFieldRoundTrip(t *testing.T) {
 	cases := []usageKey{
-		{source: "client", authType: "api_key", method: "GET", route: "/v2/items/:collection", collection: "orders"},
-		{source: "admin", authType: "bearer", method: "POST", route: "/v1/pricing/all", collection: ""},
+		{source: "client", authType: "api_key", actorID: "k-1", actorName: "Mobile App", method: "GET", route: "/v2/items/:collection", collection: "orders"},
+		{source: "admin", authType: "bearer", actorID: "u-7", method: "POST", route: "/v1/pricing/all", collection: ""},
 		{source: "client", authType: "", method: "DELETE", route: "/v2/items/:collection", collection: "we|ird"},
 	}
 
@@ -26,6 +27,7 @@ func TestUsageFieldRoundTrip(t *testing.T) {
 			t.Errorf("bucket: got %q want %q", got.bucket, testBucket)
 		}
 		if got.source != in.source || got.authType != in.authType ||
+			got.actorID != in.actorID || got.actorName != in.actorName ||
 			got.method != in.method || got.route != in.route {
 			t.Errorf("round trip lost data: %+v vs %+v", got, in)
 		}
@@ -167,5 +169,48 @@ func TestHourOfTruncatesBucket(t *testing.T) {
 		t.Error("hourOf must fall back to the current hour")
 	} else if _, err := time.Parse(bucketLayout, got); err != nil {
 		t.Errorf("fallback is not a timestamp: %q", got)
+	}
+}
+
+// Two different keys hitting the same route must stay two rows — that is the
+// whole point of recording the actor.
+func TestTrackerKeepsActorsApart(t *testing.T) {
+	tr := NewTracker(nil, 0)
+	base := usageKey{
+		projectID: "p1", source: "client", authType: config.UsageAuthApiKey,
+		method: "GET", route: "/v2/items/:collection", collection: "deal",
+	}
+
+	mobile := base
+	mobile.actorID, mobile.actorName = "key-1", "Mobile App"
+	backoffice := base
+	backoffice.actorID, backoffice.actorName = "key-2", "1C"
+
+	tr.add(mobile)
+	tr.add(mobile)
+	tr.add(backoffice)
+
+	batch := tr.take()
+	if len(batch) != 2 {
+		t.Fatalf("expected 2 rows, got %d: %v", len(batch), batch)
+	}
+	if batch[mobile] != 2 || batch[backoffice] != 1 {
+		t.Errorf("counts split wrong: mobile=%d backoffice=%d", batch[mobile], batch[backoffice])
+	}
+}
+
+// The credential must never reach the stored key. actorID comes from the
+// resolved record id (or user id), not from the X-API-KEY header.
+func TestActorIsNeverTheCredential(t *testing.T) {
+	const secret = "P-grV8bBFcJWQ5b34HIvaFLfy3kqCiJfce"
+
+	k := usageKey{
+		projectID: "p1", source: "client", authType: config.UsageAuthApiKey,
+		actorID: "6f1c2d3e-key-record-id", actorName: "Mobile App",
+		method: "GET", route: "/v2/items/:collection", collection: "deal",
+	}
+
+	if strings.Contains(k.field(testBucket), secret) {
+		t.Fatal("the encoded field must never carry the api key secret")
 	}
 }

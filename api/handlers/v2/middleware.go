@@ -218,6 +218,8 @@ func (h *HandlerV2) AuthMiddleware() gin.HandlerFunc {
 			c.Set("resource_id", resource.GetResource().GetId())
 			c.Set("environment_id", apikeys.GetEnvironmentId())
 			c.Set("project_id", apikeys.GetProjectId())
+			c.Set("actor_id", apikeys.GetId())
+			c.Set("actor_name", apikeys.GetName())
 			c.Set("resource", string(resourceBody))
 		default:
 			if !strings.Contains(c.Request.URL.Path, "api") {
@@ -298,6 +300,8 @@ func (h *HandlerV2) ResolveProjectForMetering() gin.HandlerFunc {
 		}
 
 		c.Set("project_id", apikeys.GetProjectId())
+		c.Set("actor_id", apikeys.GetId())
+		c.Set("actor_name", apikeys.GetName())
 		c.Next()
 	}
 }
