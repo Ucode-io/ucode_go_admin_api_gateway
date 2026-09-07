@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"ucode/ucode_go_api_gateway/api/handlers/callquality"
 	"ucode/ucode_go_api_gateway/api/handlers/metaads"
 	v1 "ucode/ucode_go_api_gateway/api/handlers/v1"
 	v2 "ucode/ucode_go_api_gateway/api/handlers/v2"
@@ -30,6 +31,7 @@ type Handler struct {
 	V2              v2.HandlerV2
 	V3              v3.HandlerV3
 	MetaAds         metaads.Handler
+	CallQuality     callquality.Handler
 	cache           *caching.ExpiringLRUCache
 }
 
@@ -46,6 +48,7 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter, vaultClient),
 		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter),
 		MetaAds:         metaads.NewHandler(baseConf, centralRedis, log),
+		CallQuality:     callquality.NewHandler(baseConf, log),
 		V3: v3.NewHandlerV3(&v3.HandlerV3Config{
 			BaseConf:        baseConf,
 			ProjectConfs:    projectConfs,

@@ -175,6 +175,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		crmAI := v1.Group("/crm-ai")
 		{
 			crmAI.POST("/chat", h.V1.CreateCRMAssistantMessage)
+			crmAI.POST("/call-quality/evaluate", h.CallQuality.Evaluate)
 			crmAI.POST("/actions/:action-id/confirm", h.V1.ConfirmCRMAssistantAction)
 			crmAI.GET("/preferences/:table", h.V1.GetCRMFieldPreferences)
 			crmAI.PUT("/preferences/:table", h.V1.UpdateCRMFieldPreferences)
