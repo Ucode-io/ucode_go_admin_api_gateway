@@ -53,6 +53,10 @@ type BillingServiceClient interface {
 	ListProjectCards(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListProjectCardsResponse, error)
 	ReceiptPay(ctx context.Context, in *ReceiptPayRequest, opts ...grpc.CallOption) (*ReceiptPayResponse, error)
 	DeleteProjectCard(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Ipak Yo'li (Visa/Mastercard hosted-page top-ups)
+	CreateIpakPayment(ctx context.Context, in *CreateIpakPaymentRequest, opts ...grpc.CallOption) (*CreateIpakPaymentResponse, error)
+	ConfirmIpakPayment(ctx context.Context, in *ConfirmIpakPaymentRequest, opts ...grpc.CallOption) (*IpakPaymentStatusResponse, error)
+	GetIpakPaymentStatus(ctx context.Context, in *ConfirmIpakPaymentRequest, opts ...grpc.CallOption) (*IpakPaymentStatusResponse, error)
 	// Subscription
 	GetSubscription(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*Subscription, error)
 	UpdateSubscription(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error)
@@ -314,6 +318,33 @@ func (c *billingServiceClient) DeleteProjectCard(ctx context.Context, in *Primar
 	return out, nil
 }
 
+func (c *billingServiceClient) CreateIpakPayment(ctx context.Context, in *CreateIpakPaymentRequest, opts ...grpc.CallOption) (*CreateIpakPaymentResponse, error) {
+	out := new(CreateIpakPaymentResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/CreateIpakPayment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) ConfirmIpakPayment(ctx context.Context, in *ConfirmIpakPaymentRequest, opts ...grpc.CallOption) (*IpakPaymentStatusResponse, error) {
+	out := new(IpakPaymentStatusResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/ConfirmIpakPayment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *billingServiceClient) GetIpakPaymentStatus(ctx context.Context, in *ConfirmIpakPaymentRequest, opts ...grpc.CallOption) (*IpakPaymentStatusResponse, error) {
+	out := new(IpakPaymentStatusResponse)
+	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetIpakPaymentStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *billingServiceClient) GetSubscription(ctx context.Context, in *PrimaryKey, opts ...grpc.CallOption) (*Subscription, error) {
 	out := new(Subscription)
 	err := c.cc.Invoke(ctx, "/company_service.BillingService/GetSubscription", in, out, opts...)
@@ -528,6 +559,10 @@ type BillingServiceServer interface {
 	ListProjectCards(context.Context, *ListRequest) (*ListProjectCardsResponse, error)
 	ReceiptPay(context.Context, *ReceiptPayRequest) (*ReceiptPayResponse, error)
 	DeleteProjectCard(context.Context, *PrimaryKey) (*emptypb.Empty, error)
+	// Ipak Yo'li (Visa/Mastercard hosted-page top-ups)
+	CreateIpakPayment(context.Context, *CreateIpakPaymentRequest) (*CreateIpakPaymentResponse, error)
+	ConfirmIpakPayment(context.Context, *ConfirmIpakPaymentRequest) (*IpakPaymentStatusResponse, error)
+	GetIpakPaymentStatus(context.Context, *ConfirmIpakPaymentRequest) (*IpakPaymentStatusResponse, error)
 	// Subscription
 	GetSubscription(context.Context, *PrimaryKey) (*Subscription, error)
 	UpdateSubscription(context.Context, *Subscription) (*Subscription, error)
@@ -635,6 +670,15 @@ func (UnimplementedBillingServiceServer) ReceiptPay(context.Context, *ReceiptPay
 }
 func (UnimplementedBillingServiceServer) DeleteProjectCard(context.Context, *PrimaryKey) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProjectCard not implemented")
+}
+func (UnimplementedBillingServiceServer) CreateIpakPayment(context.Context, *CreateIpakPaymentRequest) (*CreateIpakPaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateIpakPayment not implemented")
+}
+func (UnimplementedBillingServiceServer) ConfirmIpakPayment(context.Context, *ConfirmIpakPaymentRequest) (*IpakPaymentStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmIpakPayment not implemented")
+}
+func (UnimplementedBillingServiceServer) GetIpakPaymentStatus(context.Context, *ConfirmIpakPaymentRequest) (*IpakPaymentStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIpakPaymentStatus not implemented")
 }
 func (UnimplementedBillingServiceServer) GetSubscription(context.Context, *PrimaryKey) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSubscription not implemented")
@@ -1159,6 +1203,60 @@ func _BillingService_DeleteProjectCard_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_CreateIpakPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateIpakPaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).CreateIpakPayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/CreateIpakPayment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).CreateIpakPayment(ctx, req.(*CreateIpakPaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_ConfirmIpakPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmIpakPaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).ConfirmIpakPayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/ConfirmIpakPayment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).ConfirmIpakPayment(ctx, req.(*ConfirmIpakPaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BillingService_GetIpakPaymentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmIpakPaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetIpakPaymentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/company_service.BillingService/GetIpakPaymentStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetIpakPaymentStatus(ctx, req.(*ConfirmIpakPaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BillingService_GetSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PrimaryKey)
 	if err := dec(in); err != nil {
@@ -1625,6 +1723,18 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProjectCard",
 			Handler:    _BillingService_DeleteProjectCard_Handler,
+		},
+		{
+			MethodName: "CreateIpakPayment",
+			Handler:    _BillingService_CreateIpakPayment_Handler,
+		},
+		{
+			MethodName: "ConfirmIpakPayment",
+			Handler:    _BillingService_ConfirmIpakPayment_Handler,
+		},
+		{
+			MethodName: "GetIpakPaymentStatus",
+			Handler:    _BillingService_GetIpakPaymentStatus_Handler,
 		},
 		{
 			MethodName: "GetSubscription",
