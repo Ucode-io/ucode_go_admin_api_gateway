@@ -541,8 +541,9 @@ func (h *HandlerV1) InvokeFunction(c *gin.Context) {
 		AutomationURL: h.baseConf.AutomationURL,
 	}
 
-	//HISOBIM project -> UZ knative cluster
-	if projectId == "b744d518-5f66-4818-bfd7-9f3f44ce3379" && h.baseConf.KnativeBaseUrlUz != "" {
+	//HISOBIM, AIBEK projects -> UZ knative cluster
+	if (projectId == "b744d518-5f66-4818-bfd7-9f3f44ce3379" ||
+		projectId == "96d5b3ba-54ae-442c-8c15-f751741c3c6a") && h.baseConf.KnativeBaseUrlUz != "" {
 		invokeFunctionRequest.KnativeURL = h.baseConf.KnativeBaseUrlUz
 	}
 
