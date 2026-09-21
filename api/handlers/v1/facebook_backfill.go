@@ -8,6 +8,7 @@ import (
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,8 +42,14 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 		}
 		forms, listErr := h.facebookListForms(c.Request.Context(), resource.GetExternalId(), credentials.GetPageAccessToken())
 		if listErr != nil {
-			errors++
-			continue
+			// Listing page forms requires pages_manage_ads. Lead retrieval itself
+			// works with the existing leads_retrieval token, so fall back to the
+			// form IDs already persisted by the CRM ingestion flow.
+			forms = h.crmStoredFacebookForms(c, state)
+			if len(forms) == 0 {
+				errors++
+				continue
+			}
 		}
 		for _, form := range forms {
 			leads, _, fetchErr := h.facebookFetchFormLeads(c.Request.Context(), form.ID, credentials.GetPageAccessToken(), since)
@@ -61,4 +68,30 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 		}
 	}
 	h.HandleResponse(c, status_http.OK, gin.H{"since": time.Unix(since, 0).UTC().Format(time.RFC3339), "fetched": fetched, "updated": updated, "errors": errors})
+}
+
+func (h *HandlerV1) crmStoredFacebookForms(c *gin.Context, state models.FacebookOAuthState) []models.FacebookForm {
+	svc, envID, err := h.resolveProjectBuilder(c.Request.Context(), state.ProjectId, state.EnvironmentId)
+	if err != nil {
+		return nil
+	}
+	resp, err := svc.GoObjectBuilderService().ObjectBuilder().GetList2(c.Request.Context(), &nb.CommonMessage{TableSlug: "lead_forms", Data: mustStruct(map[string]any{"limit": 1000, "offset": 0}), ProjectId: envID})
+	if err != nil || resp.GetData() == nil {
+		return nil
+	}
+	rows, _ := resp.GetData().AsMap()["response"].([]any)
+	forms := make([]models.FacebookForm, 0, len(rows))
+	for _, raw := range rows {
+		row, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		id, _ := row["form_id"].(string)
+		if id == "" {
+			continue
+		}
+		name, _ := row["name"].(string)
+		forms = append(forms, models.FacebookForm{ID: id, Name: name})
+	}
+	return forms
 }
