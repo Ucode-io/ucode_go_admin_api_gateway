@@ -41,7 +41,7 @@ type crmMapping struct {
 	SourceField   string
 
 	// PipelineStageField is a per-pipeline scalar stage column (ProfessionalCrm
-	// stores the Sales Project pipeline's stage in `pipeline_sales_project`); it
+	// stores the Udevs pipeline's stage in `pipeline_udevs`); it
 	// is set to StageValue. StartDateField gets the lead's arrival time. Both are
 	// optional — left blank they are simply not written.
 	PipelineStageField string
@@ -64,11 +64,11 @@ func defaultCRMMapping() crmMapping {
 		DealContactField:   "contacts_id",
 		DealFormField:      "lead_forms_id",
 		PipelineField:      "pipeline",
-		PipelineValue:      "Sales Project",
+		PipelineValue:      "Udevs",
 		StageField:         "stage",
 		StageValue:         "Новая заявка",
 		SourceField:        "source",
-		PipelineStageField: "pipeline_sales_project",
+		PipelineStageField: "pipeline_udevs",
 		StartDateField:     "start_date",
 		FormAcceptField:    "accept_leads",
 	}
