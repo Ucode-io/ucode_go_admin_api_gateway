@@ -66,6 +66,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 		return
 	}
 
+	normalizeProfessionalCRMLegacyDeal(projectId.(string), c.Param("collection"), objectRequest.Data)
+
 	environmentId, ok := c.Get("environment_id")
 	if !ok || !util.IsValidUUID(environmentId.(string)) {
 		h.HandleResponse(c, status_http.BadRequest, "error getting environment id | not valid")
