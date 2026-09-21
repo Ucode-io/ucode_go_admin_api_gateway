@@ -77,6 +77,9 @@ type (
 		Name   string `json:"name"`
 		Status string `json:"status"`
 		Locale string `json:"locale"`
+		// PageID is populated from the CRM's lead_forms records. Meta's form
+		// endpoint does not return it, so it is intentionally not serialized.
+		PageID string `json:"-"`
 	}
 
 	FacebookFormQuestions struct {

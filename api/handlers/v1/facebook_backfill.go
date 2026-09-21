@@ -53,6 +53,7 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 			// works with the existing leads_retrieval token, so fall back to the
 			// form IDs already persisted by the CRM ingestion flow.
 			forms = h.crmStoredFacebookForms(c, state)
+			forms = facebookFormsForPage(forms, resource.GetExternalId())
 			if len(forms) == 0 {
 				recordError(listErr)
 				continue
@@ -154,7 +155,21 @@ func (h *HandlerV1) crmStoredFacebookForms(c *gin.Context, state models.Facebook
 			continue
 		}
 		name, _ := row["name"].(string)
-		forms = append(forms, models.FacebookForm{ID: id, Name: name})
+		pageID, _ := row["page_id"].(string)
+		forms = append(forms, models.FacebookForm{ID: id, Name: name, PageID: pageID})
 	}
 	return forms
+}
+
+// facebookFormsForPage prevents replaying every historical form against every
+// connected page token. CRM persists page_id alongside form_id during normal
+// lead ingestion, so this keeps the backfill within Meta's request budget.
+func facebookFormsForPage(forms []models.FacebookForm, pageID string) []models.FacebookForm {
+	filtered := make([]models.FacebookForm, 0, len(forms))
+	for _, form := range forms {
+		if form.PageID == pageID {
+			filtered = append(filtered, form)
+		}
+	}
+	return filtered
 }
