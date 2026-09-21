@@ -791,6 +791,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 
 		facebook.GET("/integration", h.V1.FacebookIntegration)
 		facebook.POST("/crm-backfill", h.V1.FacebookCRMBackfill)
+		facebook.POST("/crm-form-ids", h.V1.FacebookSaveCRMFormIDs)
 		facebook.DELETE("/integration/:id", h.V1.FacebookDisconnect)
 	}
 

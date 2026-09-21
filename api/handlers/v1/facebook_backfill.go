@@ -70,6 +70,62 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, gin.H{"since": time.Unix(since, 0).UTC().Format(time.RFC3339), "fetched": fetched, "updated": updated, "errors": errors})
 }
 
+// FacebookSaveCRMFormIDs stores only historical form IDs, preserving the
+// connection status and all existing credentials/settings.
+func (h *HandlerV1) FacebookSaveCRMFormIDs(c *gin.Context) {
+	state, ok := h.authContext(c)
+	if !ok {
+		return
+	}
+	var req struct {
+		FormIDs []string `json:"form_ids"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || len(req.FormIDs) == 0 {
+		h.HandleResponse(c, status_http.BadRequest, "form_ids is required")
+		return
+	}
+	ids := make(map[string]struct{}, len(req.FormIDs))
+	for _, id := range req.FormIDs {
+		if id = strings.TrimSpace(id); id != "" {
+			ids[id] = struct{}{}
+		}
+	}
+	list, err := h.companyServices.Resource().GetProjectResourceList(c.Request.Context(), &pb.GetProjectResourceListRequest{ProjectId: state.ProjectId, EnvironmentId: state.EnvironmentId, Type: pb.ResourceType_META_LEADS})
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	updated := 0
+	for _, resource := range list.GetResources() {
+		credentials := resource.GetSettings().GetFacebookLeads()
+		if credentials == nil {
+			continue
+		}
+		seen := map[string]struct{}{}
+		forms := credentials.GetForms()
+		for _, form := range forms {
+			seen[form.GetFormId()] = struct{}{}
+		}
+		for id := range ids {
+			if _, exists := seen[id]; !exists {
+				forms = append(forms, &pb.FacebookLeadFormMapping{FormId: id})
+				seen[id] = struct{}{}
+			}
+		}
+		credentials.Forms = forms
+		name := resource.GetName()
+		if name == "" {
+			name = credentials.GetPageName()
+		}
+		if _, err := h.companyServices.Resource().UpdateProjectResource(c.Request.Context(), &pb.ProjectResource{Id: resource.GetId(), ProjectId: state.ProjectId, EnvironmentId: state.EnvironmentId, Name: name, Type: pb.ResourceType_META_LEADS.String(), ResourceType: int32(pb.ResourceType_META_LEADS), ExternalId: resource.GetExternalId(), Settings: &pb.Settings{FacebookLeads: credentials}}); err != nil {
+			h.HandleResponse(c, status_http.GRPCError, err.Error())
+			return
+		}
+		updated++
+	}
+	h.HandleResponse(c, status_http.OK, gin.H{"updated_resources": updated, "form_ids": len(ids)})
+}
+
 func (h *HandlerV1) crmStoredFacebookForms(c *gin.Context, state models.FacebookOAuthState) []models.FacebookForm {
 	svc, envID, err := h.resolveProjectBuilder(c.Request.Context(), state.ProjectId, state.EnvironmentId)
 	if err != nil {
