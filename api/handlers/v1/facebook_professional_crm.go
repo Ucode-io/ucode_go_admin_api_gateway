@@ -560,7 +560,7 @@ func professionalCRMLeadFields(fieldData []models.FacebookFieldData) crmLeadFiel
 	}
 
 	if f.firstName == "" && f.lastName == "" {
-		if full := strings.TrimSpace(values["full_name"]); full != "" {
+		if full := facebookLeadFullName(fieldData, values); full != "" {
 			parts := strings.SplitN(full, " ", 2)
 			f.firstName = parts[0]
 			if len(parts) > 1 {
@@ -569,6 +569,32 @@ func professionalCRMLeadFields(fieldData []models.FacebookFieldData) crmLeadFiel
 		}
 	}
 	return f
+}
+
+// facebookLeadFullName accepts both Meta's standard full_name key and custom
+// question keys commonly used by localized forms (for example, ismingiz or
+// what_is_your_name). Meta preserves custom question names in field_data.
+func facebookLeadFullName(fieldData []models.FacebookFieldData, values map[string]string) string {
+	for _, key := range []string{"full_name", "name", "your_name", "ism", "ismingiz", "fio", "имя"} {
+		if value := strings.TrimSpace(values[key]); value != "" {
+			return value
+		}
+	}
+
+	for _, field := range fieldData {
+		key := strings.ToLower(strings.TrimSpace(field.Name))
+		if strings.Contains(key, "company") || strings.Contains(key, "kompaniya") {
+			continue
+		}
+		isNameField := strings.Contains(key, "name") || strings.Contains(key, "ism") ||
+			strings.Contains(key, "fio") || strings.Contains(key, "имя")
+		if isNameField && len(field.Values) > 0 {
+			if value := strings.TrimSpace(field.Values[0]); value != "" {
+				return value
+			}
+		}
+	}
+	return ""
 }
 
 func crmFirstRow(data *structpb.Struct) map[string]any {

@@ -1,6 +1,10 @@
 package v1
 
-import "testing"
+import (
+	"testing"
+
+	"ucode/ucode_go_api_gateway/api/models"
+)
 
 func TestDefaultCRMMappingUsesUdevsPipeline(t *testing.T) {
 	mapping := defaultCRMMapping()
@@ -10,6 +14,28 @@ func TestDefaultCRMMappingUsesUdevsPipeline(t *testing.T) {
 	}
 	if mapping.PipelineStageField != "pipeline_udevs" {
 		t.Fatalf("PipelineStageField = %q, want pipeline_udevs", mapping.PipelineStageField)
+	}
+}
+
+func TestProfessionalCRMLeadFieldsReadsLocalizedNameQuestion(t *testing.T) {
+	fields := professionalCRMLeadFields([]models.FacebookFieldData{
+		{Name: "ismingiz_nima", Values: []string{"Ali Valiyev"}},
+		{Name: "phone_number", Values: []string{"+998901234567"}},
+	})
+
+	if fields.fullName() != "Ali Valiyev" {
+		t.Fatalf("fullName() = %q, want Ali Valiyev", fields.fullName())
+	}
+}
+
+func TestProfessionalCRMLeadFieldsDoesNotUseCompanyName(t *testing.T) {
+	fields := professionalCRMLeadFields([]models.FacebookFieldData{
+		{Name: "company_name", Values: []string{"Udevs"}},
+		{Name: "phone_number", Values: []string{"+998901234567"}},
+	})
+
+	if fields.fullName() != "" {
+		t.Fatalf("fullName() = %q, want blank", fields.fullName())
 	}
 }
 
