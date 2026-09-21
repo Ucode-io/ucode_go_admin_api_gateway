@@ -35,6 +35,13 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 		return
 	}
 	fetched, updated, errors := 0, 0, 0
+	errorSamples := make([]string, 0, 5)
+	recordError := func(err error) {
+		errors++
+		if err != nil && len(errorSamples) < 5 {
+			errorSamples = append(errorSamples, err.Error())
+		}
+	}
 	for _, resource := range resources.GetResources() {
 		credentials := resource.GetSettings().GetFacebookLeads()
 		if credentials == nil || credentials.GetPageAccessToken() == "" || resource.GetExternalId() == "" {
@@ -47,27 +54,27 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 			// form IDs already persisted by the CRM ingestion flow.
 			forms = h.crmStoredFacebookForms(c, state)
 			if len(forms) == 0 {
-				errors++
+				recordError(listErr)
 				continue
 			}
 		}
 		for _, form := range forms {
 			leads, _, fetchErr := h.facebookFetchFormLeads(c.Request.Context(), form.ID, credentials.GetPageAccessToken(), since)
 			if fetchErr != nil {
-				errors++
+				recordError(fetchErr)
 				continue
 			}
 			for _, lead := range leads {
 				fetched++
 				if writeErr := h.writeProfessionalCRMLead(c.Request.Context(), resource, lead, models.FacebookLeadChangeValue{LeadgenID: lead.ID, PageID: resource.GetExternalId(), FormID: form.ID}); writeErr != nil {
-					errors++
+					recordError(writeErr)
 				} else {
 					updated++
 				}
 			}
 		}
 	}
-	h.HandleResponse(c, status_http.OK, gin.H{"since": time.Unix(since, 0).UTC().Format(time.RFC3339), "fetched": fetched, "updated": updated, "errors": errors})
+	h.HandleResponse(c, status_http.OK, gin.H{"since": time.Unix(since, 0).UTC().Format(time.RFC3339), "fetched": fetched, "updated": updated, "errors": errors, "error_samples": errorSamples})
 }
 
 // FacebookSaveCRMFormIDs stores only historical form IDs, preserving the
