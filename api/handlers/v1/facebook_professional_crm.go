@@ -34,11 +34,13 @@ type crmMapping struct {
 	DealContactField string // relation field on deals → contacts
 	DealFormField    string // relation field on deals → lead_forms
 
-	PipelineField string
-	PipelineValue string
-	StageField    string
-	StageValue    string
-	SourceField   string
+	PipelineField   string
+	PipelineValue   string
+	StageField      string
+	StageValue      string
+	SourceField     string
+	MetaAdIDField   string
+	MetaAdNameField string
 
 	// PipelineStageField is a per-pipeline scalar stage column (ProfessionalCrm
 	// stores the Udevs pipeline's stage in `pipeline_udevs`); it
@@ -68,6 +70,8 @@ func defaultCRMMapping() crmMapping {
 		StageField:         "stage",
 		StageValue:         "Новая заявка",
 		SourceField:        "source",
+		MetaAdIDField:      "meta_ad_id",
+		MetaAdNameField:    "meta_ad_name",
 		PipelineStageField: "pipeline_udevs",
 		StartDateField:     "start_date",
 		FormAcceptField:    "accept_leads",
@@ -146,6 +150,8 @@ type crmLeadFields struct {
 	firstName   string
 	lastName    string
 	email       string
+	metaAdID    string
+	metaAdName  string
 	phone       string
 	createdTime string // lead's created_time from Graph (ISO8601)
 }
@@ -172,6 +178,8 @@ func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.P
 	mapping := h.resolveCRMMapping(resource)
 	fields := professionalCRMLeadFields(lead.FieldData)
 	fields.createdTime = lead.CreatedTime
+	fields.metaAdID = lead.AdID
+	fields.metaAdName = lead.AdName
 
 	// Resolve the source form FIRST. Professional CRM automatically accepts every
 	// Meta form; legacy rows that were created with accept_leads=false are enabled
@@ -473,9 +481,10 @@ func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManag
 		source = strings.TrimSuffix(crmSourcePrefix, ": ")
 	}
 
+	dealGUID := uuid.NewSHA1(uuid.NameSpaceOID, []byte("facebook-lead:"+value.LeadgenID)).String()
 	payload := map[string]any{
 		// Deterministic guid from the leadgen id makes retries idempotent.
-		"guid":          uuid.NewSHA1(uuid.NameSpaceOID, []byte("facebook-lead:"+value.LeadgenID)).String(),
+		"guid":          dealGUID,
 		"name":          name,
 		m.PipelineField: []string{m.PipelineValue},
 		m.StageField:    []string{m.StageValue},
@@ -503,9 +512,37 @@ func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManag
 	if f.email != "" {
 		payload["email"] = f.email
 	}
+	if m.MetaAdIDField != "" && strings.TrimSpace(f.metaAdID) != "" {
+		payload[m.MetaAdIDField] = strings.TrimSpace(f.metaAdID)
+	}
+	if m.MetaAdNameField != "" && strings.TrimSpace(f.metaAdName) != "" {
+		payload[m.MetaAdNameField] = strings.TrimSpace(f.metaAdName)
+	}
 
 	if err := h.crmCreateItem(ctx, svc, resourceEnvID, m.DealsTable, payload); err != nil {
 		if isAlreadyExists(err) {
+			// Replayed webhook/poller events also backfill attribution for deals
+			// created before meta_ad_id/meta_ad_name were added to the schema.
+			attribution := map[string]any{"guid": dealGUID}
+			if adID := strings.TrimSpace(f.metaAdID); m.MetaAdIDField != "" && adID != "" {
+				attribution[m.MetaAdIDField] = adID
+			}
+			if adName := strings.TrimSpace(f.metaAdName); m.MetaAdNameField != "" && adName != "" {
+				attribution[m.MetaAdNameField] = adName
+			}
+			if len(attribution) > 1 {
+				data, convertErr := helper.ConvertMapToStruct(attribution)
+				if convertErr != nil {
+					return convertErr
+				}
+				if _, updateErr := svc.GoObjectBuilderService().Items().Update(ctx, &nb.CommonMessage{
+					TableSlug: m.DealsTable,
+					Data:      data,
+					ProjectId: resourceEnvID,
+				}); updateErr != nil {
+					return fmt.Errorf("backfill facebook deal attribution: %w", updateErr)
+				}
+			}
 			h.log.Info("facebook lead: deal already exists, skipping duplicate",
 				logger.String("leadgen_id", value.LeadgenID))
 			return nil
