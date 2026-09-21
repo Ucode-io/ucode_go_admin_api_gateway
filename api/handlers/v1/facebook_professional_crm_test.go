@@ -2,6 +2,17 @@ package v1
 
 import "testing"
 
+func TestDefaultCRMMappingUsesUdevsPipeline(t *testing.T) {
+	mapping := defaultCRMMapping()
+
+	if mapping.PipelineValue != "Udevs" {
+		t.Fatalf("PipelineValue = %q, want Udevs", mapping.PipelineValue)
+	}
+	if mapping.PipelineStageField != "pipeline_udevs" {
+		t.Fatalf("PipelineStageField = %q, want pipeline_udevs", mapping.PipelineStageField)
+	}
+}
+
 func TestCRMEnableNewLeadForm(t *testing.T) {
 	payload := map[string]any{}
 
