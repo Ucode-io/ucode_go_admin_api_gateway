@@ -505,7 +505,19 @@ func (h *HandlerV1) saveTelegramNotificationSettings(ctx context.Context, target
 		_, err = h.companyServices.Resource().AddResourceToProject(ctx, &pb.AddResourceToProjectRequest{Name: telegramNotificationsResourceName, ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID, Type: pb.ResourceType_TELEGRAM, ExternalId: target.CompanyID, Settings: telegramNotificationResourceSettings(h.baseConf.TelegramNotificationsBotUsername), Secret: secret})
 		return err
 	}
-	_, err = h.companyServices.Resource().UpdateProjectResource(ctx, &pb.ProjectResource{Id: resource.GetId(), Name: resource.GetName(), ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID, Type: pb.ResourceType_TELEGRAM.String(), ResourceType: int32(pb.ResourceType_TELEGRAM), ExternalId: target.CompanyID, Settings: telegramNotificationResourceSettings(h.baseConf.TelegramNotificationsBotUsername), Secret: secret})
+	// The company service treats the secret as immutable on UpdateProjectResource.
+	// Telegram settings (including the status rules) live in that secret, so use
+	// its upsert endpoint for existing resources as well. It updates the same
+	// project/environment/external-id resource without changing the connection.
+	_, err = h.companyServices.Resource().UpsertProjectResource(ctx, &pb.AddResourceToProjectRequest{
+		Name:          resource.GetName(),
+		ProjectId:     target.ProjectID,
+		EnvironmentId: target.EnvironmentID,
+		Type:          pb.ResourceType_TELEGRAM,
+		ExternalId:    target.CompanyID,
+		Settings:      telegramNotificationResourceSettings(h.baseConf.TelegramNotificationsBotUsername),
+		Secret:        secret,
+	})
 	return err
 }
 
