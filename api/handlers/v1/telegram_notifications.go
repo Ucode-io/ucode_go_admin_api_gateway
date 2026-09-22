@@ -668,8 +668,19 @@ func telegramDealStage(data map[string]any) string {
 
 func telegramStatusRuleMatches(rule models.TelegramStatusNotification, deal map[string]any) bool {
 	return strings.TrimSpace(rule.PipelineID) != "" && strings.TrimSpace(rule.StageID) != "" &&
-		strings.EqualFold(strings.TrimSpace(rule.PipelineID), telegramDealPipeline(deal)) &&
-		strings.EqualFold(strings.TrimSpace(rule.StageID), telegramDealStage(deal))
+		telegramStatusValueMatches(rule.PipelineID, telegramDealPipeline(deal)) &&
+		telegramStatusValueMatches(rule.StageID, telegramDealStage(deal))
+}
+
+// Some legacy CRM stages have an older display spelling ("Выграно") while
+// the settings resource stores the corrected value ("Выиграно"). Normalize
+// that known alias before comparing a saved notification rule to a deal event.
+func telegramStatusValueMatches(expected, actual string) bool {
+	normalize := func(value string) string {
+		value = strings.ToLower(strings.TrimSpace(value))
+		return strings.ReplaceAll(value, "выиграно", "выграно")
+	}
+	return normalize(expected) == normalize(actual)
 }
 
 func telegramDealValue(data map[string]any, keys ...string) string {

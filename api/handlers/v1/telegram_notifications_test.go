@@ -100,3 +100,11 @@ func TestRenderTelegramTemplateReplacesMissingFields(t *testing.T) {
 		t.Fatalf("rendered missing fields = %q", rendered)
 	}
 }
+
+func TestTelegramStatusRuleMatchesLegacyWinningStageSpelling(t *testing.T) {
+	rule := models.TelegramStatusNotification{PipelineID: "UHRMS", StageID: "Выиграно"}
+	deal := map[string]any{"pipeline": "UHRMS", "stage": "Выграно"}
+	if !telegramStatusRuleMatches(rule, deal) {
+		t.Fatal("legacy winning-stage spelling should match its configured rule")
+	}
+}
