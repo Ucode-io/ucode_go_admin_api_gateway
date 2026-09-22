@@ -1,8 +1,11 @@
 package metaads
 
 import (
+	"context"
+	"fmt"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	"ucode/ucode_go_api_gateway/pkg/logger"
@@ -42,6 +45,16 @@ func NewHandler(baseConf config.BaseConfig, redisClient *go_redis.Client, log lo
 		maxRangeDays: baseConf.MetaAdsMaxRangeDays,
 		log:          log,
 	}
+}
+
+// DashboardForDay is the non-HTTP entry point used by operational reports.
+// It shares the dashboard's aggregation, attribution rules and cache fallback.
+func (h Handler) DashboardForDay(ctx context.Context, day time.Time) (models.MetaAdsDashboardResponse, error) {
+	if h.service == nil {
+		return models.MetaAdsDashboardResponse{}, fmt.Errorf("Meta Ads integration is not configured")
+	}
+	day = time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location())
+	return h.service.dashboard(ctx, dashboardQuery{Since: day, Until: day}, false)
 }
 
 func (h Handler) Dashboard(c *gin.Context) {

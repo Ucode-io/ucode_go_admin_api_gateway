@@ -8,12 +8,15 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/handlers/metaads"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
+	nb "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
 	"ucode/ucode_go_api_gateway/pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -21,11 +24,13 @@ import (
 )
 
 const (
-	telegramNotificationsResourceName   = "CRM Telegram notifications"
-	telegramNotificationsResourceStatus = "crm_notifications"
-	telegramNotificationsSecretKey      = "telegram_notifications_settings"
-	telegramNotificationsCodePrefix     = "telegram:notifications:connect:"
-	telegramNotificationsCodeTTL        = 10 * time.Minute
+	telegramNotificationsResourceName    = "CRM Telegram notifications"
+	telegramNotificationsResourceStatus  = "crm_notifications"
+	telegramNotificationsSecretKey       = "telegram_notifications_settings"
+	telegramNotificationsCodePrefix      = "telegram:notifications:connect:"
+	telegramNotificationsCodeTTL         = 10 * time.Minute
+	telegramNotificationsTargetsKey      = "telegram:notifications:targets"
+	telegramNotificationsDailyLockPrefix = "telegram:notifications:daily:"
 )
 
 type telegramNotificationTarget struct {
@@ -72,6 +77,7 @@ func (h *HandlerV1) StartTelegramNotifications(ctx context.Context) {
 	if err := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).setWebhook(ctx, webhookURL, h.baseConf.TelegramNotificationsWebhookSecret, []string{"message"}); err != nil {
 		h.log.Error("telegram notifications: set webhook failed", logger.Error(err))
 	}
+	h.startTelegramDailyReportScheduler(ctx)
 }
 
 func (h *HandlerV1) telegramNotificationTarget(c *gin.Context) (telegramNotificationTarget, bool) {
@@ -95,6 +101,7 @@ func (h *HandlerV1) GetTelegramNotificationSettings(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	h.registerTelegramNotificationTarget(c.Request.Context(), target)
 	h.HandleResponse(c, status_http.OK, settings)
 }
 
@@ -122,6 +129,7 @@ func (h *HandlerV1) SaveTelegramNotificationSettings(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	h.registerTelegramNotificationTarget(c.Request.Context(), target)
 	h.HandleResponse(c, status_http.OK, settings)
 }
 
@@ -195,6 +203,7 @@ func (h *HandlerV1) TelegramNotificationsWebhook(c *gin.Context) {
 	}
 	if err == nil {
 		_ = h.centralRedis.Del(c.Request.Context(), telegramNotificationsCodePrefix+code).Err()
+		h.registerTelegramNotificationTarget(c.Request.Context(), target)
 		_, _ = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), settings.ChatID, "✅ <b>CRM Telegram guruhi ulandi.</b>\nEndi shu kompaniyaning notificationlari shu guruhga yuboriladi.")
 	}
 	c.Status(http.StatusOK)
@@ -245,11 +254,219 @@ func (h *HandlerV1) SendTelegramDailyReport(c *gin.Context) {
 		h.HandleResponse(c, status_http.BadRequest, "telegram group is not connected")
 		return
 	}
-	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), settings.ChatID, renderTelegramNotificationTemplate(settings.Templates.DailyReport)); err != nil {
+	message, err := h.telegramDailyReportMessage(c.Request.Context(), target, settings, time.Now())
+	if err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), settings.ChatID, message); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
 	h.HandleResponse(c, status_http.OK, gin.H{"sent": true})
+}
+
+// startTelegramDailyReportScheduler checks once a minute because each company
+// chooses its own local report time. Targets are kept in central Redis so every
+// replica sees the same configuration; a per-company/day lock prevents a
+// duplicated report when several replicas are running.
+func (h *HandlerV1) startTelegramDailyReportScheduler(ctx context.Context) {
+	if h.centralRedis == nil {
+		h.log.Warn("telegram notifications: daily scheduler needs central redis")
+		return
+	}
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				h.runTelegramDailyReports()
+			}
+		}
+	}()
+}
+
+func (h *HandlerV1) runTelegramDailyReports() {
+	targets, err := h.centralRedis.SMembers(context.Background(), telegramNotificationsTargetsKey).Result()
+	if err != nil {
+		h.log.Warn("telegram notifications: read daily report targets failed", logger.Error(err))
+		return
+	}
+	for _, encodedTarget := range targets {
+		target, ok := parseTelegramNotificationTarget(encodedTarget)
+		if !ok {
+			continue
+		}
+		settings, _, err := h.getTelegramNotificationSettings(context.Background(), target)
+		if err != nil || !settings.DailyReportEnabled || strings.TrimSpace(settings.ChatID) == "" {
+			continue
+		}
+		location, err := time.LoadLocation(settings.Timezone)
+		if err != nil {
+			location = time.UTC
+		}
+		now := time.Now().In(location)
+		if now.Format("15:04") != settings.ReportTime {
+			continue
+		}
+		lockKey := telegramNotificationsDailyLockPrefix + encodedTarget + ":" + now.Format("2006-01-02")
+		locked, err := h.centralRedis.SetNX(context.Background(), lockKey, "sending", 36*time.Hour).Result()
+		if err != nil || !locked {
+			continue
+		}
+		message, err := h.telegramDailyReportMessage(context.Background(), target, settings, now)
+		if err != nil {
+			_ = h.centralRedis.Del(context.Background(), lockKey).Err()
+			h.log.Error("telegram notifications: daily report build failed", logger.Error(err))
+			continue
+		}
+		if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(context.Background(), settings.ChatID, message); err != nil {
+			_ = h.centralRedis.Del(context.Background(), lockKey).Err()
+			h.log.Error("telegram notifications: daily report send failed", logger.Error(err))
+		}
+	}
+}
+
+func (h *HandlerV1) registerTelegramNotificationTarget(ctx context.Context, target telegramNotificationTarget) {
+	if h.centralRedis == nil || target.ProjectID == "" || target.EnvironmentID == "" || target.CompanyID == "" {
+		return
+	}
+	if err := h.centralRedis.SAdd(ctx, telegramNotificationsTargetsKey, encodeTelegramNotificationTarget(target)).Err(); err != nil {
+		h.log.Warn("telegram notifications: register daily report target failed", logger.Error(err))
+	}
+}
+
+func encodeTelegramNotificationTarget(target telegramNotificationTarget) string {
+	return target.ProjectID + "|" + target.EnvironmentID + "|" + target.CompanyID
+}
+
+func parseTelegramNotificationTarget(value string) (telegramNotificationTarget, bool) {
+	parts := strings.Split(value, "|")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return telegramNotificationTarget{}, false
+	}
+	return telegramNotificationTarget{ProjectID: parts[0], EnvironmentID: parts[1], CompanyID: parts[2]}, true
+}
+
+func (h *HandlerV1) telegramDailyReportMessage(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time) (string, error) {
+	location, err := time.LoadLocation(settings.Timezone)
+	if err != nil {
+		location = time.UTC
+	}
+	day := now.In(location)
+	metaReport, err := metaads.NewHandler(h.baseConf, h.centralRedis, h.log).DashboardForDay(ctx, day)
+	if err != nil {
+		return "", fmt.Errorf("Meta Ads report: %w", err)
+	}
+	statuses, err := h.telegramDealStatusesForDay(ctx, target, day)
+	if err != nil {
+		h.log.Warn("telegram notifications: CRM status report unavailable", logger.Error(err))
+		statuses = "CRM statuslari vaqtincha olinmadi."
+	}
+	currency := strings.TrimSpace(metaReport.Account.Currency)
+	if currency == "" {
+		currency = "so‘m"
+	}
+	cpl := "—"
+	if metaReport.KPIs.CPL != nil {
+		cpl = telegramReportMoney(*metaReport.KPIs.CPL, currency)
+	}
+	values := map[string]string{
+		"{{report.company}}":     "CRM",
+		"{{report.date}}":        day.Format("02.01.2006"),
+		"{{report.ad_spend}}":    telegramReportMoney(metaReport.KPIs.Spend, currency),
+		"{{report.leads_total}}": fmt.Sprint(metaReport.KPIs.Leads),
+		"{{report.cpl}}":         cpl,
+		"{{report.statuses}}":    statuses,
+	}
+	return renderTelegramTemplateValues(settings.Templates.DailyReport, values), nil
+}
+
+func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target telegramNotificationTarget, day time.Time) (string, error) {
+	service, environmentID, err := h.resolveProjectBuilder(ctx, target.ProjectID, target.EnvironmentID)
+	if err != nil {
+		return "", err
+	}
+	response, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
+		TableSlug: "deals",
+		Data:      mustStruct(map[string]any{"limit": 10000, "offset": 0}),
+		ProjectId: environmentID,
+	})
+	if err != nil {
+		return "", err
+	}
+	counts := map[string]int{}
+	for _, row := range telegramResponseRows(response.GetData()) {
+		companyID := telegramNotificationCompanyID(row)
+		if companyID != "" && companyID != target.CompanyID {
+			continue
+		}
+		createdAt, ok := telegramDealCreatedAt(row, day.Location())
+		if !ok || createdAt.Format("2006-01-02") != day.Format("2006-01-02") {
+			continue
+		}
+		status := telegramDealStage(row)
+		if status == "" {
+			status = "Status belgilanmagan"
+		}
+		counts[status]++
+	}
+	if len(counts) == 0 {
+		return "Bugun kelgan lidlar topilmadi.", nil
+	}
+	keys := make([]string, 0, len(counts))
+	for status := range counts {
+		keys = append(keys, status)
+	}
+	sort.Strings(keys)
+	lines := make([]string, 0, len(keys))
+	for _, status := range keys {
+		lines = append(lines, "• "+status+" — "+fmt.Sprint(counts[status]))
+	}
+	return strings.Join(lines, "\n"), nil
+}
+
+func telegramResponseRows(data *structpb.Struct) []map[string]any {
+	if data == nil {
+		return nil
+	}
+	rawRows, _ := data.AsMap()["response"].([]any)
+	rows := make([]map[string]any, 0, len(rawRows))
+	for _, raw := range rawRows {
+		if row, ok := raw.(map[string]any); ok {
+			rows = append(rows, row)
+		}
+	}
+	return rows
+}
+
+func telegramDealCreatedAt(deal map[string]any, location *time.Location) (time.Time, bool) {
+	for _, key := range []string{"created_at", "created_time", "start_date"} {
+		value := telegramDealValue(deal, key)
+		if value == "" {
+			continue
+		}
+		for _, layout := range []string{time.RFC3339, "2006-01-02 15:04:05", "2006-01-02"} {
+			if parsed, err := time.ParseInLocation(layout, value, location); err == nil {
+				return parsed.In(location), true
+			}
+		}
+	}
+	return time.Time{}, false
+}
+
+func telegramReportMoney(value float64, currency string) string {
+	return fmt.Sprintf("%s %.2f", currency, value)
+}
+
+func renderTelegramTemplateValues(template string, values map[string]string) string {
+	for token, value := range values {
+		template = strings.ReplaceAll(template, token, html.EscapeString(value))
+	}
+	return template
 }
 
 func (h *HandlerV1) getTelegramNotificationSettings(ctx context.Context, target telegramNotificationTarget) (models.TelegramNotificationSettings, *pb.ProjectResource, error) {
