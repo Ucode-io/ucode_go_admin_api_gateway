@@ -94,10 +94,27 @@ func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
 	}
 }
 
-func TestRenderTelegramTemplateReplacesMissingFields(t *testing.T) {
-	rendered := renderTelegramNotificationTemplateWithDeal("{{lead.name}} {{lead.phone}} {{deal.custom_field}}", map[string]any{"name": "Dilnoza"})
-	if rendered != "Dilnoza — —" {
+func TestRenderTelegramTemplateOmitsMissingFieldLines(t *testing.T) {
+	template := "🆕 <b>Yangi lid</b>\n\n👤 Ismi: {{lead.name}}\n📞 Telefon: {{lead.phone}}\n👨‍💼 Mas’ul: {{lead.owner_name}}\n\n🔗 {{lead.url}}"
+	rendered := renderTelegramNotificationTemplateWithDeal(template, map[string]any{"name": "Dilnoza"})
+	if rendered != "🆕 <b>Yangi lid</b>\n\n👤 Ismi: Dilnoza" {
 		t.Fatalf("rendered missing fields = %q", rendered)
+	}
+}
+
+func TestRenderTelegramTemplateUsesCRMFieldAliases(t *testing.T) {
+	template := "📞 {{lead.phone}}\n👨‍💼 {{lead.owner_name}}\n📦 {{deal.service}}\n💵 {{deal.amount}}"
+	deal := map[string]any{
+		"telefon":          "+998 90 123 45 67",
+		"responsible-name": "Madina",
+		"xizmat_nomi":      "IELTS kursi",
+		"budget":           1200000,
+	}
+	rendered := renderTelegramNotificationTemplateWithDeal(template, deal)
+	for _, value := range []string{"+998 90 123 45 67", "Madina", "IELTS kursi", "1200000"} {
+		if !strings.Contains(rendered, value) {
+			t.Fatalf("rendered aliases %q does not contain %q", rendered, value)
+		}
 	}
 }
 

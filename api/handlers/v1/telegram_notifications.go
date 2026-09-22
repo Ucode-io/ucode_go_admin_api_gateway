@@ -746,7 +746,27 @@ func telegramDealValue(data map[string]any, keys ...string) string {
 			return normalized
 		}
 	}
+	// Custom fields are created per CRM and their keys are not always
+	// consistently cased or separated. For example, a form can return
+	// `phone-number` while another returns `phone_number`. Resolve these to the
+	// same notification field without requiring every company to edit a template.
+	for _, key := range keys {
+		wanted := telegramFieldKey(key)
+		for actualKey, value := range data {
+			if telegramFieldKey(actualKey) != wanted {
+				continue
+			}
+			if normalized := telegramValueString(value); normalized != "" {
+				return normalized
+			}
+		}
+	}
 	return ""
+}
+
+func telegramFieldKey(key string) string {
+	key = strings.ToLower(strings.TrimSpace(key))
+	return strings.NewReplacer("_", "", "-", "", " ", "", ".", "").Replace(key)
 }
 
 // Builder fields may be returned as scalar strings, array-backed choices, or
@@ -785,26 +805,47 @@ func telegramValueString(value any) string {
 func renderTelegramNotificationTemplateWithDeal(template string, deal map[string]any) string {
 	values := map[string]string{
 		"{{lead.name}}":       telegramDealValue(deal, "name", "full_name", "contact_name"),
-		"{{lead.phone}}":      telegramDealValue(deal, "phone", "phone_number", "contact_phone"),
-		"{{lead.source}}":     telegramDealValue(deal, "source", "lead_source"),
-		"{{lead.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "assignee_name"),
+		"{{lead.phone}}":      telegramDealValue(deal, "phone", "phone_number", "contact_phone", "telephone", "telefon", "mobile", "mobile_phone"),
+		"{{lead.source}}":     telegramDealValue(deal, "source", "lead_source", "lead_channel", "manba"),
+		"{{lead.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "responsible_name", "assignee_name", "manager_name", "assigned_to"),
 		"{{lead.url}}":        telegramDealValue(deal, "url", "deal_url"),
 		"{{contact.name}}":    telegramDealValue(deal, "contact_name", "name", "full_name"),
-		"{{contact.phone}}":   telegramDealValue(deal, "contact_phone", "phone", "phone_number"),
-		"{{deal.amount}}":     telegramDealValue(deal, "amount", "sum", "price"),
-		"{{deal.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "assignee_name"),
-		"{{deal.service}}":    telegramDealValue(deal, "service", "product", "service_name"),
+		"{{contact.phone}}":   telegramDealValue(deal, "contact_phone", "phone", "phone_number", "telephone", "telefon", "mobile", "mobile_phone"),
+		"{{deal.amount}}":     telegramDealValue(deal, "amount", "sum", "price", "budget", "total", "deal_amount"),
+		"{{deal.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "responsible_name", "assignee_name", "manager_name", "assigned_to"),
+		"{{deal.service}}":    telegramDealValue(deal, "service", "product", "service_name", "product_name", "xizmat", "xizmat_nomi", "course", "direction", "deal_type"),
 		"{{deal.url}}":        telegramDealValue(deal, "url", "deal_url"),
 	}
 	for key, value := range deal {
 		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
 	}
-	for token, value := range values {
-		if value != "" {
-			template = strings.ReplaceAll(template, token, html.EscapeString(value))
+
+	// Fields such as service, amount and responsible person are optional in a
+	// CRM. Drop the whole field line when its value is absent instead of sending
+	// a misleading `—` placeholder to Telegram. This keeps a new lead/status
+	// notification compact while still showing every value that exists.
+	lines := make([]string, 0, strings.Count(template, "\n")+1)
+	for _, line := range strings.Split(template, "\n") {
+		missingValue := false
+		for _, token := range telegramTemplateToken.FindAllString(line, -1) {
+			if strings.TrimSpace(values[token]) == "" {
+				missingValue = true
+				break
+			}
 		}
+		if missingValue {
+			continue
+		}
+		for token, value := range values {
+			if value != "" {
+				line = strings.ReplaceAll(line, token, html.EscapeString(value))
+			}
+		}
+		lines = append(lines, line)
 	}
-	// A rule can contain optional/custom fields. Never expose unresolved
-	// placeholders to a Telegram group when a particular deal has no value.
-	return telegramTemplateToken.ReplaceAllString(template, "—")
+	result := strings.TrimSpace(strings.Join(lines, "\n"))
+	for strings.Contains(result, "\n\n\n") {
+		result = strings.ReplaceAll(result, "\n\n\n", "\n\n")
+	}
+	return result
 }
