@@ -40,8 +40,8 @@ func TestTelegramNotificationTemplate(t *testing.T) {
 }
 
 func TestRenderTelegramNotificationTemplate(t *testing.T) {
-	rendered := renderTelegramNotificationTemplate("{{lead.name}} {{deal.amount}} {{report.cpl}}")
-	for _, token := range []string{"Azizbek Karimov", "1 200 000 so‘m", "20 000 so‘m"} {
+	rendered := renderTelegramNotificationTemplate("{{lead.name}} {{deal.amount}} {{deal.url}} {{report.cpl}}")
+	for _, token := range []string{"Azizbek Karimov", "1 200 000 so‘m", "https://crm.ucode.co/deals", "20 000 so‘m"} {
 		if !strings.Contains(rendered, token) {
 			t.Fatalf("rendered template %q does not contain %q", rendered, token)
 		}

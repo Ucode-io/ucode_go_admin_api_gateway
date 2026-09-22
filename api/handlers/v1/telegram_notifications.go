@@ -237,7 +237,15 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
 		return
 	}
-	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), settings.ChatID, renderTelegramNotificationTemplate(template)); err != nil {
+	message := renderTelegramNotificationTemplate(template)
+	if request.Type != "daily_report" {
+		// Use a real deal for the test message so its CRM link can be opened,
+		// rather than rendering the old non-clickable preview label.
+		if deal, dealErr := h.telegramNotificationTestDeal(c.Request.Context(), target); dealErr == nil {
+			message = renderTelegramNotificationTemplateWithDeal(template, deal)
+		}
+	}
+	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), settings.ChatID, message); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -605,11 +613,32 @@ func telegramNotificationTemplate(settings models.TelegramNotificationSettings, 
 
 func renderTelegramNotificationTemplate(template string) string {
 	replacer := strings.NewReplacer(
-		"{{lead.name}}", "Azizbek Karimov", "{{lead.phone}}", "+998 90 123 45 67", "{{lead.source}}", "Instagram", "{{lead.owner_name}}", "Madina", "{{lead.url}}", "CRMda ochish",
-		"{{contact.name}}", "Azizbek Karimov", "{{contact.phone}}", "+998 90 123 45 67", "{{deal.amount}}", "1 200 000 so‘m", "{{deal.owner_name}}", "Madina", "{{deal.url}}", "Dealni CRMda ochish", "{{deal.service}}", "IELTS kursi",
+		"{{lead.name}}", "Azizbek Karimov", "{{lead.phone}}", "+998 90 123 45 67", "{{lead.source}}", "Instagram", "{{lead.owner_name}}", "Madina", "{{lead.url}}", `<a href="https://crm.ucode.co/deals">CRMda ochish</a>`,
+		"{{contact.name}}", "Azizbek Karimov", "{{contact.phone}}", "+998 90 123 45 67", "{{deal.amount}}", "1 200 000 so‘m", "{{deal.owner_name}}", "Madina", "{{deal.url}}", `<a href="https://crm.ucode.co/deals">CRMda ochish</a>`, "{{deal.service}}", "IELTS kursi",
 		"{{report.company}}", "PROFESSIONAL CRM", "{{report.date}}", time.Now().Format("02.01.2006"), "{{report.ad_spend}}", "600 000 so‘m", "{{report.leads_total}}", "40", "{{report.cpl}}", "20 000 so‘m", "{{report.statuses}}", "🆕 Yangi — 12\n📞 Bog‘lanildi — 15\n✅ Success deal — 3",
 	)
 	return replacer.Replace(template)
+}
+
+func (h *HandlerV1) telegramNotificationTestDeal(ctx context.Context, target telegramNotificationTarget) (map[string]any, error) {
+	service, environmentID, err := h.resolveProjectBuilder(ctx, target.ProjectID, target.EnvironmentID)
+	if err != nil {
+		return nil, err
+	}
+	response, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
+		TableSlug: "deals",
+		Data:      mustStruct(map[string]any{"limit": 1, "offset": 0}),
+		ProjectId: environmentID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, deal := range telegramResponseRows(response.GetData()) {
+		if telegramDealValue(deal, "guid", "id") != "" {
+			return deal, nil
+		}
+	}
+	return nil, errors.New("no deal available for Telegram notification test")
 }
 
 // NotifyDealCreated is called only after the generic item handler has created
