@@ -57,6 +57,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	// or changing project data.
 	r.POST("/v1/telegram/manager/webhook", h.V1.TelegramManagerWebhook)
 	r.POST("/v1/telegram/webhook/:project_id/:environment_id/:resource_id", h.V1.TelegramProjectWebhook)
+	r.POST("/v1/telegram-notifications/webhook", h.V1.TelegramNotificationsWebhook)
 
 	// Real Stripe PaymentIntent endpoint
 	r.POST("/stripe/webhook", h.V1.StripeWebhook)
@@ -119,6 +120,15 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			telegram.POST("/chats/:chat_id/messages", h.V1.SendTelegramMessage)
 			telegram.GET("/messages/:message_id/attachments", h.V1.ListTelegramMessageAttachments)
 			telegram.GET("/messages/:message_id/attachments/:attachment_id", h.V1.ProxyTelegramAttachment)
+		}
+
+		telegramNotifications := v1.Group("/telegram-notifications")
+		{
+			telegramNotifications.GET("/settings", h.V1.GetTelegramNotificationSettings)
+			telegramNotifications.PUT("/settings", h.V1.SaveTelegramNotificationSettings)
+			telegramNotifications.POST("/connect-code", h.V1.CreateTelegramNotificationConnectCode)
+			telegramNotifications.POST("/test", h.V1.SendTelegramNotificationTest)
+			telegramNotifications.POST("/daily-report", h.V1.SendTelegramDailyReport)
 		}
 
 		instagram := v1.Group("/instagram")

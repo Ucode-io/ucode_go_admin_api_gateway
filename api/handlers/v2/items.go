@@ -276,6 +276,9 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	}); err != nil {
 		h.log.Error("google calendar create sync failed", logger.Error(err))
 	}
+	if c.Param("collection") == "deals" && h.telegramNotifier != nil {
+		h.telegramNotifier.NotifyDealCreated(context.Background(), projectId.(string), environmentId.(string), objectRequest.Data)
+	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 	h.HandleResponse(c, statusHttp, resp)
@@ -1218,6 +1221,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		Config:          h.googleCalendarConfig(),
 	}); err != nil {
 		h.log.Error("google calendar update sync failed", logger.Error(err))
+	}
+	if c.Param("collection") == "deals" && h.telegramNotifier != nil {
+		h.telegramNotifier.NotifyDealStatusChanged(context.Background(), projectId.(string), environmentId.(string), beforeData, syncData)
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()
 }

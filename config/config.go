@@ -184,10 +184,13 @@ type BaseConfig struct {
 	GoogleCalendarFrontendSuccessURL string
 	GoogleCalendarFrontendErrorURL   string
 
-	TelegramManagerBotToken      string
-	TelegramManagerBotUsername   string
-	TelegramManagerWebhookSecret string
-	TelegramWebhookBaseURL       string
+	TelegramManagerBotToken            string
+	TelegramManagerBotUsername         string
+	TelegramManagerWebhookSecret       string
+	TelegramWebhookBaseURL             string
+	TelegramNotificationsBotToken      string
+	TelegramNotificationsBotUsername   string
+	TelegramNotificationsWebhookSecret string
 
 	YandexMetricToken string
 
@@ -345,6 +348,9 @@ func BaseLoad() BaseConfig {
 	config.TelegramManagerBotUsername = strings.TrimPrefix(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_BOT_USERNAME", "")), "@")
 	config.TelegramManagerWebhookSecret = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_MANAGER_WEBHOOK_SECRET", ""))
 	config.TelegramWebhookBaseURL = strings.TrimRight(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_WEBHOOK_BASE_URL", config.UcodeBaseUrl)), "/")
+	config.TelegramNotificationsBotToken = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_NOTIFICATIONS_BOT_TOKEN", ""))
+	config.TelegramNotificationsBotUsername = strings.TrimPrefix(cast.ToString(GetOrReturnDefaultValue("TELEGRAM_NOTIFICATIONS_BOT_USERNAME", "")), "@")
+	config.TelegramNotificationsWebhookSecret = cast.ToString(GetOrReturnDefaultValue("TELEGRAM_NOTIFICATIONS_WEBHOOK_SECRET", ""))
 
 	config.YandexMetricToken = cast.ToString(GetOrReturnDefaultValue("YANDEX_METRIC_TOKEN", ""))
 

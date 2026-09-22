@@ -32,18 +32,27 @@ import (
 )
 
 type HandlerV2 struct {
-	baseConf        config.BaseConfig
-	projectConfs    map[string]config.Config
-	log             logger.LoggerI
-	services        services.ServiceNodesI
-	companyServices services.CompanyServiceI
-	authService     services.AuthServiceManagerI
-	redis           storage.RedisStorageI
-	centralRedis    *go_redis.Client
-	cache           *caching.ExpiringLRUCache
-	rateLimiter     *util.ApiKeyRateLimiter
-	tusdHandlers    map[string]*tusd.Handler
-	tusdMu          sync.Mutex
+	baseConf         config.BaseConfig
+	projectConfs     map[string]config.Config
+	log              logger.LoggerI
+	services         services.ServiceNodesI
+	companyServices  services.CompanyServiceI
+	authService      services.AuthServiceManagerI
+	redis            storage.RedisStorageI
+	centralRedis     *go_redis.Client
+	cache            *caching.ExpiringLRUCache
+	rateLimiter      *util.ApiKeyRateLimiter
+	tusdHandlers     map[string]*tusd.Handler
+	tusdMu           sync.Mutex
+	telegramNotifier TelegramNotificationDispatcher
+}
+
+// TelegramNotificationDispatcher receives committed deal changes. Keeping the
+// interface in v2 prevents the generic item API from depending on the v1
+// Telegram implementation.
+type TelegramNotificationDispatcher interface {
+	NotifyDealCreated(ctx context.Context, projectID, environmentID string, deal map[string]any)
+	NotifyDealStatusChanged(ctx context.Context, projectID, environmentID string, before, after map[string]any)
 }
 
 func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter) HandlerV2 {
@@ -60,6 +69,10 @@ func NewHandlerV2(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		rateLimiter:     limiter,
 		tusdHandlers:    make(map[string]*tusd.Handler),
 	}
+}
+
+func (h *HandlerV2) SetTelegramNotificationDispatcher(dispatcher TelegramNotificationDispatcher) {
+	h.telegramNotifier = dispatcher
 }
 
 func (h *HandlerV2) GetProjectSrvc(c context.Context, projectId string, nodeType string) (services.ServiceManagerI, error) {

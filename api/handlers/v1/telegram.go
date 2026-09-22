@@ -190,6 +190,7 @@ type telegramMessage struct {
 	Chat      struct {
 		ID        int64  `json:"id"`
 		Type      string `json:"type"`
+		Title     string `json:"title"`
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
 		Username  string `json:"username"`
@@ -272,6 +273,12 @@ func (t *telegramAPIClient) deleteWebhook(ctx context.Context) error {
 
 func (t *telegramAPIClient) sendMessage(ctx context.Context, chatID string, text string) (telegramMessage, error) {
 	return t.sendMessageWithMarkup(ctx, chatID, text, nil)
+}
+
+func (t *telegramAPIClient) sendHTMLMessage(ctx context.Context, chatID string, text string) (telegramMessage, error) {
+	var message telegramMessage
+	err := t.call(ctx, "sendMessage", map[string]any{"chat_id": chatID, "text": text, "parse_mode": "HTML"}, &message)
+	return message, err
 }
 
 func (t *telegramAPIClient) sendMessageWithMarkup(ctx context.Context, chatID string, text string, replyMarkup any) (telegramMessage, error) {

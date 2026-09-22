@@ -30,6 +30,9 @@ jobs:
           UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN: ${{ secrets.UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN }}
           UCODE_INSTAGRAM_CLIENT_SECRET: ${{ secrets.UCODE_INSTAGRAM_CLIENT_SECRET_ROTATED }}
           UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN: ${{ secrets.UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN }}
+          TELEGRAM_NOTIFICATIONS_BOT_TOKEN: ${{ secrets.TELEGRAM_NOTIFICATIONS_BOT_TOKEN }}
+          TELEGRAM_NOTIFICATIONS_BOT_USERNAME: ${{ secrets.TELEGRAM_NOTIFICATIONS_BOT_USERNAME }}
+          TELEGRAM_NOTIFICATIONS_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_NOTIFICATIONS_WEBHOOK_SECRET }}
         run: |
           set -euo pipefail
           test -n "${META_ACCESS_TOKEN}"
@@ -37,6 +40,9 @@ jobs:
           test -n "${UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN}"
           test -n "${UCODE_INSTAGRAM_CLIENT_SECRET}"
           test -n "${UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN}"
+          test -n "${TELEGRAM_NOTIFICATIONS_BOT_TOKEN}"
+          test -n "${TELEGRAM_NOTIFICATIONS_BOT_USERNAME}"
+          test -n "${TELEGRAM_NOTIFICATIONS_WEBHOOK_SECRET}"
           go run ./scripts/write_meta_ads_env.go .meta-ads.env
           test -s .meta-ads.env
 

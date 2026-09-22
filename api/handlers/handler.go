@@ -36,6 +36,9 @@ type Handler struct {
 }
 
 func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Config, log logger.LoggerI, svcs services.ServiceNodesI, cmpServ services.CompanyServiceI, authService services.AuthServiceManagerI, redis storage.RedisStorageI, centralRedis *go_redis.Client, cache *caching.ExpiringLRUCache, limiter *util.ApiKeyRateLimiter, vaultClient vault.VaultClient) Handler {
+	v1Handler := v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter, vaultClient)
+	v2Handler := v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter)
+	v2Handler.SetTelegramNotificationDispatcher(&v1Handler)
 	return Handler{
 		baseConf:        baseConf,
 		projectConfs:    projectConfs,
@@ -45,8 +48,8 @@ func NewHandler(baseConf config.BaseConfig, projectConfs map[string]config.Confi
 		authService:     authService,
 		redis:           redis,
 		centralRedis:    centralRedis,
-		V1:              v1.NewHandlerV1(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter, vaultClient),
-		V2:              v2.NewHandlerV2(baseConf, projectConfs, log, svcs, cmpServ, authService, redis, centralRedis, cache, limiter),
+		V1:              v1Handler,
+		V2:              v2Handler,
 		MetaAds:         metaads.NewHandler(baseConf, centralRedis, log),
 		CallQuality:     callquality.NewHandler(baseConf, log),
 		V3: v3.NewHandlerV3(&v3.HandlerV3Config{
