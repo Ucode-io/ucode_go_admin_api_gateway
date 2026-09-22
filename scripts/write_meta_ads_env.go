@@ -17,6 +17,9 @@ func main() {
 	facebookWebhookVerifyToken := requiredEnv("UCODE_FACEBOOK_WEBHOOK_VERIFY_TOKEN")
 	instagramClientSecret := requiredEnv("UCODE_INSTAGRAM_CLIENT_SECRET")
 	instagramWebhookVerifyToken := requiredEnv("UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN")
+	telegramBotToken := requiredEnv("TELEGRAM_NOTIFICATIONS_BOT_TOKEN")
+	telegramBotUsername := requiredEnv("TELEGRAM_NOTIFICATIONS_BOT_USERNAME")
+	telegramWebhookSecret := requiredEnv("TELEGRAM_NOTIFICATIONS_WEBHOOK_SECRET")
 
 	contents := strings.Join([]string{
 		"META_ACCESS_TOKEN=" + accessToken,
@@ -38,6 +41,10 @@ func main() {
 		"UCODE_INSTAGRAM_FRONTEND_SUCCESS_URL=https://crm.ucode.co/settings/integrations",
 		"UCODE_INSTAGRAM_FRONTEND_ERROR_URL=https://crm.ucode.co/settings/integrations",
 		"UCODE_INSTAGRAM_WEBHOOK_VERIFY_TOKEN=" + instagramWebhookVerifyToken,
+		"TELEGRAM_NOTIFICATIONS_BOT_TOKEN=" + telegramBotToken,
+		"TELEGRAM_NOTIFICATIONS_BOT_USERNAME=" + telegramBotUsername,
+		"TELEGRAM_NOTIFICATIONS_WEBHOOK_SECRET=" + telegramWebhookSecret,
+		"TELEGRAM_WEBHOOK_BASE_URL=https://api.admin.u-code.io",
 		"",
 	}, "\n")
 
