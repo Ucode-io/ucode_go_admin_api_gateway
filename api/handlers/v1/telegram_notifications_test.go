@@ -118,6 +118,17 @@ func TestRenderTelegramTemplateUsesCRMFieldAliases(t *testing.T) {
 	}
 }
 
+func TestRenderTelegramTemplateBuildsClickableCRMDealURL(t *testing.T) {
+	rendered := renderTelegramNotificationTemplateWithDeal(
+		"🔗 {{deal.url}}",
+		map[string]any{"guid": "deal id", "pipeline": "UHRMS"},
+	)
+	want := `🔗 <a href="https://crm.ucode.co/deals?deal=deal+id&amp;pipeline=UHRMS">CRMda ochish</a>`
+	if rendered != want {
+		t.Fatalf("rendered CRM link = %q, want %q", rendered, want)
+	}
+}
+
 func TestTelegramStatusRuleMatchesLegacyWinningStageSpelling(t *testing.T) {
 	rule := models.TelegramStatusNotification{PipelineID: "UHRMS", StageID: "Выиграно"}
 	deal := map[string]any{"pipeline": "UHRMS", "stage": "Выграно"}

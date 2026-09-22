@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -808,13 +809,13 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		"{{lead.phone}}":      telegramDealValue(deal, "phone", "phone_number", "contact_phone", "telephone", "telefon", "mobile", "mobile_phone"),
 		"{{lead.source}}":     telegramDealValue(deal, "source", "lead_source", "lead_channel", "manba"),
 		"{{lead.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "responsible_name", "assignee_name", "manager_name", "assigned_to"),
-		"{{lead.url}}":        telegramDealValue(deal, "url", "deal_url"),
+		"{{lead.url}}":        telegramDealURL(deal),
 		"{{contact.name}}":    telegramDealValue(deal, "contact_name", "name", "full_name"),
 		"{{contact.phone}}":   telegramDealValue(deal, "contact_phone", "phone", "phone_number", "telephone", "telefon", "mobile", "mobile_phone"),
 		"{{deal.amount}}":     telegramDealValue(deal, "amount", "sum", "price", "budget", "total", "deal_amount"),
 		"{{deal.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "responsible_name", "assignee_name", "manager_name", "assigned_to"),
 		"{{deal.service}}":    telegramDealValue(deal, "service", "product", "service_name", "product_name", "xizmat", "xizmat_nomi", "course", "direction", "deal_type"),
-		"{{deal.url}}":        telegramDealValue(deal, "url", "deal_url"),
+		"{{deal.url}}":        telegramDealURL(deal),
 	}
 	for key, value := range deal {
 		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
@@ -838,6 +839,10 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		}
 		for token, value := range values {
 			if value != "" {
+				if token == "{{lead.url}}" || token == "{{deal.url}}" {
+					line = strings.ReplaceAll(line, token, `<a href="`+html.EscapeString(value)+`">CRMda ochish</a>`)
+					continue
+				}
 				line = strings.ReplaceAll(line, token, html.EscapeString(value))
 			}
 		}
@@ -848,4 +853,22 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		result = strings.ReplaceAll(result, "\n\n\n", "\n\n")
 	}
 	return result
+}
+
+// telegramDealURL returns a stable CRM deep link even when the builder event
+// does not include a prebuilt URL. The frontend consumes `deal` and `pipeline`
+// and opens the matching deal drawer after loading that pipeline.
+func telegramDealURL(deal map[string]any) string {
+	if url := telegramDealValue(deal, "url", "deal_url"); url != "" {
+		return url
+	}
+	dealID := telegramDealValue(deal, "guid", "id")
+	if dealID == "" {
+		return ""
+	}
+	query := "deal=" + url.QueryEscape(dealID)
+	if pipeline := telegramDealPipeline(deal); pipeline != "" {
+		query += "&pipeline=" + url.QueryEscape(pipeline)
+	}
+	return "https://crm.ucode.co/deals?" + query
 }
