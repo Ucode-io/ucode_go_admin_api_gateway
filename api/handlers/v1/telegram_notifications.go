@@ -400,10 +400,10 @@ func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target teleg
 	}
 	counts := map[string]int{}
 	for _, row := range telegramResponseRows(response.GetData()) {
-		companyID := telegramNotificationCompanyID(row)
-		if companyID != "" && companyID != target.CompanyID {
-			continue
-		}
+		// target.CompanyID identifies the CRM workspace whose Telegram group is
+		// configured. A deal's companies_id, on the other hand, is the customer
+		// company related to that deal. They are unrelated identifiers, so the
+		// report must include every deal in this workspace.
 		createdAt, ok := telegramDealCreatedAt(row, day.Location())
 		if !ok || createdAt.Format("2006-01-02") != day.Format("2006-01-02") {
 			continue
@@ -519,6 +519,31 @@ func (h *HandlerV1) telegramNotificationResource(ctx context.Context, target tel
 	return nil, nil
 }
 
+// telegramNotificationTargets returns the CRM workspaces in a project and
+// environment that have Telegram settings. Settings are keyed by the workspace
+// company, while deals contain the *customer* company in companies_id; using
+// the latter to find a group silently drops messages for ordinary deals.
+func (h *HandlerV1) telegramNotificationTargets(ctx context.Context, projectID, environmentID string) ([]telegramNotificationTarget, error) {
+	list, err := h.companyServices.Resource().GetProjectResourceList(ctx, &pb.GetProjectResourceListRequest{
+		ProjectId:     projectID,
+		EnvironmentId: environmentID,
+		Type:          pb.ResourceType_TELEGRAM,
+	})
+	if err != nil {
+		return nil, err
+	}
+	targets := make([]telegramNotificationTarget, 0, len(list.GetResources()))
+	for _, resource := range list.GetResources() {
+		if resource.GetSettings().GetTelegram().GetStatus() != telegramNotificationsResourceStatus || strings.TrimSpace(resource.GetExternalId()) == "" {
+			continue
+		}
+		targets = append(targets, telegramNotificationTarget{
+			ProjectID: projectID, EnvironmentID: environmentID, CompanyID: resource.GetExternalId(),
+		})
+	}
+	return targets, nil
+}
+
 func telegramNotificationResourceSettings(username string) *pb.Settings {
 	return &pb.Settings{Telegram: &pb.TelegramCredentials{BotUsername: strings.TrimPrefix(username, "@"), Status: telegramNotificationsResourceStatus}}
 }
@@ -572,21 +597,23 @@ func renderTelegramNotificationTemplate(template string) string {
 }
 
 // NotifyDealCreated is called only after the generic item handler has created
-// a deal successfully. A CRM company is resolved from the deal itself, so one
-// global bot can safely deliver to the group linked to that company alone.
+// a deal successfully. The delivery group belongs to the CRM workspace, not to
+// the customer company attached to an individual deal.
 func (h *HandlerV1) NotifyDealCreated(ctx context.Context, projectID, environmentID string, deal map[string]any) {
 	if !h.telegramNotificationsConfigured() {
 		return
 	}
-	companyID := telegramNotificationCompanyID(deal)
-	if companyID == "" {
+	targets, err := h.telegramNotificationTargets(ctx, projectID, environmentID)
+	if err != nil {
 		return
 	}
-	settings, _, err := h.getTelegramNotificationSettings(ctx, telegramNotificationTarget{ProjectID: projectID, EnvironmentID: environmentID, CompanyID: companyID})
-	if err != nil || !settings.NewLeadEnabled || strings.TrimSpace(settings.ChatID) == "" {
-		return
+	for _, target := range targets {
+		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
+		if err != nil || !settings.NewLeadEnabled || strings.TrimSpace(settings.ChatID) == "" {
+			continue
+		}
+		h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(settings.Templates.NewLead, deal))
 	}
-	h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(settings.Templates.NewLead, deal))
 }
 
 // NotifyDealStatusChanged sends a rule only for an actual status transition.
@@ -596,22 +623,21 @@ func (h *HandlerV1) NotifyDealStatusChanged(ctx context.Context, projectID, envi
 	if !h.telegramNotificationsConfigured() || telegramDealStage(before) == telegramDealStage(after) {
 		return
 	}
-	companyID := telegramNotificationCompanyID(after)
-	if companyID == "" {
-		companyID = telegramNotificationCompanyID(before)
-	}
-	if companyID == "" {
+	targets, err := h.telegramNotificationTargets(ctx, projectID, environmentID)
+	if err != nil {
 		return
 	}
-	settings, _, err := h.getTelegramNotificationSettings(ctx, telegramNotificationTarget{ProjectID: projectID, EnvironmentID: environmentID, CompanyID: companyID})
-	if err != nil || strings.TrimSpace(settings.ChatID) == "" {
-		return
-	}
-	for _, rule := range settings.StatusNotifications {
-		if !rule.Enabled || !telegramStatusRuleMatches(rule, after) {
+	for _, target := range targets {
+		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
+		if err != nil || strings.TrimSpace(settings.ChatID) == "" {
 			continue
 		}
-		h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(rule.Template, after))
+		for _, rule := range settings.StatusNotifications {
+			if !rule.Enabled || !telegramStatusRuleMatches(rule, after) {
+				continue
+			}
+			h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(rule.Template, after))
+		}
 	}
 }
 

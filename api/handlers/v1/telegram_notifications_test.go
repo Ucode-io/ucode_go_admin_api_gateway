@@ -74,3 +74,22 @@ func TestTelegramDailyReportHelpers(t *testing.T) {
 		t.Fatalf("created at = %s, %v", createdAt, ok)
 	}
 }
+
+func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
+	// The deals table stores these choice fields as arrays, even though the
+	// settings UI presents each as a single select.
+	rule := models.TelegramStatusNotification{
+		PipelineID: "UHRMS",
+		StageID:    "Выиграно",
+	}
+	after := map[string]any{
+		"pipeline": []any{"UHRMS"},
+		"stage":    []any{"Выиграно"},
+	}
+	if !telegramStatusRuleMatches(rule, after) {
+		t.Fatal("array-backed deal fields should match the selected status rule")
+	}
+	if telegramDealStage(map[string]any{"stage": []any{"Переговоры"}}) == telegramDealStage(after) {
+		t.Fatal("different deal stages must be distinguishable")
+	}
+}
