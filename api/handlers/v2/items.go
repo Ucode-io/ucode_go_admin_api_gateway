@@ -1223,6 +1223,14 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 		h.log.Error("google calendar update sync failed", logger.Error(err))
 	}
 	if c.Param("collection") == "deals" && h.telegramNotifier != nil {
+		// A deal may be saved for unrelated fields many times. The board's
+		// drag-and-drop request always carries stage, so use that committed
+		// request field as the status-transition signal instead of trusting the
+		// legacy GetSingle response shape for a before/after comparison.
+		if _, stageChanged := objectRequest.Data["stage"]; !stageChanged {
+			statusHttp.CustomMessage = resp.GetCustomMessage()
+			return
+		}
 		h.telegramNotifier.NotifyDealStatusChanged(context.Background(), projectId.(string), environmentId.(string), beforeData, syncData)
 	}
 	statusHttp.CustomMessage = resp.GetCustomMessage()

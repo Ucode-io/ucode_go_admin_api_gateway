@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -22,6 +23,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/structpb"
 )
+
+var telegramTemplateToken = regexp.MustCompile(`\{\{[^{}]+\}\}`)
 
 const (
 	telegramNotificationsResourceName    = "CRM Telegram notifications"
@@ -616,11 +619,11 @@ func (h *HandlerV1) NotifyDealCreated(ctx context.Context, projectID, environmen
 	}
 }
 
-// NotifyDealStatusChanged sends a rule only for an actual status transition.
-// Repeated PUT requests with the same status therefore do not create a second
-// message, while a later move away from and back to a stage remains meaningful.
+// NotifyDealStatusChanged is called by the item handler only when its request
+// contains the stage field. That is more reliable than comparing a legacy
+// builder response (whose before-data shape differs by storage engine).
 func (h *HandlerV1) NotifyDealStatusChanged(ctx context.Context, projectID, environmentID string, before, after map[string]any) {
-	if !h.telegramNotificationsConfigured() || telegramDealStage(before) == telegramDealStage(after) {
+	if !h.telegramNotificationsConfigured() {
 		return
 	}
 	targets, err := h.telegramNotificationTargets(ctx, projectID, environmentID)
@@ -721,5 +724,7 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 			template = strings.ReplaceAll(template, token, html.EscapeString(value))
 		}
 	}
-	return template
+	// A rule can contain optional/custom fields. Never expose unresolved
+	// placeholders to a Telegram group when a particular deal has no value.
+	return telegramTemplateToken.ReplaceAllString(template, "—")
 }

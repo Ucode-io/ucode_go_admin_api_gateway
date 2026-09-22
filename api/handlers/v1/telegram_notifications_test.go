@@ -93,3 +93,10 @@ func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
 		t.Fatal("different deal stages must be distinguishable")
 	}
 }
+
+func TestRenderTelegramTemplateReplacesMissingFields(t *testing.T) {
+	rendered := renderTelegramNotificationTemplateWithDeal("{{lead.name}} {{lead.phone}} {{deal.custom_field}}", map[string]any{"name": "Dilnoza"})
+	if rendered != "Dilnoza — —" {
+		t.Fatalf("rendered missing fields = %q", rendered)
+	}
+}
