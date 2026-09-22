@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"net/http"
 	"strings"
 	"time"
@@ -351,4 +352,131 @@ func renderTelegramNotificationTemplate(template string) string {
 		"{{report.company}}", "PROFESSIONAL CRM", "{{report.date}}", time.Now().Format("02.01.2006"), "{{report.ad_spend}}", "600 000 so‘m", "{{report.leads_total}}", "40", "{{report.cpl}}", "20 000 so‘m", "{{report.statuses}}", "🆕 Yangi — 12\n📞 Bog‘lanildi — 15\n✅ Success deal — 3",
 	)
 	return replacer.Replace(template)
+}
+
+// NotifyDealCreated is called only after the generic item handler has created
+// a deal successfully. A CRM company is resolved from the deal itself, so one
+// global bot can safely deliver to the group linked to that company alone.
+func (h *HandlerV1) NotifyDealCreated(ctx context.Context, projectID, environmentID string, deal map[string]any) {
+	if !h.telegramNotificationsConfigured() {
+		return
+	}
+	companyID := telegramNotificationCompanyID(deal)
+	if companyID == "" {
+		return
+	}
+	settings, _, err := h.getTelegramNotificationSettings(ctx, telegramNotificationTarget{ProjectID: projectID, EnvironmentID: environmentID, CompanyID: companyID})
+	if err != nil || !settings.NewLeadEnabled || strings.TrimSpace(settings.ChatID) == "" {
+		return
+	}
+	h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(settings.Templates.NewLead, deal))
+}
+
+// NotifyDealStatusChanged sends a rule only for an actual status transition.
+// Repeated PUT requests with the same status therefore do not create a second
+// message, while a later move away from and back to a stage remains meaningful.
+func (h *HandlerV1) NotifyDealStatusChanged(ctx context.Context, projectID, environmentID string, before, after map[string]any) {
+	if !h.telegramNotificationsConfigured() || telegramDealStage(before) == telegramDealStage(after) {
+		return
+	}
+	companyID := telegramNotificationCompanyID(after)
+	if companyID == "" {
+		companyID = telegramNotificationCompanyID(before)
+	}
+	if companyID == "" {
+		return
+	}
+	settings, _, err := h.getTelegramNotificationSettings(ctx, telegramNotificationTarget{ProjectID: projectID, EnvironmentID: environmentID, CompanyID: companyID})
+	if err != nil || strings.TrimSpace(settings.ChatID) == "" {
+		return
+	}
+	for _, rule := range settings.StatusNotifications {
+		if !rule.Enabled || !telegramStatusRuleMatches(rule, after) {
+			continue
+		}
+		h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(rule.Template, after))
+	}
+}
+
+func (h *HandlerV1) sendTelegramCRMNotification(chatID, message string) {
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if _, err := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(ctx, chatID, message); err != nil {
+			h.log.Error("telegram CRM notification send failed", logger.Error(err))
+		}
+	}()
+}
+
+func telegramNotificationCompanyID(data map[string]any) string {
+	return telegramDealValue(data, "companies_id", "company_id", "company")
+}
+
+func telegramDealPipeline(data map[string]any) string {
+	return telegramDealValue(data, "pipeline", "pipeline_id")
+}
+
+func telegramDealStage(data map[string]any) string {
+	return telegramDealValue(data, "stage", "stage_id", "status")
+}
+
+func telegramStatusRuleMatches(rule models.TelegramStatusNotification, deal map[string]any) bool {
+	return strings.TrimSpace(rule.PipelineID) != "" && strings.TrimSpace(rule.StageID) != "" &&
+		strings.EqualFold(strings.TrimSpace(rule.PipelineID), telegramDealPipeline(deal)) &&
+		strings.EqualFold(strings.TrimSpace(rule.StageID), telegramDealStage(deal))
+}
+
+func telegramDealValue(data map[string]any, keys ...string) string {
+	for _, key := range keys {
+		value, ok := data[key]
+		if !ok {
+			continue
+		}
+		switch item := value.(type) {
+		case string:
+			if value := strings.TrimSpace(item); value != "" {
+				return value
+			}
+		case []string:
+			if len(item) > 0 && strings.TrimSpace(item[0]) != "" {
+				return strings.TrimSpace(item[0])
+			}
+		case []any:
+			if len(item) > 0 {
+				if value := strings.TrimSpace(fmt.Sprint(item[0])); value != "" {
+					return value
+				}
+			}
+		default:
+			if value := strings.TrimSpace(fmt.Sprint(item)); value != "" && value != "<nil>" {
+				return value
+			}
+		}
+	}
+	return ""
+}
+
+func renderTelegramNotificationTemplateWithDeal(template string, deal map[string]any) string {
+	values := map[string]string{
+		"{{lead.name}}":       telegramDealValue(deal, "name", "full_name", "contact_name"),
+		"{{lead.phone}}":      telegramDealValue(deal, "phone", "phone_number", "contact_phone"),
+		"{{lead.source}}":     telegramDealValue(deal, "source", "lead_source"),
+		"{{lead.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "assignee_name"),
+		"{{lead.url}}":        telegramDealValue(deal, "url", "deal_url"),
+		"{{contact.name}}":    telegramDealValue(deal, "contact_name", "name", "full_name"),
+		"{{contact.phone}}":   telegramDealValue(deal, "contact_phone", "phone", "phone_number"),
+		"{{deal.amount}}":     telegramDealValue(deal, "amount", "sum", "price"),
+		"{{deal.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "assignee_name"),
+		"{{deal.service}}":    telegramDealValue(deal, "service", "product", "service_name"),
+		"{{deal.url}}":        telegramDealValue(deal, "url", "deal_url"),
+	}
+	for key, value := range deal {
+		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
+	}
+	for token, value := range values {
+		if value != "" {
+			template = strings.ReplaceAll(template, token, html.EscapeString(value))
+		}
+	}
+	return template
 }
