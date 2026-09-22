@@ -181,6 +181,7 @@ func main() {
 
 	// Facebook lead poller (webhook safety net) — no-op unless FACEBOOK_LEAD_POLL_ENABLED.
 	h.V1.StartLeadPoller(context.Background())
+	h.V1.StartTelegramNotifications(context.Background())
 
 	log.Info("server is running...")
 	if err := r.Run(baseConf.HTTPPort); err != nil {
