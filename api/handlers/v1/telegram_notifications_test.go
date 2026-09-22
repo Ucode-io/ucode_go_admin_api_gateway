@@ -116,3 +116,11 @@ func TestTelegramStatusRuleMatchesPipelineSpecificStageField(t *testing.T) {
 		t.Fatal("pipeline-specific stage field should match the selected status rule")
 	}
 }
+
+func TestTelegramStatusRuleMatchesPipelineSpecificFieldsWithoutPipelineValue(t *testing.T) {
+	rule := models.TelegramStatusNotification{PipelineID: "UHRMS", StageID: "Выиграно"}
+	deal := map[string]any{"pipeline_uhrms": "Выграно", "pipeline_udevs": "Переговоры"}
+	if !telegramStatusRuleMatches(rule, deal) {
+		t.Fatal("the configured pipeline-specific field should match without a shared pipeline value")
+	}
+}

@@ -681,8 +681,36 @@ func telegramDealStage(data map[string]any) string {
 
 func telegramStatusRuleMatches(rule models.TelegramStatusNotification, deal map[string]any) bool {
 	return strings.TrimSpace(rule.PipelineID) != "" && strings.TrimSpace(rule.StageID) != "" &&
-		telegramStatusValueMatches(rule.PipelineID, telegramDealPipeline(deal)) &&
-		telegramStatusValueMatches(rule.StageID, telegramDealStage(deal))
+		telegramDealPipelineMatches(rule.PipelineID, deal) &&
+		telegramDealStageMatches(rule.StageID, deal)
+}
+
+func telegramDealPipelineMatches(expected string, deal map[string]any) bool {
+	if telegramStatusValueMatches(expected, telegramDealPipeline(deal)) {
+		return true
+	}
+	for key := range deal {
+		normalizedKey := strings.ToLower(strings.TrimSpace(key))
+		if strings.HasPrefix(normalizedKey, "pipeline_") &&
+			telegramStatusValueMatches(expected, strings.TrimPrefix(normalizedKey, "pipeline_")) {
+			return true
+		}
+	}
+	return false
+}
+
+func telegramDealStageMatches(expected string, deal map[string]any) bool {
+	if telegramStatusValueMatches(expected, telegramDealValue(deal, "stage", "stage_id", "status")) {
+		return true
+	}
+	for key, value := range deal {
+		normalizedKey := strings.ToLower(strings.TrimSpace(key))
+		if (strings.HasPrefix(normalizedKey, "pipeline_") || strings.HasPrefix(normalizedKey, "stage_")) &&
+			telegramStatusValueMatches(expected, telegramValueString(value)) {
+			return true
+		}
+	}
+	return false
 }
 
 // Some legacy CRM stages have an older display spelling ("Выграно") while
