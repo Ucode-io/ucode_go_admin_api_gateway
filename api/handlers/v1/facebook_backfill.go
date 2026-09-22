@@ -61,6 +61,13 @@ func (h *HandlerV1) FacebookCRMBackfill(c *gin.Context) {
 		}
 		for _, form := range forms {
 			leads, _, fetchErr := h.facebookFetchFormLeads(c.Request.Context(), form.ID, credentials.GetPageAccessToken(), since)
+			// The Ads dashboard can be configured with a separate, working Meta
+			// access token. Try it only when the page token cannot read a legacy
+			// form; this makes historical attribution independent of the CRM OAuth
+			// connection while preserving the normal webhook flow.
+			if fetchErr != nil && strings.TrimSpace(h.baseConf.MetaAdsAccessToken) != "" && h.baseConf.MetaAdsAccessToken != credentials.GetPageAccessToken() {
+				leads, _, fetchErr = h.facebookFetchFormLeads(c.Request.Context(), form.ID, h.baseConf.MetaAdsAccessToken, since)
+			}
 			if fetchErr != nil {
 				recordError(fetchErr)
 				continue
