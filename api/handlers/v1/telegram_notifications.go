@@ -678,25 +678,41 @@ func telegramDealValue(data map[string]any, keys ...string) string {
 		if !ok {
 			continue
 		}
-		switch item := value.(type) {
-		case string:
-			if value := strings.TrimSpace(item); value != "" {
-				return value
+		if normalized := telegramValueString(value); normalized != "" {
+			return normalized
+		}
+	}
+	return ""
+}
+
+// Builder fields may be returned as scalar strings, array-backed choices, or
+// relation-like objects. Read the user-facing value consistently in all three
+// formats so a rule selected in the settings UI matches the saved deal.
+func telegramValueString(value any) string {
+	switch item := value.(type) {
+	case string:
+		return strings.TrimSpace(item)
+	case []string:
+		for _, child := range item {
+			if normalized := telegramValueString(child); normalized != "" {
+				return normalized
 			}
-		case []string:
-			if len(item) > 0 && strings.TrimSpace(item[0]) != "" {
-				return strings.TrimSpace(item[0])
+		}
+	case []any:
+		for _, child := range item {
+			if normalized := telegramValueString(child); normalized != "" {
+				return normalized
 			}
-		case []any:
-			if len(item) > 0 {
-				if value := strings.TrimSpace(fmt.Sprint(item[0])); value != "" {
-					return value
-				}
+		}
+	case map[string]any:
+		for _, key := range []string{"label", "name", "title", "value", "guid", "id"} {
+			if normalized := telegramValueString(item[key]); normalized != "" {
+				return normalized
 			}
-		default:
-			if value := strings.TrimSpace(fmt.Sprint(item)); value != "" && value != "<nil>" {
-				return value
-			}
+		}
+	default:
+		if normalized := strings.TrimSpace(fmt.Sprint(item)); normalized != "" && normalized != "<nil>" {
+			return normalized
 		}
 	}
 	return ""

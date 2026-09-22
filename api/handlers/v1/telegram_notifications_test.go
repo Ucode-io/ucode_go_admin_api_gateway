@@ -83,8 +83,8 @@ func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
 		StageID:    "Выиграно",
 	}
 	after := map[string]any{
-		"pipeline": []any{"UHRMS"},
-		"stage":    []any{"Выиграно"},
+		"pipeline": []any{map[string]any{"value": "UHRMS"}},
+		"stage":    []any{map[string]any{"label": "Выиграно"}},
 	}
 	if !telegramStatusRuleMatches(rule, after) {
 		t.Fatal("array-backed deal fields should match the selected status rule")
