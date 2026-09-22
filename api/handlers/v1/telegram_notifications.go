@@ -663,7 +663,20 @@ func telegramDealPipeline(data map[string]any) string {
 }
 
 func telegramDealStage(data map[string]any) string {
-	return telegramDealValue(data, "stage", "stage_id", "status")
+	if stage := telegramDealValue(data, "stage", "stage_id", "status"); stage != "" {
+		return stage
+	}
+	// Each CRM pipeline may store its current stage under a dedicated field
+	// such as pipeline_udevs or pipeline_uhrms rather than a shared stage key.
+	for key, value := range data {
+		normalizedKey := strings.ToLower(strings.TrimSpace(key))
+		if strings.HasPrefix(normalizedKey, "pipeline_") || strings.HasPrefix(normalizedKey, "stage_") {
+			if stage := telegramValueString(value); stage != "" {
+				return stage
+			}
+		}
+	}
+	return ""
 }
 
 func telegramStatusRuleMatches(rule models.TelegramStatusNotification, deal map[string]any) bool {

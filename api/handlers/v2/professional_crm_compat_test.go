@@ -62,3 +62,12 @@ func TestNormalizeProfessionalCRMLegacyDealLeavesCurrentPipelineUntouched(t *tes
 		t.Fatalf("%s = %#v, want unchanged", professionalCRMStageField, data[professionalCRMStageField])
 	}
 }
+
+func TestIsTelegramDealStageUpdate(t *testing.T) {
+	if !isTelegramDealStageUpdate(map[string]any{"pipeline_uhrms": "Выграно"}) {
+		t.Fatal("pipeline-specific stage update should be recognized")
+	}
+	if isTelegramDealStageUpdate(map[string]any{"name": "Changed deal"}) {
+		t.Fatal("unrelated update should not be treated as a stage update")
+	}
+}

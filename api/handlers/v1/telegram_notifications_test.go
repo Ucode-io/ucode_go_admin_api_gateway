@@ -108,3 +108,11 @@ func TestTelegramStatusRuleMatchesLegacyWinningStageSpelling(t *testing.T) {
 		t.Fatal("legacy winning-stage spelling should match its configured rule")
 	}
 }
+
+func TestTelegramStatusRuleMatchesPipelineSpecificStageField(t *testing.T) {
+	rule := models.TelegramStatusNotification{PipelineID: "UHRMS", StageID: "Выиграно"}
+	deal := map[string]any{"pipeline": "UHRMS", "pipeline_uhrms": "Выграно"}
+	if !telegramStatusRuleMatches(rule, deal) {
+		t.Fatal("pipeline-specific stage field should match the selected status rule")
+	}
+}
