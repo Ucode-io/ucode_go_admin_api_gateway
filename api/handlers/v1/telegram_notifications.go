@@ -711,30 +711,16 @@ func (h *HandlerV1) NotifyDealCreated(ctx context.Context, projectID, environmen
 	if err != nil {
 		return
 	}
+	settingsList := make([]models.TelegramNotificationSettings, 0, len(targets))
 	for _, target := range targets {
 		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
 		if err != nil || strings.TrimSpace(settings.ChatID) == "" {
 			continue
 		}
-		if settings.Automations != nil {
-			for _, rule := range settings.Automations {
-				if len(rule.TriggerConfigs) > 0 {
-					trigger, ok := telegramAutomationMatchingTrigger(rule, "deals", "create", deal, nil, time.Now())
-					if ok {
-						h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), deal))
-					}
-					continue
-				}
-				if telegramAutomationMatches(rule, "created", deal, time.Now()) {
-					h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, "created"), deal))
-				}
-			}
-			continue
-		}
-		if !settings.NewLeadEnabled {
-			continue
-		}
-		h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(settings.Templates.NewLead, deal))
+		settingsList = append(settingsList, settings)
+	}
+	for _, delivery := range telegramCreateDeliveries(settingsList, deal, time.Now()) {
+		h.sendTelegramCRMNotification(delivery.ChatID, delivery.Message)
 	}
 }
 
