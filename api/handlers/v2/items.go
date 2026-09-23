@@ -277,8 +277,8 @@ func (h *HandlerV2) CreateItem(c *gin.Context) {
 	}); err != nil {
 		h.log.Error("google calendar create sync failed", logger.Error(err))
 	}
-	if c.Param("collection") == "deals" && h.telegramNotifier != nil {
-		h.telegramNotifier.NotifyDealCreated(context.Background(), projectId.(string), environmentId.(string), objectRequest.Data)
+	if h.telegramNotifier != nil {
+		h.telegramNotifier.NotifyItemCreated(context.Background(), projectId.(string), environmentId.(string), c.Param("collection"), objectRequest.Data)
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()
@@ -1223,6 +1223,9 @@ func (h *HandlerV2) UpdateItem(c *gin.Context) {
 	}); err != nil {
 		h.log.Error("google calendar update sync failed", logger.Error(err))
 	}
+	if h.telegramNotifier != nil {
+		h.telegramNotifier.NotifyItemUpdated(context.Background(), projectId.(string), environmentId.(string), c.Param("collection"), syncData, objectRequest.Data)
+	}
 	if c.Param("collection") == "deals" && h.telegramNotifier != nil {
 		// A deal may be saved for unrelated fields many times. The board's
 		// drag-and-drop request always carries stage, so use that committed
@@ -1691,6 +1694,9 @@ func (h *HandlerV2) DeleteItem(c *gin.Context) {
 		Config:          h.googleCalendarConfig(),
 	}); err != nil {
 		h.log.Error("google calendar delete sync failed", logger.Error(err))
+	}
+	if h.telegramNotifier != nil {
+		h.telegramNotifier.NotifyItemDeleted(context.Background(), projectId.(string), environmentId.(string), c.Param("collection"), syncData)
 	}
 
 	statusHttp.CustomMessage = resp.GetCustomMessage()

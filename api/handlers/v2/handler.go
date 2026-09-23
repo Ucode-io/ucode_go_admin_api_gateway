@@ -51,7 +51,9 @@ type HandlerV2 struct {
 // interface in v2 prevents the generic item API from depending on the v1
 // Telegram implementation.
 type TelegramNotificationDispatcher interface {
-	NotifyDealCreated(ctx context.Context, projectID, environmentID string, deal map[string]any)
+	NotifyItemCreated(ctx context.Context, projectID, environmentID, table string, item map[string]any)
+	NotifyItemUpdated(ctx context.Context, projectID, environmentID, table string, item, changedFields map[string]any)
+	NotifyItemDeleted(ctx context.Context, projectID, environmentID, table string, item map[string]any)
 	NotifyDealStatusChanged(ctx context.Context, projectID, environmentID string, before, after map[string]any)
 }
 

@@ -105,6 +105,9 @@ func (h *HandlerV1) GetTelegramNotificationSettings(c *gin.Context) {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
+	if settings.Automations == nil {
+		settings.Automations = telegramLegacyAutomations(settings)
+	}
 	h.registerTelegramNotificationTarget(c.Request.Context(), target)
 	h.HandleResponse(c, status_http.OK, settings)
 }
@@ -238,7 +241,21 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 		return
 	}
 	message := renderTelegramNotificationTemplate(template)
-	if request.Type != "daily_report" {
+	isDailyReport := request.Type == "daily_report"
+	if request.Type == "automation" {
+		for _, rule := range settings.Automations {
+			if rule.ID == request.RuleID && telegramAutomationHasTrigger(rule, "daily_report") {
+				isDailyReport = true
+				message, err = h.telegramDailyReportMessageWithTemplate(c.Request.Context(), target, settings, time.Now(), template)
+				if err != nil {
+					h.HandleResponse(c, status_http.GRPCError, err.Error())
+					return
+				}
+				break
+			}
+		}
+	}
+	if !isDailyReport {
 		// Use a real deal for the test message so its CRM link can be opened,
 		// rather than rendering the old non-clickable preview label.
 		if deal, dealErr := h.telegramNotificationTestDeal(c.Request.Context(), target); dealErr == nil {
@@ -313,7 +330,7 @@ func (h *HandlerV1) runTelegramDailyReports() {
 			continue
 		}
 		settings, _, err := h.getTelegramNotificationSettings(context.Background(), target)
-		if err != nil || !settings.DailyReportEnabled || strings.TrimSpace(settings.ChatID) == "" {
+		if err != nil || strings.TrimSpace(settings.ChatID) == "" {
 			continue
 		}
 		location, err := time.LoadLocation(settings.Timezone)
@@ -321,24 +338,48 @@ func (h *HandlerV1) runTelegramDailyReports() {
 			location = time.UTC
 		}
 		now := time.Now().In(location)
-		if now.Format("15:04") != settings.ReportTime {
+		if settings.Automations != nil {
+			for _, rule := range settings.Automations {
+				if len(rule.TriggerConfigs) > 0 {
+					for _, trigger := range rule.TriggerConfigs {
+						if trigger.Kind != "daily_report" || now.Format("15:04") != trigger.ReportTime {
+							continue
+						}
+						if _, ok := telegramAutomationMatchingTrigger(rule, "", "daily_report", nil, nil, now); ok {
+							h.sendScheduledTelegramReport(target, encodedTarget+":"+rule.ID+":"+trigger.ID, settings, telegramAutomationTriggerTemplate(trigger), now)
+						}
+					}
+					continue
+				}
+				if !telegramAutomationHasTrigger(rule, "daily_report") || now.Format("15:04") != rule.ReportTime || !telegramAutomationMatches(rule, "daily_report", nil, now) {
+					continue
+				}
+				h.sendScheduledTelegramReport(target, encodedTarget+":"+rule.ID, settings, telegramAutomationTemplate(rule, settings, "daily_report"), now)
+			}
 			continue
 		}
-		lockKey := telegramNotificationsDailyLockPrefix + encodedTarget + ":" + now.Format("2006-01-02")
-		locked, err := h.centralRedis.SetNX(context.Background(), lockKey, "sending", 36*time.Hour).Result()
-		if err != nil || !locked {
+		if !settings.DailyReportEnabled || now.Format("15:04") != settings.ReportTime {
 			continue
 		}
-		message, err := h.telegramDailyReportMessage(context.Background(), target, settings, now)
-		if err != nil {
-			_ = h.centralRedis.Del(context.Background(), lockKey).Err()
-			h.log.Error("telegram notifications: daily report build failed", logger.Error(err))
-			continue
-		}
-		if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(context.Background(), settings.ChatID, message); err != nil {
-			_ = h.centralRedis.Del(context.Background(), lockKey).Err()
-			h.log.Error("telegram notifications: daily report send failed", logger.Error(err))
-		}
+		h.sendScheduledTelegramReport(target, encodedTarget, settings, settings.Templates.DailyReport, now)
+	}
+}
+
+func (h *HandlerV1) sendScheduledTelegramReport(target telegramNotificationTarget, lockID string, settings models.TelegramNotificationSettings, template string, now time.Time) {
+	lockKey := telegramNotificationsDailyLockPrefix + lockID + ":" + now.Format("2006-01-02")
+	locked, err := h.centralRedis.SetNX(context.Background(), lockKey, "sending", 36*time.Hour).Result()
+	if err != nil || !locked {
+		return
+	}
+	message, err := h.telegramDailyReportMessageWithTemplate(context.Background(), target, settings, now, template)
+	if err != nil {
+		_ = h.centralRedis.Del(context.Background(), lockKey).Err()
+		h.log.Error("telegram notifications: daily report build failed", logger.Error(err))
+		return
+	}
+	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(context.Background(), settings.ChatID, message); err != nil {
+		_ = h.centralRedis.Del(context.Background(), lockKey).Err()
+		h.log.Error("telegram notifications: daily report send failed", logger.Error(err))
 	}
 }
 
@@ -364,6 +405,10 @@ func parseTelegramNotificationTarget(value string) (telegramNotificationTarget, 
 }
 
 func (h *HandlerV1) telegramDailyReportMessage(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time) (string, error) {
+	return h.telegramDailyReportMessageWithTemplate(ctx, target, settings, now, settings.Templates.DailyReport)
+}
+
+func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time, template string) (string, error) {
 	location, err := time.LoadLocation(settings.Timezone)
 	if err != nil {
 		location = time.UTC
@@ -394,7 +439,7 @@ func (h *HandlerV1) telegramDailyReportMessage(ctx context.Context, target teleg
 		"{{report.cpl}}":         cpl,
 		"{{report.statuses}}":    statuses,
 	}
-	return renderTelegramTemplateValues(settings.Templates.DailyReport, values), nil
+	return renderTelegramTemplateValues(template, values), nil
 }
 
 func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target telegramNotificationTarget, day time.Time) (string, error) {
@@ -573,6 +618,11 @@ func telegramNotificationResourceSettings(username string) *pb.Settings {
 }
 
 func validateTelegramNotificationSettings(settings *models.TelegramNotificationSettings) error {
+	if settings.Automations != nil {
+		if err := validateTelegramAutomations(settings.Automations); err != nil {
+			return err
+		}
+	}
 	if len(settings.StatusNotifications) > 100 {
 		return errors.New("too many status notifications")
 	}
@@ -605,6 +655,15 @@ func telegramNotificationTemplate(settings models.TelegramNotificationSettings, 
 		for _, rule := range settings.StatusNotifications {
 			if rule.ID == ruleID {
 				return rule.Template, nil
+			}
+		}
+	case "automation":
+		for _, rule := range settings.Automations {
+			if rule.ID == ruleID {
+				if telegramAutomationHasTrigger(rule, "daily_report") {
+					return telegramAutomationTemplate(rule, settings, "daily_report"), nil
+				}
+				return telegramAutomationTemplate(rule, settings, "created"), nil
 			}
 		}
 	}
@@ -654,11 +713,69 @@ func (h *HandlerV1) NotifyDealCreated(ctx context.Context, projectID, environmen
 	}
 	for _, target := range targets {
 		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
-		if err != nil || !settings.NewLeadEnabled || strings.TrimSpace(settings.ChatID) == "" {
+		if err != nil || strings.TrimSpace(settings.ChatID) == "" {
+			continue
+		}
+		if settings.Automations != nil {
+			for _, rule := range settings.Automations {
+				if len(rule.TriggerConfigs) > 0 {
+					trigger, ok := telegramAutomationMatchingTrigger(rule, "deals", "create", deal, nil, time.Now())
+					if ok {
+						h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), deal))
+					}
+					continue
+				}
+				if telegramAutomationMatches(rule, "created", deal, time.Now()) {
+					h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, "created"), deal))
+				}
+			}
+			continue
+		}
+		if !settings.NewLeadEnabled {
 			continue
 		}
 		h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(settings.Templates.NewLead, deal))
 	}
+}
+
+func (h *HandlerV1) NotifyDealUpdated(ctx context.Context, projectID, environmentID string, deal map[string]any, stageChanged bool) {
+	h.notifyDealAutomations(ctx, projectID, environmentID, deal, "updated", stageChanged)
+}
+
+func (h *HandlerV1) NotifyDealDeleted(ctx context.Context, projectID, environmentID string, deal map[string]any) {
+	h.notifyDealAutomations(ctx, projectID, environmentID, deal, "deleted", false)
+}
+
+func (h *HandlerV1) NotifyItemCreated(ctx context.Context, projectID, environmentID, table string, item map[string]any) {
+	if table == "deals" {
+		h.NotifyDealCreated(ctx, projectID, environmentID, item)
+		return
+	}
+	h.notifyItemAutomations(ctx, projectID, environmentID, table, item, "create", nil, false)
+}
+
+func (h *HandlerV1) NotifyItemUpdated(ctx context.Context, projectID, environmentID, table string, item, changedFields map[string]any) {
+	stageChanged := table == "deals" && telegramStageFieldChanged(changedFields)
+	h.notifyItemAutomations(ctx, projectID, environmentID, table, item, "update", changedFields, stageChanged)
+	if table == "deals" {
+		h.notifyDealAutomations(ctx, projectID, environmentID, item, "updated", stageChanged)
+	}
+}
+
+func (h *HandlerV1) NotifyItemDeleted(ctx context.Context, projectID, environmentID, table string, item map[string]any) {
+	h.notifyItemAutomations(ctx, projectID, environmentID, table, item, "delete", nil, false)
+	if table == "deals" {
+		h.notifyDealAutomations(ctx, projectID, environmentID, item, "deleted", false)
+	}
+}
+
+func telegramStageFieldChanged(changedFields map[string]any) bool {
+	for _, key := range []string{"stage", "stage_id", "stageId", "status", "status_id"} {
+		if _, ok := changedFields[key]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // NotifyDealStatusChanged is called by the item handler only when its request
@@ -675,6 +792,9 @@ func (h *HandlerV1) NotifyDealStatusChanged(ctx context.Context, projectID, envi
 	for _, target := range targets {
 		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
 		if err != nil || strings.TrimSpace(settings.ChatID) == "" {
+			continue
+		}
+		if settings.Automations != nil {
 			continue
 		}
 		for _, rule := range settings.StatusNotifications {
@@ -848,6 +968,7 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 	}
 	for key, value := range deal {
 		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
+		values["{{item."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
 	}
 
 	// Fields such as service, amount and responsible person are optional in a

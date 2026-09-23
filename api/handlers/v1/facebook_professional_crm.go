@@ -200,7 +200,15 @@ func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.P
 		return fmt.Errorf("find-or-create contact: %w", err)
 	}
 
-	return h.crmCreateDeal(ctx, svc, resourceEnvID, mapping, contactGUID, formGUID, formName, fields, value)
+	createdDeal, err := h.crmCreateDeal(ctx, svc, resourceEnvID, mapping, contactGUID, formGUID, formName, fields, value)
+	if err != nil {
+		return err
+	}
+	if createdDeal != nil {
+		createdDeal["phone"] = fields.phone
+		h.NotifyDealCreated(ctx, resource.GetProjectId(), resource.GetEnvironmentId(), createdDeal)
+	}
+	return nil
 }
 
 // resolveProjectBuilder returns the builder service handle and resource-env id
@@ -467,7 +475,7 @@ func crmFormAccepted(row map[string]any, field string) bool {
 // crmCreateDeal writes the deal linking the contact and the source form, placed
 // in the agreed entry pipeline/stage, deduped by leadgen id so Meta webhook
 // retries do not create duplicate deals.
-func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManagerI, resourceEnvID string, m crmMapping, contactGUID, formGUID, formName string, f crmLeadFields, value models.FacebookLeadChangeValue) error {
+func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManagerI, resourceEnvID string, m crmMapping, contactGUID, formGUID, formName string, f crmLeadFields, value models.FacebookLeadChangeValue) (map[string]any, error) {
 	name := f.fullName()
 	if name == "" {
 		name = formName
@@ -533,28 +541,28 @@ func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManag
 			if len(attribution) > 1 {
 				data, convertErr := helper.ConvertMapToStruct(attribution)
 				if convertErr != nil {
-					return convertErr
+					return nil, convertErr
 				}
 				if _, updateErr := svc.GoObjectBuilderService().Items().Update(ctx, &nb.CommonMessage{
 					TableSlug: m.DealsTable,
 					Data:      data,
 					ProjectId: resourceEnvID,
 				}); updateErr != nil {
-					return fmt.Errorf("backfill facebook deal attribution: %w", updateErr)
+					return nil, fmt.Errorf("backfill facebook deal attribution: %w", updateErr)
 				}
 			}
 			h.log.Info("facebook lead: deal already exists, skipping duplicate",
 				logger.String("leadgen_id", value.LeadgenID))
-			return nil
+			return nil, nil
 		}
-		return err
+		return nil, err
 	}
 
 	h.log.Info("facebook lead: deal written",
 		logger.String("leadgen_id", value.LeadgenID),
 		logger.String("form_id", value.FormID),
 	)
-	return nil
+	return payload, nil
 }
 
 // crmLookupRow returns the first row of table where field == value, or nil.
