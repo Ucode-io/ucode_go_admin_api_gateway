@@ -262,11 +262,20 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 	}
 	message := renderTelegramNotificationTemplate(template)
 	isDailyReport := request.Type == "daily_report"
+	chatID := settings.ChatID
 	if request.Type == "automation" {
 		for _, rule := range settings.Automations {
-			if rule.ID == request.RuleID && telegramAutomationHasTrigger(rule, "daily_report") {
+			if rule.ID != request.RuleID {
+				continue
+			}
+			if strings.TrimSpace(rule.ChatID) != "" {
+				chatID = strings.TrimSpace(rule.ChatID)
+			}
+			if telegramAutomationHasTrigger(rule, "daily_report") {
 				isDailyReport = true
-				message, err = h.telegramDailyReportMessageWithTemplate(c.Request.Context(), target, settings, time.Now(), template)
+				ruleSettings := settings
+				ruleSettings.ChatID = chatID
+				message, err = h.telegramDailyReportMessageWithTemplate(c.Request.Context(), target, ruleSettings, time.Now(), template)
 				if err != nil {
 					h.HandleResponse(c, status_http.GRPCError, err.Error())
 					return
@@ -282,7 +291,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 			message = renderTelegramNotificationTemplateWithDeal(template, deal)
 		}
 	}
-	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), settings.ChatID, message); err != nil {
+	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), chatID, message); err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
@@ -453,7 +462,11 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	statuses, err := h.telegramDealStatusesForDay(ctx, target, day)
 	if err != nil {
 		h.log.Warn("telegram notifications: CRM status report unavailable", logger.Error(err))
-		statuses = "CRM statuslari vaqtincha olinmadi."
+		statuses = "Статусы CRM временно недоступны."
+	}
+	sales, err := h.telegramDailySalesForDay(ctx, target, day)
+	if err != nil {
+		h.log.Warn("telegram notifications: daily sales unavailable", logger.Error(err))
 	}
 	currency := strings.TrimSpace(metaReport.Account.Currency)
 	if currency == "" {
@@ -463,15 +476,28 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	if metaReport.KPIs.CPL != nil {
 		cpl = telegramReportMoney(*metaReport.KPIs.CPL, currency)
 	}
-	values := map[string]string{
-		"{{report.company}}":     "CRM",
-		"{{report.date}}":        day.Format("02.01.2006"),
-		"{{report.ad_spend}}":    telegramReportMoney(metaReport.KPIs.Spend, currency),
-		"{{report.leads_total}}": fmt.Sprint(metaReport.KPIs.Leads),
-		"{{report.cpl}}":         cpl,
-		"{{report.statuses}}":    statuses,
+	company := strings.TrimSpace(settings.ChatTitle)
+	for _, group := range settings.Groups {
+		if group.ChatID == settings.ChatID && strings.TrimSpace(group.ChatTitle) != "" {
+			company = strings.TrimSpace(group.ChatTitle)
+			break
+		}
 	}
-	return renderTelegramTemplateValues(template, values), nil
+	if company == "" {
+		company = "CRM"
+	}
+	values := map[string]string{
+		"{{report.company}}":      company,
+		"{{report.date}}":         day.Format("02.01.2006"),
+		"{{report.ad_spend}}":     telegramReportMoney(metaReport.KPIs.Spend, currency),
+		"{{report.leads_total}}":  fmt.Sprint(metaReport.KPIs.Leads),
+		"{{report.cpl}}":          cpl,
+		"{{report.sales_deals}}":  fmt.Sprint(sales.Deals),
+		"{{report.bricks_count}}": telegramFormatBricks(sales.Bricks),
+		"{{report.sales_total}}":  telegramReportMoney(sales.Total, "USD"),
+		"{{report.statuses}}":     "TELEGRAM_REPORT_STATUSES_PLACEHOLDER",
+	}
+	return strings.ReplaceAll(renderTelegramTemplateValues(template, values), "TELEGRAM_REPORT_STATUSES_PLACEHOLDER", statuses), nil
 }
 
 func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target telegramNotificationTarget, day time.Time) (string, error) {
@@ -487,35 +513,59 @@ func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target teleg
 	if err != nil {
 		return "", err
 	}
-	counts := map[string]int{}
-	for _, row := range telegramResponseRows(response.GetData()) {
-		// target.CompanyID identifies the CRM workspace whose Telegram group is
-		// configured. A deal's companies_id, on the other hand, is the customer
-		// company related to that deal. They are unrelated identifiers, so the
-		// report must include every deal in this workspace.
+	return telegramFormatDealStatusesForDay(telegramResponseRows(response.GetData()), day), nil
+}
+
+type telegramDailyDeal struct {
+	Name      string
+	Phone     string
+	CreatedAt time.Time
+}
+
+func telegramFormatDealStatusesForDay(rows []map[string]any, day time.Time) string {
+	groups := map[string][]telegramDailyDeal{}
+	for _, row := range rows {
+		// The builder query is scoped to the CRM project. The deal's companies_id
+		// is a customer relation, not the Telegram group's workspace identifier.
 		createdAt, ok := telegramDealCreatedAt(row, day.Location())
 		if !ok || createdAt.Format("2006-01-02") != day.Format("2006-01-02") {
 			continue
 		}
 		status := telegramDealStage(row)
 		if status == "" {
-			status = "Status belgilanmagan"
+			status = "Без статуса"
 		}
-		counts[status]++
+		name := telegramDealValue(row, "name", "full_name", "contact_name")
+		if name == "" {
+			name = "Без имени"
+		}
+		groups[status] = append(groups[status], telegramDailyDeal{
+			Name: name, Phone: telegramDealValue(row, "phone", "phone_number", "contact_phone", "telephone", "telefon", "mobile", "mobile_phone"), CreatedAt: createdAt,
+		})
 	}
-	if len(counts) == 0 {
-		return "Bugun kelgan lidlar topilmadi.", nil
+	if len(groups) == 0 {
+		return "За сегодня лидов нет."
 	}
-	keys := make([]string, 0, len(counts))
-	for status := range counts {
+	keys := make([]string, 0, len(groups))
+	for status := range groups {
 		keys = append(keys, status)
 	}
 	sort.Strings(keys)
 	lines := make([]string, 0, len(keys))
 	for _, status := range keys {
-		lines = append(lines, "• "+status+" — "+fmt.Sprint(counts[status]))
+		deals := groups[status]
+		sort.SliceStable(deals, func(i, j int) bool { return deals[i].CreatedAt.Before(deals[j].CreatedAt) })
+		items := make([]string, 0, len(deals))
+		for _, deal := range deals {
+			item := deal.CreatedAt.Format("15:04") + "  <b>" + html.EscapeString(deal.Name) + "</b>"
+			if deal.Phone != "" {
+				item += " · " + html.EscapeString(deal.Phone)
+			}
+			items = append(items, item)
+		}
+		lines = append(lines, "📍 <b>"+html.EscapeString(status)+" — "+fmt.Sprint(len(deals))+"</b>\n<blockquote expandable>"+strings.Join(items, "\n")+"</blockquote>")
 	}
-	return strings.Join(lines, "\n"), nil
+	return strings.Join(lines, "\n\n")
 }
 
 func telegramResponseRows(data *structpb.Struct) []map[string]any {
@@ -826,6 +876,7 @@ func (h *HandlerV1) NotifyDealStatusChanged(ctx context.Context, projectID, envi
 	if !h.telegramNotificationsConfigured() {
 		return
 	}
+	h.recordTelegramDailySale(ctx, projectID, environmentID, before, after)
 	targets, err := h.telegramNotificationTargets(ctx, projectID, environmentID)
 	if err != nil {
 		return
@@ -994,8 +1045,18 @@ func telegramValueString(value any) string {
 }
 
 func renderTelegramNotificationTemplateWithDeal(template string, deal map[string]any) string {
+	location, err := time.LoadLocation("Asia/Tashkent")
+	if err != nil {
+		location = time.FixedZone("Tashkent", 5*60*60)
+	}
+	arrivedAt, ok := telegramDealCreatedAt(deal, location)
+	if !ok {
+		arrivedAt = time.Now().In(location)
+	}
+	arrivalLabel := arrivedAt.Format("02.01.2006 15:04")
 	values := map[string]string{
 		"{{lead.name}}":       telegramDealValue(deal, "name", "full_name", "contact_name"),
+		"{{lead.arrived_at}}": arrivalLabel,
 		"{{lead.phone}}":      telegramDealValue(deal, "phone", "phone_number", "contact_phone", "telephone", "telefon", "mobile", "mobile_phone"),
 		"{{lead.source}}":     telegramDealValue(deal, "source", "lead_source", "lead_channel", "manba"),
 		"{{lead.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "responsible_name", "assignee_name", "manager_name", "assigned_to"),
@@ -1006,6 +1067,7 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		"{{deal.owner_name}}": telegramDealValue(deal, "owner_name", "responsible", "responsible_name", "assignee_name", "manager_name", "assigned_to"),
 		"{{deal.service}}":    telegramDealValue(deal, "service", "product", "service_name", "product_name", "xizmat", "xizmat_nomi", "course", "direction", "deal_type"),
 		"{{deal.url}}":        telegramDealURL(deal),
+		"{{item.arrived_at}}": arrivalLabel,
 	}
 	for key, value := range deal {
 		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)

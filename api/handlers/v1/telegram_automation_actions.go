@@ -213,6 +213,7 @@ func (h *HandlerV1) updateTelegramAutomationDealStatus(ctx context.Context, acti
 	if telegramDealValue(item, field) == value {
 		return item, true, nil
 	}
+	previous := item
 	data, err := structpb.NewStruct(map[string]any{"guid": action.RecordID, "id": action.RecordID, "company_service_project_id": action.Target.ProjectID, field: value})
 	if err != nil {
 		return nil, false, err
@@ -227,6 +228,9 @@ func (h *HandlerV1) updateTelegramAutomationDealStatus(ctx context.Context, acti
 	}
 	if !found {
 		return nil, true, errors.New("updated deal was not found")
+	}
+	if field == "pipeline_enterprise_sales" {
+		h.recordTelegramDailySale(ctx, action.Target.ProjectID, action.Target.EnvironmentID, previous, item)
 	}
 	return item, true, nil
 }

@@ -75,6 +75,30 @@ func TestTelegramDailyReportHelpers(t *testing.T) {
 	}
 }
 
+func TestTelegramDailyReportGroupsTodayLeadsIntoExpandableStatuses(t *testing.T) {
+	location := time.FixedZone("Asia/Tashkent", 5*60*60)
+	day := time.Date(2026, 9, 24, 21, 0, 0, 0, location)
+	rows := []map[string]any{
+		{"created_at": "2026-09-24T06:20:00Z", "stage": "Yuk Jonatildi", "name": "Samandar", "phone": "+998 93 345 67 89"},
+		{"created_at": "2026-09-24T04:15:00Z", "stage": "Yuk Jonatildi", "name": "Asadbek & Ali", "phone": "+998 90 123 45 67"},
+		{"created_at": "2026-09-23T18:00:00Z", "stage": "Yuk Jonatildi", "name": "Kecha"},
+		{"created_at": "2026-09-24T08:00:00Z", "stage": "Yuklab Berildi", "name": "Nurmuhammad"},
+	}
+	got := telegramFormatDealStatusesForDay(rows, day)
+	for _, expected := range []string{
+		"📍 <b>Yuk Jonatildi — 2</b>",
+		"<blockquote expandable>09:15  <b>Asadbek &amp; Ali</b> · +998 90 123 45 67\n11:20  <b>Samandar</b> · +998 93 345 67 89</blockquote>",
+		"📍 <b>Yuklab Berildi — 1</b>",
+	} {
+		if !strings.Contains(got, expected) {
+			t.Fatalf("report %q does not contain %q", got, expected)
+		}
+	}
+	if strings.Contains(got, "Kecha") {
+		t.Fatalf("yesterday's lead appeared in today's report: %q", got)
+	}
+}
+
 func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
 	// The deals table stores these choice fields as arrays, even though the
 	// settings UI presents each as a single select.
