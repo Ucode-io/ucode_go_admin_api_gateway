@@ -108,6 +108,7 @@ func (h *HandlerV1) GetTelegramNotificationSettings(c *gin.Context) {
 	if settings.Automations == nil {
 		settings.Automations = telegramLegacyAutomations(settings)
 	}
+	normalizeTelegramNotificationGroups(&settings)
 	h.registerTelegramNotificationTarget(c.Request.Context(), target)
 	h.HandleResponse(c, status_http.OK, settings)
 }
@@ -128,6 +129,7 @@ func (h *HandlerV1) SaveTelegramNotificationSettings(c *gin.Context) {
 	}
 	settings.CompanyID = target.CompanyID
 	settings.BotUsername = strings.TrimPrefix(h.baseConf.TelegramNotificationsBotUsername, "@")
+	normalizeTelegramNotificationGroups(&settings)
 	if err := validateTelegramNotificationSettings(&settings); err != nil {
 		h.HandleResponse(c, status_http.InvalidArgument, err.Error())
 		return
@@ -203,8 +205,17 @@ func (h *HandlerV1) TelegramNotificationsWebhook(c *gin.Context) {
 	target := telegramNotificationTarget{ProjectID: connect.ProjectID, EnvironmentID: connect.EnvironmentID, CompanyID: connect.CompanyID}
 	settings, _, err := h.getTelegramNotificationSettings(c.Request.Context(), target)
 	if err == nil {
-		settings.ChatID = fmt.Sprint(message.Chat.ID)
-		settings.ChatTitle = strings.TrimSpace(message.Chat.Title)
+		chatID, chatTitle := fmt.Sprint(message.Chat.ID), strings.TrimSpace(message.Chat.Title)
+		settings.ChatID, settings.ChatTitle = chatID, chatTitle
+		found := false
+		for index := range settings.Groups {
+			if settings.Groups[index].ChatID == chatID {
+				settings.Groups[index].ChatTitle, found = chatTitle, true
+			}
+		}
+		if !found {
+			settings.Groups = append(settings.Groups, models.TelegramNotificationGroup{ChatID: chatID, ChatTitle: chatTitle})
+		}
 		settings.BotUsername = strings.TrimPrefix(h.baseConf.TelegramNotificationsBotUsername, "@")
 		err = h.saveTelegramNotificationSettings(c.Request.Context(), target, settings)
 	}
@@ -342,16 +353,20 @@ func (h *HandlerV1) runTelegramDailyReports() {
 		now := time.Now().In(location)
 		if settings.Automations != nil {
 			for _, rule := range settings.Automations {
+				ruleSettings := settings
+				if strings.TrimSpace(rule.ChatID) != "" {
+					ruleSettings.ChatID = strings.TrimSpace(rule.ChatID)
+				}
 				if len(rule.TriggerConfigs) > 0 {
 					for _, trigger := range rule.TriggerConfigs {
 						if trigger.Kind == "daily_report" {
-							modernChats[settings.ChatID] = true
+							modernChats[ruleSettings.ChatID] = true
 						}
 						if trigger.Kind != "daily_report" || now.Format("15:04") != trigger.ReportTime {
 							continue
 						}
 						if _, ok := telegramAutomationMatchingTrigger(rule, "", "daily_report", nil, nil, now); ok {
-							candidates = append(candidates, telegramScheduledReport{target, settings, telegramAutomationTriggerTemplate(trigger), now, true})
+							candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTriggerTemplate(trigger), now, true})
 						}
 					}
 					continue
@@ -359,7 +374,7 @@ func (h *HandlerV1) runTelegramDailyReports() {
 				if !telegramAutomationHasTrigger(rule, "daily_report") || now.Format("15:04") != rule.ReportTime || !telegramAutomationMatches(rule, "daily_report", nil, now) {
 					continue
 				}
-				candidates = append(candidates, telegramScheduledReport{target, settings, telegramAutomationTemplate(rule, settings, "daily_report"), now, false})
+				candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTemplate(rule, settings, "daily_report"), now, false})
 			}
 			continue
 		}
@@ -547,7 +562,30 @@ func (h *HandlerV1) getTelegramNotificationSettings(ctx context.Context, target 
 	}
 	settings.CompanyID = target.CompanyID
 	settings.BotUsername = strings.TrimPrefix(h.baseConf.TelegramNotificationsBotUsername, "@")
+	normalizeTelegramNotificationGroups(&settings)
 	return settings, resource, nil
+}
+
+func normalizeTelegramNotificationGroups(settings *models.TelegramNotificationSettings) {
+	seen := make(map[string]bool)
+	groups := make([]models.TelegramNotificationGroup, 0, len(settings.Groups)+1)
+	for _, group := range settings.Groups {
+		group.ChatID, group.ChatTitle = strings.TrimSpace(group.ChatID), strings.TrimSpace(group.ChatTitle)
+		if group.ChatID == "" || seen[group.ChatID] {
+			continue
+		}
+		seen[group.ChatID] = true
+		groups = append(groups, group)
+	}
+	if chatID := strings.TrimSpace(settings.ChatID); chatID != "" && !seen[chatID] {
+		groups = append(groups, models.TelegramNotificationGroup{ChatID: chatID, ChatTitle: strings.TrimSpace(settings.ChatTitle)})
+	}
+	settings.Groups = groups
+	for index := range settings.Automations {
+		if strings.TrimSpace(settings.Automations[index].ChatID) == "" {
+			settings.Automations[index].ChatID = strings.TrimSpace(settings.ChatID)
+		}
+	}
 }
 
 func (h *HandlerV1) saveTelegramNotificationSettings(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings) error {

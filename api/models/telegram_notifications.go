@@ -41,6 +41,12 @@ type TelegramAutomation struct {
 	Action         string                        `json:"action"`
 	Template       string                        `json:"template"`
 	TriggerConfigs []TelegramAutomationTrigger   `json:"trigger_configs,omitempty"`
+	ChatID         string                        `json:"chat_id,omitempty"`
+}
+
+type TelegramNotificationGroup struct {
+	ChatID    string `json:"chat_id"`
+	ChatTitle string `json:"chat_title"`
 }
 
 type TelegramNotificationTemplates struct {
@@ -60,6 +66,7 @@ type TelegramNotificationSettings struct {
 	Templates           TelegramNotificationTemplates `json:"templates"`
 	StatusNotifications []TelegramStatusNotification  `json:"status_notifications"`
 	Automations         []TelegramAutomation          `json:"automations"`
+	Groups              []TelegramNotificationGroup   `json:"groups,omitempty"`
 }
 
 type TelegramNotificationTestRequest struct {

@@ -24,15 +24,22 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 	}
 	for _, target := range targets {
 		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
-		if err != nil || settings.Automations == nil || strings.TrimSpace(settings.ChatID) == "" {
+		if err != nil || settings.Automations == nil {
 			continue
 		}
 		for _, rule := range settings.Automations {
+			chatID := strings.TrimSpace(rule.ChatID)
+			if chatID == "" {
+				chatID = strings.TrimSpace(settings.ChatID)
+			}
+			if chatID == "" {
+				continue
+			}
 			if len(rule.TriggerConfigs) > 0 {
 				trigger, ok := telegramAutomationMatchingTrigger(rule, table, event, item, changedFields, time.Now())
 				if ok {
 					template := telegramAutomationTriggerTemplate(trigger)
-					h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(template, item))
+					h.sendTelegramCRMNotification(chatID, renderTelegramNotificationTemplateWithDeal(template, item))
 				}
 				continue
 			}
@@ -43,7 +50,7 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 				matches = telegramAutomationMatches(rule, event, item, time.Now())
 			}
 			if matches {
-				h.sendTelegramCRMNotification(settings.ChatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, event), item))
+				h.sendTelegramCRMNotification(chatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, event), item))
 			}
 		}
 	}

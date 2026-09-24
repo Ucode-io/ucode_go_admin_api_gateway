@@ -49,3 +49,17 @@ func TestTelegramCreateDeliveriesKeepsOtherGroupsIndependent(t *testing.T) {
 		t.Fatalf("deliveries = %#v, want one message per group", got)
 	}
 }
+
+func TestTelegramCreateDeliveriesRoutesRulesToTheirGroups(t *testing.T) {
+	rule := func(chatID, message string) models.TelegramAutomation {
+		return models.TelegramAutomation{Enabled: true, Action: "telegram_notification", ChatID: chatID,
+			TriggerConfigs: []models.TelegramAutomationTrigger{{Kind: "create", Table: "deals", Template: message}}}
+	}
+	settings := models.TelegramNotificationSettings{ChatID: "latest", Automations: []models.TelegramAutomation{
+		rule("sales", "sales message"), rule("owners", "owners message"),
+	}}
+	got := telegramCreateDeliveries([]models.TelegramNotificationSettings{settings}, map[string]any{}, time.Now())
+	if len(got) != 2 || got[0].ChatID != "sales" || got[1].ChatID != "owners" {
+		t.Fatalf("deliveries = %#v, want each automation routed to its group", got)
+	}
+}

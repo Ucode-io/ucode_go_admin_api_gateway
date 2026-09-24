@@ -38,21 +38,32 @@ func telegramCreateDeliveries(settingsList []models.TelegramNotificationSettings
 			continue
 		}
 		for _, rule := range settings.Automations {
+			ruleChatID := strings.TrimSpace(rule.ChatID)
+			if ruleChatID == "" {
+				ruleChatID = chatID
+			}
+			if ruleChatID == "" {
+				continue
+			}
+			if !seenChat[ruleChatID] {
+				seenChat[ruleChatID] = true
+				chatOrder = append(chatOrder, ruleChatID)
+			}
 			if len(rule.TriggerConfigs) > 0 {
-				modernChats[chatID] = true
+				modernChats[ruleChatID] = true
 				if trigger, ok := telegramAutomationMatchingTrigger(rule, "deals", "create", deal, nil, now); ok {
-					modernMessages[chatID] = append(modernMessages[chatID], renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), deal))
+					modernMessages[ruleChatID] = append(modernMessages[ruleChatID], renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), deal))
 				}
 				continue
 			}
 			if rule.Trigger == "new_lead" && telegramAutomationMatches(rule, "created", deal, now) {
-				if legacyMessages[chatID] == "" {
-					legacyMessages[chatID] = renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, "created"), deal)
+				if legacyMessages[ruleChatID] == "" {
+					legacyMessages[ruleChatID] = renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, "created"), deal)
 				}
 				continue
 			}
 			if telegramAutomationMatches(rule, "created", deal, now) {
-				modernMessages[chatID] = append(modernMessages[chatID], renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, "created"), deal))
+				modernMessages[ruleChatID] = append(modernMessages[ruleChatID], renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, "created"), deal))
 			}
 		}
 	}
