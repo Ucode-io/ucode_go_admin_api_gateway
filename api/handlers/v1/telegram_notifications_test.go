@@ -101,9 +101,14 @@ func TestTelegramDailyReportGroupsTodayLeadsIntoExpandableStatuses(t *testing.T)
 
 func TestTelegramDealCreatedAtAcceptsCRMMinutePrecisionUTC(t *testing.T) {
 	location := time.FixedZone("Asia/Tashkent", 5*60*60)
-	createdAt, ok := telegramDealCreatedAt(map[string]any{"start_date": "2026-09-24T10:36"}, location)
-	if !ok || createdAt.Format("2006-01-02 15:04") != "2026-09-24 15:36" {
-		t.Fatalf("CRM start date = %s, %v", createdAt, ok)
+	for _, row := range []map[string]any{
+		{"start_date": "2026-09-24T10:36"},
+		{"created_at": "2026-09-24T10:36:42.596468"},
+	} {
+		createdAt, ok := telegramDealCreatedAt(row, location)
+		if !ok || createdAt.Format("2006-01-02 15:04") != "2026-09-24 15:36" {
+			t.Fatalf("CRM date %#v = %s, %v", row, createdAt, ok)
+		}
 	}
 }
 
