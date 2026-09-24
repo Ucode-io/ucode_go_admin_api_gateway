@@ -52,8 +52,16 @@ func renderTelegramAutomationMessage(trigger models.TelegramAutomationTrigger, i
 	return renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), readable)
 }
 
-func renderTelegramAutomationCompletedMessage(trigger models.TelegramAutomationTrigger, item map[string]any, status string) string {
-	return renderTelegramAutomationMessage(trigger, item) + "\n\n✅ <b>Текущий статус:</b> " + html.EscapeString(status)
+func renderTelegramAutomationCompletedMessage(trigger models.TelegramAutomationTrigger, item map[string]any, statusValue, statusLabel string) string {
+	current := make(map[string]any, len(item)+1)
+	for key, value := range item {
+		current[key] = value
+	}
+	// Builder can return an older denormalized choice value immediately after a
+	// successful update. The chosen button is the committed status for this
+	// message, so render that value in the original field as well as the footer.
+	current[trigger.StatusField] = statusValue
+	return renderTelegramAutomationMessage(trigger, current) + "\n\n✅ <b>Текущий статус:</b> " + html.EscapeString(statusLabel)
 }
 
 func (h *HandlerV1) sendTelegramAutomationAction(target telegramNotificationTarget, chatID string, rule models.TelegramAutomation, trigger models.TelegramAutomationTrigger, item map[string]any) {
@@ -165,7 +173,7 @@ func (h *HandlerV1) handleTelegramAutomationCallback(ctx context.Context, callba
 		answer("Статус обновлён, но сообщение не удалось обновить")
 		return
 	}
-	message := renderTelegramAutomationCompletedMessage(trigger, updatedItem, button.Label)
+	message := renderTelegramAutomationCompletedMessage(trigger, updatedItem, button.Value, button.Label)
 	if err := client.editHTMLMessage(ctx, action.ChatID, action.MessageID, message); err != nil {
 		h.log.Error("telegram automation message edit failed", logger.Error(err))
 		_ = client.removeInlineKeyboard(ctx, action.ChatID, action.MessageID)

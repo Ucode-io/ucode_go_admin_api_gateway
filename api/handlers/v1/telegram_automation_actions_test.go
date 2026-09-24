@@ -24,9 +24,18 @@ func TestRenderTelegramAutomationMessageUsesChoiceLabel(t *testing.T) {
 }
 
 func TestRenderTelegramAutomationCompletedMessageUsesNewStatus(t *testing.T) {
-	trigger := models.TelegramAutomationTrigger{Template: "📍 Статус: {{item.pipeline_enterprise_sales}}"}
-	message := renderTelegramAutomationCompletedMessage(trigger, map[string]any{"pipeline_enterprise_sales": "Yuk Jonatildi"}, "🚚 Yuk jo‘natildi")
+	trigger := models.TelegramAutomationTrigger{
+		Template:    "📍 Статус: {{item.pipeline_enterprise_sales}}",
+		StatusField: "pipeline_enterprise_sales",
+		FieldOptions: map[string][]models.TelegramFieldOption{
+			"pipeline_enterprise_sales": {{Value: "stage-yuk", Label: "Yuk Jonatildi"}},
+		},
+	}
+	message := renderTelegramAutomationCompletedMessage(trigger, map[string]any{"pipeline_enterprise_sales": "Narx kelishildi"}, "stage-yuk", "🚚 Yuk jo‘natildi")
 	if !strings.Contains(message, "📍 Статус: Yuk Jonatildi") || !strings.Contains(message, "✅ <b>Текущий статус:</b> 🚚 Yuk jo‘natildi") {
 		t.Fatalf("edited message should show the updated deal status: %q", message)
+	}
+	if strings.Contains(message, "Narx kelishildi") {
+		t.Fatalf("edited message retained the previous status: %q", message)
 	}
 }
