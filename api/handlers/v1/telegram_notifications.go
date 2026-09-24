@@ -271,7 +271,28 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 			if strings.TrimSpace(rule.ChatID) != "" {
 				chatID = strings.TrimSpace(rule.ChatID)
 			}
-			if telegramAutomationHasTrigger(rule, "daily_report") {
+			if len(rule.TriggerConfigs) > 0 {
+				selected := rule.TriggerConfigs[0]
+				if request.TriggerID != "" {
+					found := false
+					for _, trigger := range rule.TriggerConfigs {
+						if trigger.ID == request.TriggerID {
+							selected, found = trigger, true
+							break
+						}
+					}
+					if !found {
+						h.HandleResponse(c, status_http.InvalidArgument, "automation trigger was not found")
+						return
+					}
+				}
+				template = telegramAutomationTriggerTemplate(selected)
+				message = renderTelegramNotificationTemplate(template)
+				isDailyReport = selected.Kind == "daily_report"
+			} else {
+				isDailyReport = telegramAutomationHasTrigger(rule, "daily_report")
+			}
+			if isDailyReport {
 				isDailyReport = true
 				ruleSettings := settings
 				ruleSettings.ChatID = chatID

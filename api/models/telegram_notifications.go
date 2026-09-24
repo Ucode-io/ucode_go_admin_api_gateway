@@ -88,4 +88,5 @@ type TelegramNotificationTestRequest struct {
 	CompanyID string `json:"company_id"`
 	Type      string `json:"type"`
 	RuleID    string `json:"rule_id"`
+	TriggerID string `json:"trigger_id"`
 }
