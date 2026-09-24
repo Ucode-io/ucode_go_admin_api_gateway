@@ -125,6 +125,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		telegramNotifications := v1.Group("/telegram-notifications")
 		{
 			telegramNotifications.GET("/settings", h.V1.GetTelegramNotificationSettings)
+			telegramNotifications.GET("/marketing-accounts", h.V1.ListTelegramMarketingAccounts)
 			telegramNotifications.PUT("/settings", h.V1.SaveTelegramNotificationSettings)
 			telegramNotifications.POST("/connect-code", h.V1.CreateTelegramNotificationConnectCode)
 			telegramNotifications.POST("/test", h.V1.SendTelegramNotificationTest)

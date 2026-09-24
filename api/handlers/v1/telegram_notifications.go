@@ -113,6 +113,34 @@ func (h *HandlerV1) GetTelegramNotificationSettings(c *gin.Context) {
 	h.HandleResponse(c, status_http.OK, settings)
 }
 
+func (h *HandlerV1) ListTelegramMarketingAccounts(c *gin.Context) {
+	target, ok := h.telegramNotificationTarget(c)
+	if !ok {
+		return
+	}
+	token, err := h.getFacebookUserToken(c.Request.Context(), models.FacebookOAuthState{ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID})
+	if err != nil {
+		h.HandleResponse(c, status_http.OK, gin.H{"accounts": []any{}})
+		return
+	}
+	var accounts struct {
+		Data []struct {
+			ID       string `json:"id"`
+			Name     string `json:"name"`
+			Currency string `json:"currency"`
+		} `json:"data"`
+	}
+	if err := h.facebookGraphGet(c.Request.Context(), "me/adaccounts", url.Values{
+		"fields":       {"id,name,currency"},
+		"limit":        {"100"},
+		"access_token": {token},
+	}, &accounts); err != nil {
+		h.HandleResponse(c, status_http.GRPCError, err.Error())
+		return
+	}
+	h.HandleResponse(c, status_http.OK, gin.H{"accounts": accounts.Data})
+}
+
 func (h *HandlerV1) SaveTelegramNotificationSettings(c *gin.Context) {
 	target, ok := h.telegramNotificationTarget(c)
 	if !ok {
@@ -476,9 +504,20 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 		location = time.UTC
 	}
 	day := now.In(location)
-	metaReport, err := metaads.NewHandler(h.baseConf, h.centralRedis, h.log).DashboardForDay(ctx, day)
-	if err != nil {
-		return "", fmt.Errorf("Meta Ads report: %w", err)
+	var metaReport models.MetaAdsDashboardResponse
+	if accountID := strings.TrimSpace(settings.MetaAdsAccountID); accountID != "" {
+		userToken, tokenErr := h.getFacebookUserToken(ctx, models.FacebookOAuthState{ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID})
+		if tokenErr == nil {
+			accountConf := h.baseConf
+			accountConf.MetaAdsAdAccountID = accountID
+			accountConf.MetaAdsAccessToken = userToken
+			metaReport, err = metaads.NewHandler(accountConf, h.centralRedis, h.log).DashboardForDay(ctx, day)
+		} else {
+			err = tokenErr
+		}
+		if err != nil {
+			h.log.Warn("telegram notifications: workspace Meta Ads report unavailable", logger.Error(err))
+		}
 	}
 	statuses, err := h.telegramDealStatusesForDay(ctx, target, day)
 	if err != nil {
@@ -491,7 +530,7 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	}
 	currency := strings.TrimSpace(metaReport.Account.Currency)
 	if currency == "" {
-		currency = "so‘m"
+		currency = "USD"
 	}
 	cpl := "—"
 	if metaReport.KPIs.CPL != nil {

@@ -71,6 +71,7 @@ type TelegramNotificationTemplates struct {
 
 type TelegramNotificationSettings struct {
 	CompanyID           string                        `json:"company_id"`
+	MetaAdsAccountID    string                        `json:"meta_ads_account_id,omitempty"`
 	ChatID              string                        `json:"chat_id"`
 	ChatTitle           string                        `json:"chat_title"`
 	BotUsername         string                        `json:"bot_username"`
