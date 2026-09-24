@@ -527,9 +527,10 @@ func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target teleg
 		return "", err
 	}
 	response, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
-		TableSlug: "deals",
-		Data:      mustStruct(map[string]any{"limit": 10000, "offset": 0}),
-		ProjectId: environmentID,
+		TableSlug:        "deals",
+		Data:             mustStruct(map[string]any{"limit": 10000, "offset": 0}),
+		ProjectId:        environmentID,
+		CompanyProjectId: target.ProjectID,
 	})
 	if err != nil {
 		return "", err
@@ -811,9 +812,10 @@ func (h *HandlerV1) telegramNotificationTestDeal(ctx context.Context, target tel
 		return nil, err
 	}
 	response, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
-		TableSlug: "deals",
-		Data:      mustStruct(map[string]any{"limit": 1, "offset": 0}),
-		ProjectId: environmentID,
+		TableSlug:        "deals",
+		Data:             mustStruct(map[string]any{"limit": 1, "offset": 0}),
+		ProjectId:        environmentID,
+		CompanyProjectId: target.ProjectID,
 	})
 	if err != nil {
 		return nil, err
