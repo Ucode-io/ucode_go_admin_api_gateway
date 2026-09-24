@@ -658,8 +658,13 @@ func telegramDealCreatedAt(deal map[string]any, location *time.Location) (time.T
 		if value == "" {
 			continue
 		}
-		for _, layout := range []string{time.RFC3339, "2006-01-02 15:04:05", "2006-01-02"} {
-			if parsed, err := time.ParseInLocation(layout, value, location); err == nil {
+		if parsed, err := time.Parse(time.RFC3339, value); err == nil {
+			return parsed.In(location), true
+		}
+		// CRM datetime fields are stored as UTC without a timezone suffix.
+		// The deal form commonly emits minute precision (YYYY-MM-DDTHH:mm).
+		for _, layout := range []string{"2006-01-02T15:04:05", "2006-01-02T15:04", "2006-01-02 15:04:05", "2006-01-02 15:04", "2006-01-02"} {
+			if parsed, err := time.ParseInLocation(layout, value, time.UTC); err == nil {
 				return parsed.In(location), true
 			}
 		}

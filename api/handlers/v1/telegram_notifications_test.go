@@ -99,6 +99,14 @@ func TestTelegramDailyReportGroupsTodayLeadsIntoExpandableStatuses(t *testing.T)
 	}
 }
 
+func TestTelegramDealCreatedAtAcceptsCRMMinutePrecisionUTC(t *testing.T) {
+	location := time.FixedZone("Asia/Tashkent", 5*60*60)
+	createdAt, ok := telegramDealCreatedAt(map[string]any{"start_date": "2026-09-24T10:36"}, location)
+	if !ok || createdAt.Format("2006-01-02 15:04") != "2026-09-24 15:36" {
+		t.Fatalf("CRM start date = %s, %v", createdAt, ok)
+	}
+}
+
 func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
 	// The deals table stores these choice fields as arrays, even though the
 	// settings UI presents each as a single select.
