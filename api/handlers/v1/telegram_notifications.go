@@ -499,6 +499,7 @@ func (h *HandlerV1) telegramDailyReportMessage(ctx context.Context, target teleg
 }
 
 func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time, template string) (string, error) {
+	template = strings.ReplaceAll(template, "Сделок с согласованной ценой:", "Количество сделок:")
 	location, err := time.LoadLocation(settings.Timezone)
 	if err != nil {
 		location = time.UTC
