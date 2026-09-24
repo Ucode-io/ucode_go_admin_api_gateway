@@ -78,7 +78,7 @@ func (h *HandlerV1) StartTelegramNotifications(ctx context.Context) {
 		return
 	}
 	webhookURL := fmt.Sprintf("%s/v1/telegram-notifications/webhook", strings.TrimRight(h.baseConf.TelegramWebhookBaseURL, "/"))
-	if err := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).setWebhook(ctx, webhookURL, h.baseConf.TelegramNotificationsWebhookSecret, []string{"message"}); err != nil {
+	if err := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).setWebhook(ctx, webhookURL, h.baseConf.TelegramNotificationsWebhookSecret, []string{"message", "callback_query"}); err != nil {
 		h.log.Error("telegram notifications: set webhook failed", logger.Error(err))
 	}
 	h.startTelegramDailyReportScheduler(ctx)
@@ -178,7 +178,16 @@ func (h *HandlerV1) TelegramNotificationsWebhook(c *gin.Context) {
 		return
 	}
 	var update telegramUpdate
-	if err := c.ShouldBindJSON(&update); err != nil || update.Message == nil {
+	if err := c.ShouldBindJSON(&update); err != nil {
+		c.Status(http.StatusOK)
+		return
+	}
+	if update.CallbackQuery != nil {
+		h.handleTelegramAutomationCallback(c.Request.Context(), update.CallbackQuery)
+		c.Status(http.StatusOK)
+		return
+	}
+	if update.Message == nil {
 		c.Status(http.StatusOK)
 		return
 	}

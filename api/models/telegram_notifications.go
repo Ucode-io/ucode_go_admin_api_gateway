@@ -17,15 +17,30 @@ type TelegramAutomationCondition struct {
 }
 
 type TelegramAutomationTrigger struct {
-	ID            string                        `json:"id"`
-	Kind          string                        `json:"kind"`
-	Table         string                        `json:"table"`
-	WatchField    string                        `json:"watch_field"`
-	ReportTime    string                        `json:"report_time"`
-	ConditionMode string                        `json:"condition_mode"`
-	Conditions    []TelegramAutomationCondition `json:"conditions"`
-	MessageFields []string                      `json:"message_fields"`
-	Template      string                        `json:"template"`
+	ID            string                           `json:"id"`
+	Kind          string                           `json:"kind"`
+	Table         string                           `json:"table"`
+	WatchField    string                           `json:"watch_field"`
+	ReportTime    string                           `json:"report_time"`
+	ConditionMode string                           `json:"condition_mode"`
+	Conditions    []TelegramAutomationCondition    `json:"conditions"`
+	MessageFields []string                         `json:"message_fields"`
+	Template      string                           `json:"template"`
+	FieldOptions  map[string][]TelegramFieldOption `json:"field_options,omitempty"`
+	StatusField   string                           `json:"status_field,omitempty"`
+	StatusButtons []TelegramStatusButton           `json:"status_buttons,omitempty"`
+}
+
+type TelegramFieldOption struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+	Slug  string `json:"slug,omitempty"`
+}
+
+type TelegramStatusButton struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+	Value string `json:"value"`
 }
 
 type TelegramAutomation struct {

@@ -172,11 +172,18 @@ type telegramFile struct {
 }
 
 type telegramUpdate struct {
-	UpdateID      int64            `json:"update_id"`
-	Message       *telegramMessage `json:"message"`
-	EditedMessage *telegramMessage `json:"edited_message"`
-	ManagedBot    *telegramManaged `json:"managed_bot"`
-	MyChatMember  json.RawMessage  `json:"my_chat_member"`
+	UpdateID      int64                  `json:"update_id"`
+	Message       *telegramMessage       `json:"message"`
+	CallbackQuery *telegramCallbackQuery `json:"callback_query"`
+	EditedMessage *telegramMessage       `json:"edited_message"`
+	ManagedBot    *telegramManaged       `json:"managed_bot"`
+	MyChatMember  json.RawMessage        `json:"my_chat_member"`
+}
+
+type telegramCallbackQuery struct {
+	ID      string           `json:"id"`
+	Data    string           `json:"data"`
+	Message *telegramMessage `json:"message"`
 }
 
 type telegramManaged struct {
@@ -279,6 +286,20 @@ func (t *telegramAPIClient) sendHTMLMessage(ctx context.Context, chatID string, 
 	var message telegramMessage
 	err := t.call(ctx, "sendMessage", map[string]any{"chat_id": chatID, "text": text, "parse_mode": "HTML"}, &message)
 	return message, err
+}
+
+func (t *telegramAPIClient) sendHTMLMessageWithMarkup(ctx context.Context, chatID, text string, markup any) (telegramMessage, error) {
+	var message telegramMessage
+	err := t.call(ctx, "sendMessage", map[string]any{"chat_id": chatID, "text": text, "parse_mode": "HTML", "reply_markup": markup}, &message)
+	return message, err
+}
+
+func (t *telegramAPIClient) answerCallbackQuery(ctx context.Context, callbackID, text string) error {
+	return t.call(ctx, "answerCallbackQuery", map[string]any{"callback_query_id": callbackID, "text": text, "show_alert": false}, nil)
+}
+
+func (t *telegramAPIClient) removeInlineKeyboard(ctx context.Context, chatID string, messageID int64) error {
+	return t.call(ctx, "editMessageReplyMarkup", map[string]any{"chat_id": chatID, "message_id": messageID, "reply_markup": map[string]any{"inline_keyboard": []any{}}}, nil)
 }
 
 func (t *telegramAPIClient) sendMessageWithMarkup(ctx context.Context, chatID string, text string, replyMarkup any) (telegramMessage, error) {

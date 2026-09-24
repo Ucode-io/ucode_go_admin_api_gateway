@@ -38,8 +38,7 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 			if len(rule.TriggerConfigs) > 0 {
 				trigger, ok := telegramAutomationMatchingTrigger(rule, table, event, item, changedFields, time.Now())
 				if ok {
-					template := telegramAutomationTriggerTemplate(trigger)
-					h.sendTelegramCRMNotification(chatID, renderTelegramNotificationTemplateWithDeal(template, item))
+					h.sendTelegramAutomationAction(target, chatID, rule, trigger, item)
 				}
 				continue
 			}
