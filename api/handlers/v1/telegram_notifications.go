@@ -290,6 +290,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 	}
 	message := renderTelegramNotificationTemplate(template)
 	isDailyReport := request.Type == "daily_report"
+	reportPipeline := ""
 	chatID := settings.ChatID
 	if request.Type == "automation" {
 		for _, rule := range settings.Automations {
@@ -317,6 +318,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 				template = telegramAutomationTriggerTemplate(selected)
 				message = renderTelegramNotificationTemplate(template)
 				isDailyReport = selected.Kind == "daily_report"
+				reportPipeline = selected.ReportPipeline
 			} else {
 				isDailyReport = telegramAutomationHasTrigger(rule, "daily_report")
 			}
@@ -324,7 +326,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 				isDailyReport = true
 				ruleSettings := settings
 				ruleSettings.ChatID = chatID
-				message, err = h.telegramDailyReportMessageWithTemplate(c.Request.Context(), target, ruleSettings, time.Now(), template)
+				message, err = h.telegramDailyReportMessageWithTemplate(c.Request.Context(), target, ruleSettings, time.Now(), template, reportPipeline)
 				if err != nil {
 					h.HandleResponse(c, status_http.GRPCError, err.Error())
 					return
@@ -433,7 +435,7 @@ func (h *HandlerV1) runTelegramDailyReports() {
 							continue
 						}
 						if _, ok := telegramAutomationMatchingTrigger(rule, "", "daily_report", nil, nil, now); ok {
-							candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTriggerTemplate(trigger), now, true})
+							candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTriggerTemplate(trigger), trigger.ReportPipeline, now, true})
 						}
 					}
 					continue
@@ -441,14 +443,14 @@ func (h *HandlerV1) runTelegramDailyReports() {
 				if !telegramAutomationHasTrigger(rule, "daily_report") || now.Format("15:04") != rule.ReportTime || !telegramAutomationMatches(rule, "daily_report", nil, now) {
 					continue
 				}
-				candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTemplate(rule, settings, "daily_report"), now, false})
+				candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTemplate(rule, settings, "daily_report"), "", now, false})
 			}
 			continue
 		}
 		if !settings.DailyReportEnabled || now.Format("15:04") != settings.ReportTime {
 			continue
 		}
-		candidates = append(candidates, telegramScheduledReport{target, settings, settings.Templates.DailyReport, now, false})
+		candidates = append(candidates, telegramScheduledReport{target, settings, settings.Templates.DailyReport, "", now, false})
 	}
 	for _, candidate := range telegramReportsForChats(candidates, modernChats) {
 		h.sendScheduledTelegramReport(candidate)
@@ -461,7 +463,7 @@ func (h *HandlerV1) sendScheduledTelegramReport(report telegramScheduledReport) 
 	if err != nil || !locked {
 		return
 	}
-	message, err := h.telegramDailyReportMessageWithTemplate(context.Background(), report.target, report.settings, report.now, report.template)
+	message, err := h.telegramDailyReportMessageWithTemplate(context.Background(), report.target, report.settings, report.now, report.template, report.pipeline)
 	if err != nil {
 		_ = h.centralRedis.Del(context.Background(), lockKey).Err()
 		h.log.Error("telegram notifications: daily report build failed", logger.Error(err))
@@ -495,10 +497,10 @@ func parseTelegramNotificationTarget(value string) (telegramNotificationTarget, 
 }
 
 func (h *HandlerV1) telegramDailyReportMessage(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time) (string, error) {
-	return h.telegramDailyReportMessageWithTemplate(ctx, target, settings, now, settings.Templates.DailyReport)
+	return h.telegramDailyReportMessageWithTemplate(ctx, target, settings, now, settings.Templates.DailyReport, "")
 }
 
-func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time, template string) (string, error) {
+func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time, template, reportPipeline string) (string, error) {
 	template = strings.ReplaceAll(template, "Сделок с согласованной ценой:", "Количество сделок:")
 	location, err := time.LoadLocation(settings.Timezone)
 	if err != nil {
@@ -520,7 +522,7 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 			h.log.Warn("telegram notifications: workspace Meta Ads report unavailable", logger.Error(err))
 		}
 	}
-	statuses, err := h.telegramDealStatusesForDay(ctx, target, day)
+	statuses, err := h.telegramDealStatusesForDay(ctx, target, day, reportPipeline)
 	if err != nil {
 		h.log.Warn("telegram notifications: CRM status report unavailable", logger.Error(err))
 		statuses = "Статусы CRM временно недоступны."
@@ -561,7 +563,7 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	return strings.ReplaceAll(renderTelegramTemplateValues(template, values), "TELEGRAM_REPORT_STATUSES_PLACEHOLDER", statuses), nil
 }
 
-func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target telegramNotificationTarget, day time.Time) (string, error) {
+func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target telegramNotificationTarget, day time.Time, reportPipeline string) (string, error) {
 	service, environmentID, err := h.resolveProjectBuilder(ctx, target.ProjectID, target.EnvironmentID)
 	if err != nil {
 		return "", err
@@ -584,7 +586,7 @@ func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target teleg
 			break
 		}
 	}
-	return telegramFormatDealStatusesForDay(rows, day), nil
+	return telegramFormatDealStatusesForDay(rows, day, reportPipeline), nil
 }
 
 type telegramDailyDeal struct {
@@ -593,9 +595,12 @@ type telegramDailyDeal struct {
 	CreatedAt time.Time
 }
 
-func telegramFormatDealStatusesForDay(rows []map[string]any, day time.Time) string {
+func telegramFormatDealStatusesForDay(rows []map[string]any, day time.Time, reportPipeline string) string {
 	groups := map[string][]telegramDailyDeal{}
 	for _, row := range rows {
+		if reportPipeline != "" && !telegramStatusValueMatches(reportPipeline, telegramDealValue(row, "pipeline")) {
+			continue
+		}
 		// The builder query is scoped to the CRM project. The deal's companies_id
 		// is a customer relation, not the Telegram group's workspace identifier.
 		createdAt, ok := telegramDealCreatedAt(row, day.Location())

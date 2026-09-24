@@ -84,7 +84,7 @@ func TestTelegramDailyReportGroupsTodayLeadsIntoExpandableStatuses(t *testing.T)
 		{"created_at": "2026-09-23T18:00:00Z", "stage": "Yuk Jonatildi", "name": "Kecha"},
 		{"created_at": "2026-09-24T08:00:00Z", "stage": "Yuklab Berildi", "name": "Nurmuhammad"},
 	}
-	got := telegramFormatDealStatusesForDay(rows, day)
+	got := telegramFormatDealStatusesForDay(rows, day, "")
 	for _, expected := range []string{
 		"📍 <b>Yuk Jonatildi — 2</b>",
 		"<blockquote expandable>09:15  <b>Asadbek &amp; Ali</b> · +998 90 123 45 67\n11:20  <b>Samandar</b> · +998 93 345 67 89</blockquote>",
@@ -96,6 +96,18 @@ func TestTelegramDailyReportGroupsTodayLeadsIntoExpandableStatuses(t *testing.T)
 	}
 	if strings.Contains(got, "Kecha") {
 		t.Fatalf("yesterday's lead appeared in today's report: %q", got)
+	}
+}
+
+func TestTelegramDailyReportExcludesOtherPipelines(t *testing.T) {
+	day := time.Date(2026, 9, 24, 21, 0, 0, 0, time.UTC)
+	rows := []map[string]any{
+		{"created_at": "2026-09-24T10:36:00Z", "pipeline": []any{"Gisht Voronkasi"}, "stage": []any{"Yangi Lid"}, "name": "Armada lead"},
+		{"created_at": "2026-09-24T09:42:00Z", "pipeline": []any{"Udevs"}, "stage": []any{"Новая заявка"}, "name": "Other project lead"},
+	}
+	got := telegramFormatDealStatusesForDay(rows, day, "Gisht Voronkasi")
+	if !strings.Contains(got, "Armada lead") || strings.Contains(got, "Other project lead") {
+		t.Fatalf("report included the wrong pipeline: %q", got)
 	}
 }
 

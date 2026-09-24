@@ -11,6 +11,7 @@ type telegramScheduledReport struct {
 	target   telegramNotificationTarget
 	settings models.TelegramNotificationSettings
 	template string
+	pipeline string
 	now      time.Time
 	modern   bool
 }
