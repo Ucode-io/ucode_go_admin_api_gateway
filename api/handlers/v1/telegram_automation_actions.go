@@ -61,6 +61,14 @@ func renderTelegramAutomationCompletedMessage(trigger models.TelegramAutomationT
 	// successful update. The chosen button is the committed status for this
 	// message, so render that value in the original field as well as the footer.
 	current[trigger.StatusField] = statusValue
+	if trigger.StatusField == "stage" {
+		stageLabel := telegramAutomationFieldLabel(trigger, "stage", statusValue)
+		for field := range trigger.FieldOptions {
+			if strings.HasPrefix(field, "pipeline_") {
+				current[field] = stageLabel
+			}
+		}
+	}
 	return renderTelegramAutomationMessage(trigger, current) + "\n\n✅ <b>Текущий статус:</b> " + html.EscapeString(statusLabel)
 }
 

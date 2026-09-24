@@ -26,8 +26,9 @@ func TestRenderTelegramAutomationMessageUsesChoiceLabel(t *testing.T) {
 func TestRenderTelegramAutomationCompletedMessageUsesNewStatus(t *testing.T) {
 	trigger := models.TelegramAutomationTrigger{
 		Template:    "📍 Статус: {{item.pipeline_enterprise_sales}}",
-		StatusField: "pipeline_enterprise_sales",
+		StatusField: "stage",
 		FieldOptions: map[string][]models.TelegramFieldOption{
+			"stage":                     {{Value: "stage-yuk", Label: "Yuk Jonatildi"}},
 			"pipeline_enterprise_sales": {{Value: "stage-yuk", Label: "Yuk Jonatildi"}},
 		},
 	}
