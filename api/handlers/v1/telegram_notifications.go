@@ -324,6 +324,8 @@ func (h *HandlerV1) runTelegramDailyReports() {
 		h.log.Warn("telegram notifications: read daily report targets failed", logger.Error(err))
 		return
 	}
+	candidates := make([]telegramScheduledReport, 0, len(targets))
+	modernChats := make(map[string]bool)
 	for _, encodedTarget := range targets {
 		target, ok := parseTelegramNotificationTarget(encodedTarget)
 		if !ok {
@@ -342,11 +344,14 @@ func (h *HandlerV1) runTelegramDailyReports() {
 			for _, rule := range settings.Automations {
 				if len(rule.TriggerConfigs) > 0 {
 					for _, trigger := range rule.TriggerConfigs {
+						if trigger.Kind == "daily_report" {
+							modernChats[settings.ChatID] = true
+						}
 						if trigger.Kind != "daily_report" || now.Format("15:04") != trigger.ReportTime {
 							continue
 						}
 						if _, ok := telegramAutomationMatchingTrigger(rule, "", "daily_report", nil, nil, now); ok {
-							h.sendScheduledTelegramReport(target, encodedTarget+":"+rule.ID+":"+trigger.ID, settings, telegramAutomationTriggerTemplate(trigger), now)
+							candidates = append(candidates, telegramScheduledReport{target, settings, telegramAutomationTriggerTemplate(trigger), now, true})
 						}
 					}
 					continue
@@ -354,30 +359,33 @@ func (h *HandlerV1) runTelegramDailyReports() {
 				if !telegramAutomationHasTrigger(rule, "daily_report") || now.Format("15:04") != rule.ReportTime || !telegramAutomationMatches(rule, "daily_report", nil, now) {
 					continue
 				}
-				h.sendScheduledTelegramReport(target, encodedTarget+":"+rule.ID, settings, telegramAutomationTemplate(rule, settings, "daily_report"), now)
+				candidates = append(candidates, telegramScheduledReport{target, settings, telegramAutomationTemplate(rule, settings, "daily_report"), now, false})
 			}
 			continue
 		}
 		if !settings.DailyReportEnabled || now.Format("15:04") != settings.ReportTime {
 			continue
 		}
-		h.sendScheduledTelegramReport(target, encodedTarget, settings, settings.Templates.DailyReport, now)
+		candidates = append(candidates, telegramScheduledReport{target, settings, settings.Templates.DailyReport, now, false})
+	}
+	for _, candidate := range telegramReportsForChats(candidates, modernChats) {
+		h.sendScheduledTelegramReport(candidate)
 	}
 }
 
-func (h *HandlerV1) sendScheduledTelegramReport(target telegramNotificationTarget, lockID string, settings models.TelegramNotificationSettings, template string, now time.Time) {
-	lockKey := telegramNotificationsDailyLockPrefix + lockID + ":" + now.Format("2006-01-02")
+func (h *HandlerV1) sendScheduledTelegramReport(report telegramScheduledReport) {
+	lockKey := telegramNotificationsDailyLockPrefix + "chat:" + strings.TrimSpace(report.settings.ChatID) + ":" + report.now.Format("2006-01-02")
 	locked, err := h.centralRedis.SetNX(context.Background(), lockKey, "sending", 36*time.Hour).Result()
 	if err != nil || !locked {
 		return
 	}
-	message, err := h.telegramDailyReportMessageWithTemplate(context.Background(), target, settings, now, template)
+	message, err := h.telegramDailyReportMessageWithTemplate(context.Background(), report.target, report.settings, report.now, report.template)
 	if err != nil {
 		_ = h.centralRedis.Del(context.Background(), lockKey).Err()
 		h.log.Error("telegram notifications: daily report build failed", logger.Error(err))
 		return
 	}
-	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(context.Background(), settings.ChatID, message); err != nil {
+	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(context.Background(), report.settings.ChatID, message); err != nil {
 		_ = h.centralRedis.Del(context.Background(), lockKey).Err()
 		h.log.Error("telegram notifications: daily report send failed", logger.Error(err))
 	}
