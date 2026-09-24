@@ -302,6 +302,13 @@ func (t *telegramAPIClient) removeInlineKeyboard(ctx context.Context, chatID str
 	return t.call(ctx, "editMessageReplyMarkup", map[string]any{"chat_id": chatID, "message_id": messageID, "reply_markup": map[string]any{"inline_keyboard": []any{}}}, nil)
 }
 
+func (t *telegramAPIClient) editHTMLMessage(ctx context.Context, chatID string, messageID int64, text string) error {
+	return t.call(ctx, "editMessageText", map[string]any{
+		"chat_id": chatID, "message_id": messageID, "text": text, "parse_mode": "HTML",
+		"reply_markup": map[string]any{"inline_keyboard": []any{}},
+	}, nil)
+}
+
 func (t *telegramAPIClient) sendMessageWithMarkup(ctx context.Context, chatID string, text string, replyMarkup any) (telegramMessage, error) {
 	var message telegramMessage
 	payload := map[string]any{"chat_id": chatID, "text": text}

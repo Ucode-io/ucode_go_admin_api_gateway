@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"strings"
 	"time"
 
@@ -49,6 +50,10 @@ func renderTelegramAutomationMessage(trigger models.TelegramAutomationTrigger, i
 		}
 	}
 	return renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), readable)
+}
+
+func renderTelegramAutomationCompletedMessage(trigger models.TelegramAutomationTrigger, item map[string]any, status string) string {
+	return renderTelegramAutomationMessage(trigger, item) + "\n\n✅ <b>Текущий статус:</b> " + html.EscapeString(status)
 }
 
 func (h *HandlerV1) sendTelegramAutomationAction(target telegramNotificationTarget, chatID string, rule models.TelegramAutomation, trigger models.TelegramAutomationTrigger, item map[string]any) {
@@ -147,42 +152,65 @@ func (h *HandlerV1) handleTelegramAutomationCallback(ctx context.Context, callba
 		answer("Кнопка больше не активна")
 		return
 	}
-	if err := h.updateTelegramAutomationDealStatus(ctx, action, trigger.StatusField, button.Value); err != nil {
+	updatedItem, updated, err := h.updateTelegramAutomationDealStatus(ctx, action, trigger.StatusField, button.Value)
+	if !updated {
 		h.log.Error("telegram automation status update failed", logger.Error(err))
 		answer("Не удалось обновить статус")
 		return
 	}
 	_ = h.centralRedis.Del(ctx, key).Err()
-	_ = client.removeInlineKeyboard(ctx, action.ChatID, action.MessageID)
+	if err != nil {
+		h.log.Error("telegram automation deal reload failed", logger.Error(err))
+		_ = client.removeInlineKeyboard(ctx, action.ChatID, action.MessageID)
+		answer("Статус обновлён, но сообщение не удалось обновить")
+		return
+	}
+	message := renderTelegramAutomationCompletedMessage(trigger, updatedItem, button.Label)
+	if err := client.editHTMLMessage(ctx, action.ChatID, action.MessageID, message); err != nil {
+		h.log.Error("telegram automation message edit failed", logger.Error(err))
+		_ = client.removeInlineKeyboard(ctx, action.ChatID, action.MessageID)
+		answer("Статус обновлён, но сообщение не удалось обновить")
+		return
+	}
 	answer("Статус обновлён: " + button.Label)
 }
 
-func (h *HandlerV1) updateTelegramAutomationDealStatus(ctx context.Context, action telegramAutomationAction, field, value string) error {
+func (h *HandlerV1) updateTelegramAutomationDealStatus(ctx context.Context, action telegramAutomationAction, field, value string) (map[string]any, bool, error) {
 	if field == "" || value == "" || action.RecordID == "" {
-		return errors.New("missing status field, value or record")
+		return nil, false, errors.New("missing status field, value or record")
 	}
 	resource, err := h.companyServices.ServiceResource().GetSingle(ctx, &pb.GetSingleServiceResourceReq{ProjectId: action.Target.ProjectID, EnvironmentId: action.Target.EnvironmentID, ServiceType: pb.ServiceType_BUILDER_SERVICE})
 	if err != nil {
-		return err
+		return nil, false, err
 	}
 	services, err := h.GetProjectSrvc(ctx, action.Target.ProjectID, resource.NodeType)
 	if err != nil {
-		return err
+		return nil, false, err
 	}
 	item, found, err := h.lookupItem(ctx, services, resource.ResourceEnvironmentId, "deals", action.RecordID)
 	if err != nil {
-		return err
+		return nil, false, err
 	}
 	if !found {
-		return errors.New("deal was not found")
+		return nil, false, errors.New("deal was not found")
 	}
 	if telegramDealValue(item, field) == value {
-		return nil
+		return item, true, nil
 	}
 	data, err := structpb.NewStruct(map[string]any{"guid": action.RecordID, "id": action.RecordID, "company_service_project_id": action.Target.ProjectID, field: value})
 	if err != nil {
-		return err
+		return nil, false, err
 	}
 	_, err = services.GoObjectBuilderService().Items().Update(ctx, &nb.CommonMessage{TableSlug: "deals", ProjectId: resource.ResourceEnvironmentId, Data: data})
-	return err
+	if err != nil {
+		return nil, false, err
+	}
+	item, found, err = h.lookupItem(ctx, services, resource.ResourceEnvironmentId, "deals", action.RecordID)
+	if err != nil {
+		return nil, true, err
+	}
+	if !found {
+		return nil, true, errors.New("updated deal was not found")
+	}
+	return item, true, nil
 }

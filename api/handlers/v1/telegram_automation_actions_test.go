@@ -22,3 +22,11 @@ func TestRenderTelegramAutomationMessageUsesChoiceLabel(t *testing.T) {
 		t.Fatalf("message leaked a choice slug: %q", message)
 	}
 }
+
+func TestRenderTelegramAutomationCompletedMessageUsesNewStatus(t *testing.T) {
+	trigger := models.TelegramAutomationTrigger{Template: "📍 Статус: {{item.pipeline_enterprise_sales}}"}
+	message := renderTelegramAutomationCompletedMessage(trigger, map[string]any{"pipeline_enterprise_sales": "Yuk Jonatildi"}, "🚚 Yuk jo‘natildi")
+	if !strings.Contains(message, "📍 Статус: Yuk Jonatildi") || !strings.Contains(message, "✅ <b>Текущий статус:</b> 🚚 Yuk jo‘natildi") {
+		t.Fatalf("edited message should show the updated deal status: %q", message)
+	}
+}
