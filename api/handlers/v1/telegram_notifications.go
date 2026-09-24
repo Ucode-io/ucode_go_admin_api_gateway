@@ -415,10 +415,7 @@ func (h *HandlerV1) runTelegramDailyReports() {
 		if err != nil || strings.TrimSpace(settings.ChatID) == "" {
 			continue
 		}
-		location, err := time.LoadLocation(settings.Timezone)
-		if err != nil {
-			location = time.UTC
-		}
+		location := telegramReportLocation()
 		now := time.Now().In(location)
 		if settings.Automations != nil {
 			for _, rule := range settings.Automations {
@@ -502,11 +499,9 @@ func (h *HandlerV1) telegramDailyReportMessage(ctx context.Context, target teleg
 
 func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, target telegramNotificationTarget, settings models.TelegramNotificationSettings, now time.Time, template, reportPipeline string) (string, error) {
 	template = strings.ReplaceAll(template, "Сделок с согласованной ценой:", "Количество сделок:")
-	location, err := time.LoadLocation(settings.Timezone)
-	if err != nil {
-		location = time.UTC
-	}
+	location := telegramReportLocation()
 	day := now.In(location)
+	var err error
 	var metaReport models.MetaAdsDashboardResponse
 	if accountID := strings.TrimSpace(settings.MetaAdsAccountID); accountID != "" {
 		userToken, tokenErr := h.getFacebookUserToken(ctx, models.FacebookOAuthState{ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID})
@@ -557,10 +552,18 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 		"{{report.cpl}}":          cpl,
 		"{{report.sales_deals}}":  fmt.Sprint(sales.Deals),
 		"{{report.bricks_count}}": telegramFormatBricks(sales.Bricks),
-		"{{report.sales_total}}":  telegramReportMoney(sales.Total, "USD"),
+		"{{report.sales_total}}":  telegramFormatUZS(sales.Total),
 		"{{report.statuses}}":     "TELEGRAM_REPORT_STATUSES_PLACEHOLDER",
 	}
 	return strings.ReplaceAll(renderTelegramTemplateValues(template, values), "TELEGRAM_REPORT_STATUSES_PLACEHOLDER", statuses), nil
+}
+
+func telegramReportLocation() *time.Location {
+	location, err := time.LoadLocation("Asia/Tashkent")
+	if err != nil {
+		return time.FixedZone("Tashkent", 5*60*60)
+	}
+	return location
 }
 
 func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target telegramNotificationTarget, day time.Time, reportPipeline string) (string, error) {

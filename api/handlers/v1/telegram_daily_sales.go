@@ -55,12 +55,13 @@ func telegramDailySaleFromDeal(deal map[string]any) (telegramDailySale, bool) {
 	if dealID == "" {
 		return telegramDailySale{}, false
 	}
-	bricks := telegramNumber(telegramDealValue(deal, "gisht_soni"))
-	total := telegramNumber(telegramDealValue(deal, "amount", "sum", "total"))
-	if total == 0 {
-		total = bricks * telegramNumber(telegramDealValue(deal, "gisht_narxi"))
-	}
+	bricks, total := telegramDailySaleValues(deal)
 	return telegramDailySale{DealID: dealID, Bricks: bricks, Total: total}, true
+}
+
+func telegramDailySaleValues(deal map[string]any) (float64, float64) {
+	bricks := telegramNumber(telegramDealValue(deal, "gisht_soni"))
+	return bricks, bricks * telegramNumber(telegramDealValue(deal, "gisht_narxi"))
 }
 
 func (h *HandlerV1) recordTelegramDailySale(ctx context.Context, projectID, environmentID string, before, after map[string]any) {
@@ -93,11 +94,29 @@ func (h *HandlerV1) telegramDailySalesForDay(ctx context.Context, target telegra
 	if err != nil {
 		return totals, err
 	}
+	if len(stored) == 0 {
+		return totals, nil
+	}
+	service, environmentID, err := h.resolveProjectBuilder(ctx, target.ProjectID, target.EnvironmentID)
+	if err != nil {
+		return totals, err
+	}
 	for _, encoded := range stored {
 		var sale telegramDailySale
 		if json.Unmarshal([]byte(encoded), &sale) != nil {
 			continue
 		}
+		// The cache identifies deals that reached the agreed-price stage today.
+		// Read their current brick fields so reports also correct older cached
+		// entries that were previously calculated from the unrelated amount field.
+		deal, found, err := h.lookupItem(ctx, service, environmentID, "deals", sale.DealID)
+		if err != nil {
+			return totals, err
+		}
+		if !found {
+			continue
+		}
+		sale.Bricks, sale.Total = telegramDailySaleValues(deal)
 		totals.Deals++
 		totals.Bricks += sale.Bricks
 		totals.Total += sale.Total
@@ -110,4 +129,21 @@ func telegramFormatBricks(value float64) string {
 		return fmt.Sprintf("%d", int64(value))
 	}
 	return strconv.FormatFloat(value, 'f', 2, 64)
+}
+
+func telegramFormatUZS(value float64) string {
+	text := strconv.FormatFloat(value, 'f', 2, 64)
+	parts := strings.SplitN(text, ".", 2)
+	whole := parts[0]
+	start := 0
+	if strings.HasPrefix(whole, "-") {
+		start = 1
+	}
+	for i := len(whole) - 3; i > start; i -= 3 {
+		whole = whole[:i] + " " + whole[i:]
+	}
+	if parts[1] != "00" {
+		whole += "." + parts[1]
+	}
+	return whole + " UZS"
 }

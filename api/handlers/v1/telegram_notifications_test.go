@@ -73,6 +73,10 @@ func TestTelegramDailyReportHelpers(t *testing.T) {
 	if !ok || createdAt.Format(time.RFC3339) != "2026-09-22T11:30:00Z" {
 		t.Fatalf("created at = %s, %v", createdAt, ok)
 	}
+	localTime, ok := telegramDealCreatedAt(map[string]any{"created_at": "2026-09-24T11:51:00Z"}, telegramReportLocation())
+	if !ok || localTime.Format("2006-01-02 15:04") != "2026-09-24 16:51" {
+		t.Fatalf("Tashkent report time = %s, %v", localTime, ok)
+	}
 }
 
 func TestTelegramDailyReportGroupsTodayLeadsIntoExpandableStatuses(t *testing.T) {
