@@ -565,16 +565,25 @@ func (h *HandlerV1) telegramDealStatusesForDay(ctx context.Context, target teleg
 	if err != nil {
 		return "", err
 	}
-	response, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
-		TableSlug:        "deals",
-		Data:             mustStruct(map[string]any{"limit": 10000, "offset": 0}),
-		ProjectId:        environmentID,
-		CompanyProjectId: target.ProjectID,
-	})
-	if err != nil {
-		return "", err
+	const pageSize = 500
+	rows := make([]map[string]any, 0, pageSize)
+	for offset := 0; offset < 10000; offset += pageSize {
+		response, err := service.GoObjectBuilderService().ObjectBuilder().GetList2(ctx, &nb.CommonMessage{
+			TableSlug:        "deals",
+			Data:             mustStruct(map[string]any{"limit": pageSize, "offset": offset}),
+			ProjectId:        environmentID,
+			CompanyProjectId: target.ProjectID,
+		})
+		if err != nil {
+			return "", err
+		}
+		page := telegramResponseRows(response.GetData())
+		rows = append(rows, page...)
+		if len(page) < pageSize {
+			break
+		}
 	}
-	return telegramFormatDealStatusesForDay(telegramResponseRows(response.GetData()), day), nil
+	return telegramFormatDealStatusesForDay(rows, day), nil
 }
 
 type telegramDailyDeal struct {
