@@ -243,10 +243,20 @@ func (h *HandlerV1) FacebookDisconnect(c *gin.Context) {
 		pageID := strings.TrimSpace(credentials.GetPageId())
 		pageToken := strings.TrimSpace(credentials.GetPageAccessToken())
 		if pageID != "" && pageToken != "" {
-			if err := h.facebookUnsubscribePage(c.Request.Context(), pageID, pageToken); err != nil {
-				// Page may already be unsubscribed or the token expired; log and
-				// proceed with removal so the integration can be cleaned up.
-				h.log.Warn("facebook disconnect: unsubscribe failed: " + err.Error())
+			connections, lookupErr := h.companyServices.Resource().GetProjectResourcesByExternalId(c.Request.Context(), &pb.GetByExternalIdRequest{
+				ExternalId: pageID,
+				Type:       pb.ResourceType_META_LEADS,
+			})
+			// Meta's page subscription is global, even though CRM resources belong
+			// to individual projects. Never unsubscribe while another project uses it.
+			if lookupErr != nil {
+				h.log.Warn("facebook disconnect: could not check other page connections: " + lookupErr.Error())
+			} else if !facebookPageHasOtherConnections(connections.GetResources(), resourceID) {
+				if err := h.facebookUnsubscribePage(c.Request.Context(), pageID, pageToken); err != nil {
+					// Page may already be unsubscribed or the token expired; log and
+					// proceed with removal so the integration can be cleaned up.
+					h.log.Warn("facebook disconnect: unsubscribe failed: " + err.Error())
+				}
 			}
 		}
 	}
@@ -261,6 +271,15 @@ func (h *HandlerV1) FacebookDisconnect(c *gin.Context) {
 	}
 
 	h.HandleResponse(c, status_http.OK, gin.H{"resource_id": resourceID})
+}
+
+func facebookPageHasOtherConnections(resources []*pb.ProjectResource, currentID string) bool {
+	for _, resource := range resources {
+		if resource.GetId() != currentID && resource.GetSettings().GetFacebookLeads().GetStatus() == config.FacebookStatusActive {
+			return true
+		}
+	}
+	return false
 }
 
 func (h *HandlerV1) findFacebookResource(ctx context.Context, projectID, environmentID, pageID string) (*pb.ProjectResource, error) {

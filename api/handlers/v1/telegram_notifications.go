@@ -1034,6 +1034,10 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 					line = strings.ReplaceAll(line, token, `<a href="`+html.EscapeString(value)+`">CRMda ochish</a>`)
 					continue
 				}
+				if token == "{{item.name}}" || token == "{{item.full_name}}" || token == "{{deal.name}}" || token == "{{lead.name}}" || token == "{{contact.name}}" {
+					line = strings.ReplaceAll(line, token, "<b>"+html.EscapeString(value)+"</b>")
+					continue
+				}
 				line = strings.ReplaceAll(line, token, html.EscapeString(value))
 			}
 		}

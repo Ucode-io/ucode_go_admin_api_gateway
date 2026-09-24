@@ -21,7 +21,7 @@ func TestTelegramCreateDeliveriesPrefersAutomationForSharedGroup(t *testing.T) {
 	}
 	for _, settings := range [][]models.TelegramNotificationSettings{{legacy, modern}, {modern, legacy}} {
 		got := telegramCreateDeliveries(settings, deal, time.Now())
-		if len(got) != 1 || got[0].ChatID != "group" || got[0].Message != "Создание: Test lead" {
+		if len(got) != 1 || got[0].ChatID != "group" || got[0].Message != "Создание: <b>Test lead</b>" {
 			t.Fatalf("deliveries = %#v, want one automation message", got)
 		}
 	}
@@ -29,7 +29,7 @@ func TestTelegramCreateDeliveriesPrefersAutomationForSharedGroup(t *testing.T) {
 		ID: "legacy-new-lead", Enabled: true, Trigger: "new_lead", Action: "telegram_notification", Template: legacy.Templates.NewLead,
 	}}
 	got := telegramCreateDeliveries([]models.TelegramNotificationSettings{modern, legacy}, deal, time.Now())
-	if len(got) != 1 || got[0].Message != "Создание: Test lead" {
+	if len(got) != 1 || got[0].Message != "Создание: <b>Test lead</b>" {
 		t.Fatalf("deliveries with persisted legacy rule = %#v, want one automation message", got)
 	}
 	modern.Automations[0].Enabled = false

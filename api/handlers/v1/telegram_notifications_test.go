@@ -97,8 +97,15 @@ func TestTelegramStatusRuleMatchesArrayBackedDealFields(t *testing.T) {
 func TestRenderTelegramTemplateOmitsMissingFieldLines(t *testing.T) {
 	template := "🆕 <b>Yangi lid</b>\n\n👤 Ismi: {{lead.name}}\n📞 Telefon: {{lead.phone}}\n👨‍💼 Mas’ul: {{lead.owner_name}}\n\n🔗 {{lead.url}}"
 	rendered := renderTelegramNotificationTemplateWithDeal(template, map[string]any{"name": "Dilnoza"})
-	if rendered != "🆕 <b>Yangi lid</b>\n\n👤 Ismi: Dilnoza" {
+	if rendered != "🆕 <b>Yangi lid</b>\n\n👤 Ismi: <b>Dilnoza</b>" {
 		t.Fatalf("rendered missing fields = %q", rendered)
+	}
+}
+
+func TestRenderTelegramTemplateBoldsAndEscapesDealName(t *testing.T) {
+	rendered := renderTelegramNotificationTemplateWithDeal("Название: {{item.name}}", map[string]any{"name": "Ali & Vali"})
+	if rendered != "Название: <b>Ali &amp; Vali</b>" {
+		t.Fatalf("rendered name = %q", rendered)
 	}
 }
 
