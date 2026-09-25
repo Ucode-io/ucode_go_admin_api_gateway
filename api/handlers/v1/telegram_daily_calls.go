@@ -9,9 +9,12 @@ import (
 )
 
 type telegramDailyCallMetrics struct {
-	Total   int
-	Leads   int
-	Seconds int
+	Total    int
+	Inbound  int
+	Outbound int
+	Answered int
+	Leads    int
+	Seconds  int
 }
 
 // PBX writes an initial row and a completion row for the same call UUID.
@@ -49,9 +52,16 @@ func telegramCallMetricsForDay(rows []map[string]any, day time.Time, leadPhones 
 	metrics := telegramDailyCallMetrics{Total: len(byID)}
 	leads := map[string]bool{}
 	for _, row := range byID {
+		if telegramDealValue(row, "direction") == "incoming" {
+			metrics.Inbound++
+		} else {
+			// Older PBX rows were outgoing and have no direction value.
+			metrics.Outbound++
+		}
 		if telegramDealValue(row, "status") != "answered" {
 			continue
 		}
+		metrics.Answered++
 		metrics.Seconds += int(telegramNumber(telegramDealValue(row, "duration")))
 		phone := telegramPhoneKey(telegramDealValue(row, "client_phone"))
 		if leadPhones[phone] {

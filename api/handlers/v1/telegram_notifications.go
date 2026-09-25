@@ -538,7 +538,7 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 		h.log.Warn("telegram notifications: daily sales unavailable", logger.Error(err))
 	}
 	var calls telegramDailyCallMetrics
-	if strings.Contains(template, "{{report.calls_total}}") || strings.Contains(template, "{{report.calls_leads}}") || strings.Contains(template, "{{report.calls_duration}}") {
+	if strings.Contains(template, "{{report.calls_") {
 		calls, err = h.telegramDailyCallsForDay(ctx, target, day)
 		if err != nil {
 			h.log.Warn("telegram notifications: daily calls unavailable", logger.Error(err))
@@ -573,6 +573,9 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 		"{{report.sales_total}}":    telegramFormatUZS(sales.Total),
 		"{{report.statuses}}":       "TELEGRAM_REPORT_STATUSES_PLACEHOLDER",
 		"{{report.calls_total}}":    fmt.Sprint(calls.Total),
+		"{{report.calls_inbound}}":  fmt.Sprint(calls.Inbound),
+		"{{report.calls_outbound}}": fmt.Sprint(calls.Outbound),
+		"{{report.calls_answered}}": fmt.Sprint(calls.Answered),
 		"{{report.calls_leads}}":    fmt.Sprint(calls.Leads),
 		"{{report.calls_duration}}": fmt.Sprintf("%d:%02d", calls.Seconds/60, calls.Seconds%60),
 	}
