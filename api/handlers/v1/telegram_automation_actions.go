@@ -37,7 +37,7 @@ func telegramAutomationButtons(token string, trigger models.TelegramAutomationTr
 		if button.ID == "" || button.Value == "" {
 			continue
 		}
-		label := button.Label
+		label := telegramAutomationButtonLabel(button.Label)
 		if selected == button.Value {
 			if strings.HasPrefix(label, "✅ ") {
 				label = "☑ " + strings.TrimPrefix(label, "✅ ")
@@ -48,6 +48,13 @@ func telegramAutomationButtons(token string, trigger models.TelegramAutomationTr
 		buttons = append(buttons, []map[string]string{{"text": label, "callback_data": "crm:" + token + ":" + button.ID}})
 	}
 	return map[string]any{"inline_keyboard": buttons}
+}
+
+func telegramAutomationButtonLabel(label string) string {
+	if strings.HasPrefix(label, "✅ 100%") {
+		return "💰 " + strings.TrimPrefix(label, "✅ ")
+	}
+	return label
 }
 
 func telegramAutomationFieldLabel(trigger models.TelegramAutomationTrigger, field, value string) string {
@@ -183,7 +190,7 @@ func (h *HandlerV1) handleTelegramAutomationCallback(ctx context.Context, callba
 		return
 	}
 	if action.StatusValue == button.Value {
-		answer("Статус уже выбран: " + button.Label)
+		answer("Статус уже выбран: " + telegramAutomationButtonLabel(button.Label))
 		return
 	}
 	updatedItem, updated, err := h.updateTelegramAutomationDealStatus(ctx, action, trigger.StatusField, button.Value)
@@ -197,7 +204,7 @@ func (h *HandlerV1) handleTelegramAutomationCallback(ctx context.Context, callba
 		answer("Статус обновлён, но сообщение не удалось обновить")
 		return
 	}
-	message := renderTelegramAutomationCompletedMessage(trigger, updatedItem, button.Value, button.Label)
+	message := renderTelegramAutomationCompletedMessage(trigger, updatedItem, button.Value, telegramAutomationButtonLabel(button.Label))
 	if err := client.editHTMLMessageWithMarkup(ctx, action.ChatID, action.MessageID, message, telegramAutomationButtons(parts[1], trigger, button.Value)); err != nil {
 		h.log.Error("telegram automation message edit failed", logger.Error(err))
 		answer("Статус обновлён, но сообщение не удалось обновить")
@@ -207,7 +214,7 @@ func (h *HandlerV1) handleTelegramAutomationCallback(ctx context.Context, callba
 	if body, err := json.Marshal(action); err == nil {
 		_ = h.centralRedis.Set(ctx, key, body, 30*24*time.Hour).Err()
 	}
-	answer("Статус обновлён: " + button.Label)
+	answer("Статус обновлён: " + telegramAutomationButtonLabel(button.Label))
 }
 
 func (h *HandlerV1) updateTelegramAutomationDealStatus(ctx context.Context, action telegramAutomationAction, field, value string) (map[string]any, bool, error) {
