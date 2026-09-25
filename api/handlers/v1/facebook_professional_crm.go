@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -34,13 +35,15 @@ type crmMapping struct {
 	DealContactField string // relation field on deals → contacts
 	DealFormField    string // relation field on deals → lead_forms
 
-	PipelineField   string
-	PipelineValue   string
-	StageField      string
-	StageValue      string
-	SourceField     string
-	MetaAdIDField   string
-	MetaAdNameField string
+	PipelineField         string
+	PipelineValue         string
+	StageField            string
+	StageValue            string
+	SourceField           string
+	MetaAdIDField         string
+	MetaAdNameField       string
+	MetaCampaignIDField   string
+	MetaCampaignNameField string
 
 	// PipelineStageField is a per-pipeline scalar stage column (ProfessionalCrm
 	// stores the Udevs pipeline's stage in `pipeline_udevs`); it
@@ -60,21 +63,23 @@ type crmMapping struct {
 // schema but are only a fallback, never the sole source of truth.
 func defaultCRMMapping() crmMapping {
 	return crmMapping{
-		ContactsTable:      "contacts",
-		DealsTable:         "deals",
-		LeadFormsTable:     "lead_forms",
-		DealContactField:   "contacts_id",
-		DealFormField:      "lead_forms_id",
-		PipelineField:      "pipeline",
-		PipelineValue:      "Udevs",
-		StageField:         "stage",
-		StageValue:         "Новая заявка",
-		SourceField:        "source",
-		MetaAdIDField:      "meta_ad_id",
-		MetaAdNameField:    "meta_ad_name",
-		PipelineStageField: "pipeline_udevs",
-		StartDateField:     "start_date",
-		FormAcceptField:    "accept_leads",
+		ContactsTable:         "contacts",
+		DealsTable:            "deals",
+		LeadFormsTable:        "lead_forms",
+		DealContactField:      "contacts_id",
+		DealFormField:         "lead_forms_id",
+		PipelineField:         "pipeline",
+		PipelineValue:         "Udevs",
+		StageField:            "stage",
+		StageValue:            "Новая заявка",
+		SourceField:           "source",
+		MetaAdIDField:         "meta_ad_id",
+		MetaAdNameField:       "meta_ad_name",
+		MetaCampaignIDField:   "meta_campaign_id",
+		MetaCampaignNameField: "meta_campaign_name",
+		PipelineStageField:    "pipeline_udevs",
+		StartDateField:        "start_date",
+		FormAcceptField:       "accept_leads",
 	}
 }
 
@@ -154,13 +159,15 @@ func crmMappingRequestToProto(req models.FacebookCrmMapping) *pb.FacebookCrmMapp
 // crmLeadFields is the normalized person/contact data extracted from a Facebook
 // lead's field_data, independent of how the form named its questions.
 type crmLeadFields struct {
-	firstName   string
-	lastName    string
-	email       string
-	metaAdID    string
-	metaAdName  string
-	phone       string
-	createdTime string // lead's created_time from Graph (ISO8601)
+	firstName        string
+	lastName         string
+	email            string
+	metaAdID         string
+	metaAdName       string
+	metaCampaignID   string
+	metaCampaignName string
+	phone            string
+	createdTime      string // lead's created_time from Graph (ISO8601)
 }
 
 func (f crmLeadFields) hasContactIdentity() bool {
@@ -197,6 +204,20 @@ func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.P
 	fields.createdTime = lead.CreatedTime
 	fields.metaAdID = lead.AdID
 	fields.metaAdName = lead.AdName
+	if lead.AdID != "" {
+		if campaignID, resolveErr := h.facebookAdCampaignID(ctx, resource, lead.AdID); resolveErr == nil {
+			fields.metaCampaignID = campaignID
+			state := models.FacebookOAuthState{ProjectId: resource.GetProjectId(), EnvironmentId: resource.GetEnvironmentId()}
+			if token, tokenErr := h.getFacebookUserToken(ctx, state); tokenErr == nil {
+				var campaign struct {
+					Name string `json:"name"`
+				}
+				if h.facebookGraphGet(ctx, campaignID, url.Values{"fields": {"name"}, "access_token": {token}}, &campaign) == nil {
+					fields.metaCampaignName = campaign.Name
+				}
+			}
+		}
+	}
 
 	// Resolve the source form FIRST. Professional CRM automatically accepts every
 	// Meta form; legacy rows that were created with accept_leads=false are enabled
@@ -543,6 +564,12 @@ func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManag
 	if m.MetaAdNameField != "" && strings.TrimSpace(f.metaAdName) != "" {
 		payload[m.MetaAdNameField] = strings.TrimSpace(f.metaAdName)
 	}
+	if m.MetaCampaignIDField != "" && strings.TrimSpace(f.metaCampaignID) != "" {
+		payload[m.MetaCampaignIDField] = strings.TrimSpace(f.metaCampaignID)
+	}
+	if m.MetaCampaignNameField != "" && strings.TrimSpace(f.metaCampaignName) != "" {
+		payload[m.MetaCampaignNameField] = strings.TrimSpace(f.metaCampaignName)
+	}
 
 	if err := h.crmCreateItem(ctx, svc, resourceEnvID, m.DealsTable, payload); err != nil {
 		if isAlreadyExists(err) {
@@ -554,6 +581,12 @@ func (h *HandlerV1) crmCreateDeal(ctx context.Context, svc services.ServiceManag
 			}
 			if adName := strings.TrimSpace(f.metaAdName); m.MetaAdNameField != "" && adName != "" {
 				attribution[m.MetaAdNameField] = adName
+			}
+			if campaignID := strings.TrimSpace(f.metaCampaignID); m.MetaCampaignIDField != "" && campaignID != "" {
+				attribution[m.MetaCampaignIDField] = campaignID
+			}
+			if campaignName := strings.TrimSpace(f.metaCampaignName); m.MetaCampaignNameField != "" && campaignName != "" {
+				attribution[m.MetaCampaignNameField] = campaignName
 			}
 			if len(attribution) > 1 {
 				data, convertErr := helper.ConvertMapToStruct(attribution)
