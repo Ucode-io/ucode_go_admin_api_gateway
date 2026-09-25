@@ -61,6 +61,11 @@ func (h *HandlerV1) FacebookLeadAttribution(c *gin.Context) {
 		leads, _, err = h.facebookFetchFormLeads(c.Request.Context(), formID, h.baseConf.MetaAdsAccessToken, time.Now().Add(-30*24*time.Hour).Unix())
 	}
 	if err != nil {
+		if token, tokenErr := h.getFacebookUserToken(c.Request.Context(), state); tokenErr == nil {
+			leads, _, err = h.facebookFetchFormLeads(c.Request.Context(), formID, token, time.Now().Add(-30*24*time.Hour).Unix())
+		}
+	}
+	if err != nil {
 		h.HandleResponse(c, status_http.BadGateway, "Meta form leads are unavailable")
 		return
 	}
