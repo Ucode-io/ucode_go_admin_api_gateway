@@ -152,9 +152,11 @@ func (h *HandlerV1) pollResourceLeads(ctx context.Context, resource *pb.ProjectR
 	}
 
 	newest := since
+	allWritesSucceeded := true
 	for _, form := range forms {
 		leads, maxTime, err := h.facebookFetchFormLeads(ctx, form.ID, pageToken, since)
 		if err != nil {
+			allWritesSucceeded = false
 			h.log.Warn("facebook poll: fetch leads failed: " + err.Error())
 			continue
 		}
@@ -166,6 +168,7 @@ func (h *HandlerV1) pollResourceLeads(ctx context.Context, resource *pb.ProjectR
 			lead := leads[i]
 			value := models.FacebookLeadChangeValue{LeadgenID: lead.ID, PageID: pageID, FormID: form.ID}
 			if err := h.writeProfessionalCRMLead(ctx, resource, lead, value); err != nil {
+				allWritesSucceeded = false
 				h.log.Error("facebook poll: write failed", logger.Error(err),
 					logger.String("leadgen_id", lead.ID),
 					logger.String("page_id", pageID),
@@ -174,7 +177,7 @@ func (h *HandlerV1) pollResourceLeads(ctx context.Context, resource *pb.ProjectR
 		}
 	}
 
-	if newest > since {
+	if allWritesSucceeded && newest > since {
 		h.setFacebookPollCursor(ctx, cursorKey, newest)
 	}
 }

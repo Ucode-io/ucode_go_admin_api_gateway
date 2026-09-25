@@ -177,15 +177,22 @@ func (f crmLeadFields) fullName() string {
 // (ProfessionalCrm is Postgres); other backends are skipped rather than written
 // with a wrong shape.
 func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.ProjectResource, lead models.FacebookLead, value models.FacebookLeadChangeValue) error {
+	mapping := h.resolveCRMMapping(resource)
+	if mapping.PipelineValue == disabledFacebookPipeline {
+		return nil
+	}
+	allowed, err := h.facebookCampaignAllowed(ctx, resource, mapping.PipelineValue, lead.AdID)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return nil
+	}
 	svc, resourceEnvID, err := h.resolveProjectBuilder(ctx, resource.GetProjectId(), resource.GetEnvironmentId())
 	if err != nil {
 		return err
 	}
 
-	mapping := h.resolveCRMMapping(resource)
-	if mapping.PipelineValue == disabledFacebookPipeline {
-		return nil
-	}
 	fields := professionalCRMLeadFields(lead.FieldData)
 	fields.createdTime = lead.CreatedTime
 	fields.metaAdID = lead.AdID
