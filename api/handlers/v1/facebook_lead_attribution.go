@@ -66,7 +66,7 @@ func (h *HandlerV1) FacebookLeadAttribution(c *gin.Context) {
 		}
 	}
 	if err != nil {
-		h.HandleResponse(c, status_http.BadGateway, "Meta form leads are unavailable")
+		h.HandleResponse(c, status_http.BadGateway, "Meta form leads are unavailable: "+err.Error())
 		return
 	}
 	results := make([]gin.H, 0, len(wanted))
