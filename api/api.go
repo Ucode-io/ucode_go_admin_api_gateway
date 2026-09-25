@@ -816,6 +816,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		metaAds.GET("/dashboard", h.MetaAds.Dashboard)
 		metaAds.GET("/workspace-dashboard", h.V1.WorkspaceMetaAdsDashboard)
 		metaAds.GET("/accounts", h.V1.WorkspaceMetaAdsAccounts)
+		metaAds.GET("/selected-account", h.V1.WorkspaceMetaAdsSelectedAccount)
 	}
 
 	// Google Lead Form Ads webhook — public, Google posts leads here (no OAuth).
