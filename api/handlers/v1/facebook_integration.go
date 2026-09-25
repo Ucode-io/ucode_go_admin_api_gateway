@@ -104,6 +104,20 @@ func (h *HandlerV1) facebookConnectPage(ctx context.Context, state models.Facebo
 	if existing.GetName() != "" {
 		pageName = existing.GetName()
 	}
+	if existing == nil || existing.GetSettings().GetFacebookLeads().GetCrmMapping() == nil {
+		list, listErr := h.companyServices.Resource().GetProjectResourceList(ctx, &pb.GetProjectResourceListRequest{
+			ProjectId: state.ProjectId, EnvironmentId: state.EnvironmentId, Type: pb.ResourceType_META_LEADS,
+		})
+		if listErr != nil {
+			return "", listErr
+		}
+		for _, other := range list.GetResources() {
+			if mapping := other.GetSettings().GetFacebookLeads().GetCrmMapping(); facebookAssignedPipeline(mapping) != "" || mapping.GetPipelineValue() == disabledFacebookPipeline {
+				credentials.CrmMapping = &pb.FacebookCrmMapping{PipelineValue: disabledFacebookPipeline}
+				break
+			}
+		}
+	}
 
 	resource, err := h.companyServices.Resource().UpsertProjectResource(ctx, &pb.AddResourceToProjectRequest{
 		Name:          pageName,

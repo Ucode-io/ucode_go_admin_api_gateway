@@ -798,6 +798,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 		facebook.PUT("/mapping", h.V1.FacebookSaveMapping)
 
 		facebook.GET("/crm-mapping", h.V1.FacebookGetCrmMapping)
+		facebook.GET("/pipeline-mappings", h.V1.FacebookPipelineMappings)
+		facebook.PUT("/pipeline-mappings", h.V1.SaveFacebookPipelineMappings)
 		facebook.PUT("/crm-mapping", h.V1.FacebookSaveCrmMapping)
 
 		facebook.GET("/integration", h.V1.FacebookIntegration)
@@ -812,6 +814,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	{
 		metaAds.GET("/account", h.MetaAds.Account)
 		metaAds.GET("/dashboard", h.MetaAds.Dashboard)
+		metaAds.GET("/workspace-dashboard", h.V1.WorkspaceMetaAdsDashboard)
+		metaAds.GET("/accounts", h.V1.WorkspaceMetaAdsAccounts)
 	}
 
 	// Google Lead Form Ads webhook — public, Google posts leads here (no OAuth).

@@ -83,7 +83,14 @@ func defaultCRMMapping() crmMapping {
 // seam through which each connected project chooses its own tables/pipeline/
 // stage — nothing downstream references a hardcoded slug.
 func (h *HandlerV1) resolveCRMMapping(resource *pb.ProjectResource) crmMapping {
-	return overlayCRMMapping(defaultCRMMapping(), resource.GetSettings().GetFacebookLeads().GetCrmMapping())
+	m := overlayCRMMapping(defaultCRMMapping(), resource.GetSettings().GetFacebookLeads().GetCrmMapping())
+	if strings.HasPrefix(m.StageField, "pipeline_") {
+		// The pipeline editor stores the exact scalar STATUS column in StageField.
+		// Keep the canonical stage populated and preserve legacy custom mappings.
+		m.PipelineStageField = m.StageField
+		m.StageField = "stage"
+	}
+	return m
 }
 
 // overlayCRMMapping applies the project's stored overrides over a base mapping.
@@ -176,6 +183,9 @@ func (h *HandlerV1) writeProfessionalCRMLead(ctx context.Context, resource *pb.P
 	}
 
 	mapping := h.resolveCRMMapping(resource)
+	if mapping.PipelineValue == disabledFacebookPipeline {
+		return nil
+	}
 	fields := professionalCRMLeadFields(lead.FieldData)
 	fields.createdTime = lead.CreatedTime
 	fields.metaAdID = lead.AdID
