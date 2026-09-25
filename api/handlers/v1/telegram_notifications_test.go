@@ -48,6 +48,14 @@ func TestRenderTelegramNotificationTemplate(t *testing.T) {
 	}
 }
 
+func TestRenderTelegramDealCustomFieldsWithDifferentKeyCase(t *testing.T) {
+	deal := map[string]any{"Gisht_soni": 8000, "Gisht_narxi": 1200}
+	message := renderTelegramNotificationTemplateWithDeal("🧱 Gisht_soni: {{item.gisht_soni}}\n💵 Gisht_narxi: {{item.gisht_narxi}}", deal)
+	if !strings.Contains(message, "Gisht_soni: 8000") || !strings.Contains(message, "Gisht_narxi: 1200") {
+		t.Fatalf("custom fields missing from notification: %q", message)
+	}
+}
+
 func TestRenderTelegramDailyReportValues(t *testing.T) {
 	template := "<b>{{report.date}}</b> {{report.ad_spend}} {{report.leads_total}} {{report.statuses}}"
 	rendered := renderTelegramTemplateValues(template, map[string]string{

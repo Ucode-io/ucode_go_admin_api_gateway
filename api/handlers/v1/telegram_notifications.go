@@ -1171,6 +1171,18 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
 		values["{{item."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
 	}
+	for _, token := range telegramTemplateToken.FindAllString(template, -1) {
+		if _, exists := values[token]; exists {
+			continue
+		}
+		for _, scope := range []string{"item", "deal"} {
+			prefix := "{{" + scope + "."
+			if strings.HasPrefix(token, prefix) {
+				values[token] = telegramDealValue(deal, strings.TrimSuffix(strings.TrimPrefix(token, prefix), "}}"))
+				break
+			}
+		}
+	}
 
 	// Fields such as service, amount and responsible person are optional in a
 	// CRM. Drop the whole field line when its value is absent instead of sending
