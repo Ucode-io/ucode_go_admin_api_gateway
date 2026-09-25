@@ -22,12 +22,32 @@ import (
 const telegramAutomationActionPrefix = "telegram:notifications:action:"
 
 type telegramAutomationAction struct {
-	Target    telegramNotificationTarget `json:"target"`
-	ChatID    string                     `json:"chat_id"`
-	MessageID int64                      `json:"message_id"`
-	RecordID  string                     `json:"record_id"`
-	RuleID    string                     `json:"rule_id"`
-	TriggerID string                     `json:"trigger_id"`
+	Target      telegramNotificationTarget `json:"target"`
+	ChatID      string                     `json:"chat_id"`
+	MessageID   int64                      `json:"message_id"`
+	RecordID    string                     `json:"record_id"`
+	RuleID      string                     `json:"rule_id"`
+	TriggerID   string                     `json:"trigger_id"`
+	StatusValue string                     `json:"status_value,omitempty"`
+}
+
+func telegramAutomationButtons(token string, trigger models.TelegramAutomationTrigger, selected string) map[string]any {
+	buttons := make([][]map[string]string, 0, len(trigger.StatusButtons))
+	for _, button := range trigger.StatusButtons {
+		if button.ID == "" || button.Value == "" {
+			continue
+		}
+		label := button.Label
+		if selected == button.Value {
+			if strings.HasPrefix(label, "✅ ") {
+				label = "☑ " + strings.TrimPrefix(label, "✅ ")
+			} else {
+				label = "✅ " + label
+			}
+		}
+		buttons = append(buttons, []map[string]string{{"text": label, "callback_data": "crm:" + token + ":" + button.ID}})
+	}
+	return map[string]any{"inline_keyboard": buttons}
 }
 
 func telegramAutomationFieldLabel(trigger models.TelegramAutomationTrigger, field, value string) string {
@@ -85,14 +105,8 @@ func (h *HandlerV1) sendTelegramAutomationAction(target telegramNotificationTarg
 		return
 	}
 	token := hex.EncodeToString(random[:])
-	buttons := make([][]map[string]string, 0, len(trigger.StatusButtons))
-	for _, button := range trigger.StatusButtons {
-		if button.ID == "" || button.Value == "" {
-			continue
-		}
-		buttons = append(buttons, []map[string]string{{"text": button.Label, "callback_data": "crm:" + token + ":" + button.ID}})
-	}
-	if len(buttons) == 0 {
+	markup := telegramAutomationButtons(token, trigger, "")
+	if len(markup["inline_keyboard"].([][]map[string]string)) == 0 {
 		h.sendTelegramCRMNotification(chatID, message)
 		return
 	}
@@ -100,7 +114,7 @@ func (h *HandlerV1) sendTelegramAutomationAction(target telegramNotificationTarg
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		client := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken)
-		sent, err := client.sendHTMLMessageWithMarkup(ctx, chatID, message, map[string]any{"inline_keyboard": buttons})
+		sent, err := client.sendHTMLMessageWithMarkup(ctx, chatID, message, markup)
 		if err != nil {
 			h.log.Error("telegram automation send failed", logger.Error(err))
 			return
@@ -168,25 +182,30 @@ func (h *HandlerV1) handleTelegramAutomationCallback(ctx context.Context, callba
 		answer("Кнопка больше не активна")
 		return
 	}
+	if action.StatusValue == button.Value {
+		answer("Статус уже выбран: " + button.Label)
+		return
+	}
 	updatedItem, updated, err := h.updateTelegramAutomationDealStatus(ctx, action, trigger.StatusField, button.Value)
 	if !updated {
 		h.log.Error("telegram automation status update failed", logger.Error(err))
 		answer("Не удалось обновить статус")
 		return
 	}
-	_ = h.centralRedis.Del(ctx, key).Err()
 	if err != nil {
 		h.log.Error("telegram automation deal reload failed", logger.Error(err))
-		_ = client.removeInlineKeyboard(ctx, action.ChatID, action.MessageID)
 		answer("Статус обновлён, но сообщение не удалось обновить")
 		return
 	}
 	message := renderTelegramAutomationCompletedMessage(trigger, updatedItem, button.Value, button.Label)
-	if err := client.editHTMLMessage(ctx, action.ChatID, action.MessageID, message); err != nil {
+	if err := client.editHTMLMessageWithMarkup(ctx, action.ChatID, action.MessageID, message, telegramAutomationButtons(parts[1], trigger, button.Value)); err != nil {
 		h.log.Error("telegram automation message edit failed", logger.Error(err))
-		_ = client.removeInlineKeyboard(ctx, action.ChatID, action.MessageID)
 		answer("Статус обновлён, но сообщение не удалось обновить")
 		return
+	}
+	action.StatusValue = button.Value
+	if body, err := json.Marshal(action); err == nil {
+		_ = h.centralRedis.Set(ctx, key, body, 30*24*time.Hour).Err()
 	}
 	answer("Статус обновлён: " + button.Label)
 }

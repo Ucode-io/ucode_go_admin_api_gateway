@@ -33,3 +33,15 @@ func TestTelegramReportsForChatsOnePerGroup(t *testing.T) {
 		t.Fatalf("reports = %#v, want one per group", reports)
 	}
 }
+
+func TestTelegramReportsForChatsKeepsDistinctRules(t *testing.T) {
+	candidates := []telegramScheduledReport{
+		{settings: models.TelegramNotificationSettings{ChatID: "group"}, template: "sales", modern: true, ruleID: "sales", triggerID: "one"},
+		{settings: models.TelegramNotificationSettings{ChatID: "group"}, template: "calls", modern: true, ruleID: "calls", triggerID: "two"},
+		{settings: models.TelegramNotificationSettings{ChatID: "group"}, template: "sales", modern: true, ruleID: "sales", triggerID: "one"},
+	}
+	reports := telegramReportsForChats(candidates, map[string]bool{"group": true})
+	if len(reports) != 2 || reports[0].template != "sales" || reports[1].template != "calls" {
+		t.Fatalf("reports = %#v, want separate sales and calls", reports)
+	}
+}

@@ -8,12 +8,14 @@ import (
 )
 
 type telegramScheduledReport struct {
-	target   telegramNotificationTarget
-	settings models.TelegramNotificationSettings
-	template string
-	pipeline string
-	now      time.Time
-	modern   bool
+	target    telegramNotificationTarget
+	settings  models.TelegramNotificationSettings
+	template  string
+	pipeline  string
+	now       time.Time
+	modern    bool
+	ruleID    string
+	triggerID string
 }
 
 // Several workspaces can point at one Telegram group. Prefer the configured
@@ -26,17 +28,21 @@ func telegramReportsForChats(candidates []telegramScheduledReport, modernChats m
 		if chatID == "" || modernChats[chatID] && !candidate.modern {
 			continue
 		}
-		previous, exists := selected[chatID]
+		key := chatID
+		if candidate.modern && candidate.ruleID != "" {
+			key += ":" + candidate.ruleID + ":" + candidate.triggerID
+		}
+		previous, exists := selected[key]
 		if !exists {
-			order = append(order, chatID)
+			order = append(order, key)
 		}
 		if !exists || candidate.modern && !previous.modern {
-			selected[chatID] = candidate
+			selected[key] = candidate
 		}
 	}
 	reports := make([]telegramScheduledReport, 0, len(order))
-	for _, chatID := range order {
-		reports = append(reports, selected[chatID])
+	for _, key := range order {
+		reports = append(reports, selected[key])
 	}
 	return reports
 }

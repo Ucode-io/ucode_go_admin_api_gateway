@@ -23,6 +23,7 @@ type TelegramAutomationTrigger struct {
 	WatchField     string                           `json:"watch_field"`
 	ReportTime     string                           `json:"report_time"`
 	ReportPipeline string                           `json:"report_pipeline,omitempty"`
+	ReportType     string                           `json:"report_type,omitempty"`
 	ConditionMode  string                           `json:"condition_mode"`
 	Conditions     []TelegramAutomationCondition    `json:"conditions"`
 	MessageFields  []string                         `json:"message_fields"`

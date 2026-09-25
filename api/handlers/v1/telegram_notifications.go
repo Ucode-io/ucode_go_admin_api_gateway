@@ -432,7 +432,7 @@ func (h *HandlerV1) runTelegramDailyReports() {
 							continue
 						}
 						if _, ok := telegramAutomationMatchingTrigger(rule, "", "daily_report", nil, nil, now); ok {
-							candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTriggerTemplate(trigger), trigger.ReportPipeline, now, true})
+							candidates = append(candidates, telegramScheduledReport{target: target, settings: ruleSettings, template: telegramAutomationTriggerTemplate(trigger), pipeline: trigger.ReportPipeline, now: now, modern: true, ruleID: rule.ID, triggerID: trigger.ID})
 						}
 					}
 					continue
@@ -440,14 +440,14 @@ func (h *HandlerV1) runTelegramDailyReports() {
 				if !telegramAutomationHasTrigger(rule, "daily_report") || now.Format("15:04") != rule.ReportTime || !telegramAutomationMatches(rule, "daily_report", nil, now) {
 					continue
 				}
-				candidates = append(candidates, telegramScheduledReport{target, ruleSettings, telegramAutomationTemplate(rule, settings, "daily_report"), "", now, false})
+				candidates = append(candidates, telegramScheduledReport{target: target, settings: ruleSettings, template: telegramAutomationTemplate(rule, settings, "daily_report"), now: now, ruleID: rule.ID})
 			}
 			continue
 		}
 		if !settings.DailyReportEnabled || now.Format("15:04") != settings.ReportTime {
 			continue
 		}
-		candidates = append(candidates, telegramScheduledReport{target, settings, settings.Templates.DailyReport, "", now, false})
+		candidates = append(candidates, telegramScheduledReport{target: target, settings: settings, template: settings.Templates.DailyReport, now: now})
 	}
 	for _, candidate := range telegramReportsForChats(candidates, modernChats) {
 		h.sendScheduledTelegramReport(candidate)
@@ -456,6 +456,9 @@ func (h *HandlerV1) runTelegramDailyReports() {
 
 func (h *HandlerV1) sendScheduledTelegramReport(report telegramScheduledReport) {
 	lockKey := telegramNotificationsDailyLockPrefix + "chat:" + strings.TrimSpace(report.settings.ChatID) + ":" + report.now.Format("2006-01-02")
+	if report.ruleID != "" {
+		lockKey += ":" + report.ruleID + ":" + report.triggerID
+	}
 	locked, err := h.centralRedis.SetNX(context.Background(), lockKey, "sending", 36*time.Hour).Result()
 	if err != nil || !locked {
 		return
@@ -526,6 +529,13 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	if err != nil {
 		h.log.Warn("telegram notifications: daily sales unavailable", logger.Error(err))
 	}
+	var calls telegramDailyCallMetrics
+	if strings.Contains(template, "{{report.calls_total}}") || strings.Contains(template, "{{report.calls_leads}}") || strings.Contains(template, "{{report.calls_duration}}") {
+		calls, err = h.telegramDailyCallsForDay(ctx, target, day)
+		if err != nil {
+			h.log.Warn("telegram notifications: daily calls unavailable", logger.Error(err))
+		}
+	}
 	currency := strings.TrimSpace(metaReport.Account.Currency)
 	if currency == "" {
 		currency = "USD"
@@ -545,15 +555,18 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 		company = "CRM"
 	}
 	values := map[string]string{
-		"{{report.company}}":      company,
-		"{{report.date}}":         day.Format("02.01.2006"),
-		"{{report.ad_spend}}":     telegramReportMoney(metaReport.KPIs.Spend, currency),
-		"{{report.leads_total}}":  fmt.Sprint(metaReport.KPIs.Leads),
-		"{{report.cpl}}":          cpl,
-		"{{report.sales_deals}}":  fmt.Sprint(sales.Deals),
-		"{{report.bricks_count}}": telegramFormatBricks(sales.Bricks),
-		"{{report.sales_total}}":  telegramFormatUZS(sales.Total),
-		"{{report.statuses}}":     "TELEGRAM_REPORT_STATUSES_PLACEHOLDER",
+		"{{report.company}}":        company,
+		"{{report.date}}":           day.Format("02.01.2006"),
+		"{{report.ad_spend}}":       telegramReportMoney(metaReport.KPIs.Spend, currency),
+		"{{report.leads_total}}":    fmt.Sprint(metaReport.KPIs.Leads),
+		"{{report.cpl}}":            cpl,
+		"{{report.sales_deals}}":    fmt.Sprint(sales.Deals),
+		"{{report.bricks_count}}":   telegramFormatBricks(sales.Bricks),
+		"{{report.sales_total}}":    telegramFormatUZS(sales.Total),
+		"{{report.statuses}}":       "TELEGRAM_REPORT_STATUSES_PLACEHOLDER",
+		"{{report.calls_total}}":    fmt.Sprint(calls.Total),
+		"{{report.calls_leads}}":    fmt.Sprint(calls.Leads),
+		"{{report.calls_duration}}": fmt.Sprintf("%d:%02d", calls.Seconds/60, calls.Seconds%60),
 	}
 	return strings.ReplaceAll(renderTelegramTemplateValues(template, values), "TELEGRAM_REPORT_STATUSES_PLACEHOLDER", statuses), nil
 }
