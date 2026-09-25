@@ -116,7 +116,14 @@ func TestTelegramAutomationTriggerConfigsMatchTableFieldAndConditions(t *testing
 func TestTelegramAutomationTriggerConfigTemplateUsesSelectedFields(t *testing.T) {
 	trigger := models.TelegramAutomationTrigger{Kind: "create", Table: "deals", MessageFields: []string{"name", "amount"}}
 	message := renderTelegramNotificationTemplateWithDeal(telegramAutomationTriggerTemplate(trigger), map[string]any{"name": "Azizbek", "amount": 1500000})
-	if !strings.Contains(message, "Azizbek") || !strings.Contains(message, "1500000") {
+	if !strings.Contains(message, "Azizbek") || !strings.Contains(message, "1 500 000") {
 		t.Fatalf("selected fields were not rendered: %q", message)
+	}
+}
+
+func TestTelegramDealMoneyRendersWithoutExponent(t *testing.T) {
+	message := renderTelegramNotificationTemplateWithDeal("Summa: {{item.summa}}", map[string]any{"summa": 1000000.0})
+	if message != "Summa: 1 000 000" {
+		t.Fatalf("unexpected money format: %q", message)
 	}
 }

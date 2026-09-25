@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -290,6 +291,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 	}
 	message := renderTelegramNotificationTemplate(template)
 	isDailyReport := request.Type == "daily_report"
+	var selectedAutomationTrigger *models.TelegramAutomationTrigger
 	reportPipeline := ""
 	chatID := settings.ChatID
 	if request.Type == "automation" {
@@ -316,6 +318,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 					}
 				}
 				template = telegramAutomationTriggerTemplate(selected)
+				selectedAutomationTrigger = &selected
 				message = renderTelegramNotificationTemplate(template)
 				isDailyReport = selected.Kind == "daily_report"
 				reportPipeline = selected.ReportPipeline
@@ -339,7 +342,12 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 		// Use a real deal for the test message so its CRM link can be opened,
 		// rather than rendering the old non-clickable preview label.
 		if deal, dealErr := h.telegramNotificationTestDeal(c.Request.Context(), target); dealErr == nil {
-			message = renderTelegramNotificationTemplateWithDeal(template, deal)
+			readable := h.telegramAutomationReadableItem(c.Request.Context(), target, deal)
+			if selectedAutomationTrigger != nil {
+				message = renderTelegramAutomationMessage(*selectedAutomationTrigger, readable)
+			} else {
+				message = renderTelegramNotificationTemplateWithDeal(template, readable)
+			}
 		}
 	}
 	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), chatID, message); err != nil {
@@ -1134,12 +1142,37 @@ func telegramValueString(value any) string {
 				return normalized
 			}
 		}
+	case float64:
+		return strconv.FormatFloat(item, 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(item), 'f', -1, 32)
 	default:
 		if normalized := strings.TrimSpace(fmt.Sprint(item)); normalized != "" && normalized != "<nil>" {
 			return normalized
 		}
 	}
 	return ""
+}
+
+func telegramAmountString(value string) string {
+	number, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+	if err != nil {
+		return value
+	}
+	plain := strconv.FormatFloat(number, 'f', -1, 64)
+	parts := strings.SplitN(plain, ".", 2)
+	digits := parts[0]
+	sign := ""
+	if strings.HasPrefix(digits, "-") {
+		sign, digits = "-", digits[1:]
+	}
+	for i := len(digits) - 3; i > 0; i -= 3 {
+		digits = digits[:i] + " " + digits[i:]
+	}
+	if len(parts) == 2 {
+		return sign + digits + "." + parts[1]
+	}
+	return sign + digits
 }
 
 func renderTelegramNotificationTemplateWithDeal(template string, deal map[string]any) string {
@@ -1168,8 +1201,12 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		"{{item.arrived_at}}": arrivalLabel,
 	}
 	for key, value := range deal {
-		values["{{deal."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
-		values["{{item."+key+"}}"] = telegramDealValue(map[string]any{key: value}, key)
+		readable := telegramDealValue(map[string]any{key: value}, key)
+		if strings.EqualFold(key, "summa") || strings.EqualFold(key, "amount") {
+			readable = telegramAmountString(readable)
+		}
+		values["{{deal."+key+"}}"] = readable
+		values["{{item."+key+"}}"] = readable
 	}
 	for _, token := range telegramTemplateToken.FindAllString(template, -1) {
 		if _, exists := values[token]; exists {

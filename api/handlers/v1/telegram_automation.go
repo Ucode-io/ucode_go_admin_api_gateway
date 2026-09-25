@@ -23,6 +23,7 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 		return
 	}
 	for _, target := range targets {
+		readableItem := h.telegramAutomationReadableItem(ctx, target, item)
 		settings, _, err := h.getTelegramNotificationSettings(ctx, target)
 		if err != nil || settings.Automations == nil {
 			continue
@@ -38,7 +39,7 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 			if len(rule.TriggerConfigs) > 0 {
 				trigger, ok := telegramAutomationMatchingTrigger(rule, table, event, item, changedFields, time.Now())
 				if ok {
-					h.sendTelegramAutomationAction(target, chatID, rule, trigger, item)
+					h.sendTelegramAutomationAction(target, chatID, rule, trigger, readableItem)
 				}
 				continue
 			}
@@ -49,10 +50,39 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 				matches = telegramAutomationMatches(rule, event, item, time.Now())
 			}
 			if matches {
-				h.sendTelegramCRMNotification(chatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, event), item))
+				h.sendTelegramCRMNotification(chatID, renderTelegramNotificationTemplateWithDeal(telegramAutomationTemplate(rule, settings, event), readableItem))
 			}
 		}
 	}
+}
+
+func (h *HandlerV1) telegramAutomationReadableItem(ctx context.Context, target telegramNotificationTarget, item map[string]any) map[string]any {
+	managerID := telegramDealValue(item, "users_id", "sotuv_manajeri")
+	if managerID == "" {
+		return item
+	}
+	service, environmentID, err := h.resolveProjectBuilder(ctx, target.ProjectID, target.EnvironmentID)
+	if err != nil {
+		return item
+	}
+	user, found, err := h.lookupItem(ctx, service, environmentID, "users", managerID)
+	if err != nil || !found {
+		return item
+	}
+	name := telegramDealValue(user, "full_name", "name", "login", "email")
+	if name == "" {
+		name = strings.TrimSpace(telegramDealValue(user, "first_name") + " " + telegramDealValue(user, "last_name"))
+	}
+	if name == "" {
+		return item
+	}
+	readable := make(map[string]any, len(item))
+	for key, value := range item {
+		readable[key] = value
+	}
+	readable["users_id"] = name
+	readable["sotuv_manajeri"] = name
+	return readable
 }
 
 func telegramAutomationMatchingTrigger(rule models.TelegramAutomation, table, event string, item, changedFields map[string]any, now time.Time) (models.TelegramAutomationTrigger, bool) {
