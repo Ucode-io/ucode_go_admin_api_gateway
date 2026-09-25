@@ -2,6 +2,7 @@ package v1
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"ucode/ucode_go_api_gateway/api/status_http"
@@ -35,8 +36,10 @@ func (h *HandlerV1) WorkspaceMetaAdsSelectedAccount(c *gin.Context) {
 		return
 	}
 	pageIDs := map[string]bool{}
+	pipelineFilter := strings.TrimSpace(c.Query("pipeline_value"))
 	for _, resource := range list.GetResources() {
-		if facebookAssignedPipeline(resource.GetSettings().GetFacebookLeads().GetCrmMapping()) != "" {
+		pipeline := facebookAssignedPipeline(resource.GetSettings().GetFacebookLeads().GetCrmMapping())
+		if pipeline != "" && (pipelineFilter == "" || pipeline == pipelineFilter) {
 			pageIDs[resource.GetExternalId()] = true
 		}
 	}

@@ -97,6 +97,41 @@ func TestFacebookPipelineMappingsSavePreservesCredentialsAndOtherPipelines(t *te
 	}
 }
 
+func TestFacebookPipelineMappingsPreservesPageSpecificStages(t *testing.T) {
+	resources := &pipelineMappingResources{resources: []*pb.ProjectResource{
+		pipelineMappingResource("first", "Gisht Voronkasi"),
+		pipelineMappingResource("second", "Gisht Voronkasi"),
+	}}
+	response := runPipelineMappingRequest(resources, http.MethodPut, `{"pipeline_value":"Gisht Voronkasi","pipeline_stage_field":"pipeline_gisht_voronkasi","stage_value":"Yangi Lid","page_ids":["first","second"],"page_stage_values":{"first":"Old stage","second":"Other stage"}}`)
+	if response.Code != http.StatusOK || len(resources.updated) != 2 {
+		t.Fatalf("save failed: %d %s", response.Code, response.Body.String())
+	}
+	for i, stage := range []string{"Old stage", "Other stage"} {
+		if got := resources.updated[i].GetSettings().GetFacebookLeads().GetCrmMapping().GetStageValue(); got != stage {
+			t.Fatalf("page %d stage = %q, want %q", i, got, stage)
+		}
+	}
+}
+
+func TestFacebookPagePipelineMappingUpdatesOnlySelectedPage(t *testing.T) {
+	resources := &pipelineMappingResources{resources: []*pb.ProjectResource{pipelineMappingResource("first", "Gisht Voronkasi"), pipelineMappingResource("second", "Generators")}}
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Set("project_id", "00000000-0000-4000-8000-000000000001")
+	c.Set("environment_id", "00000000-0000-4000-8000-000000000002")
+	c.Params = gin.Params{{Key: "page_id", Value: "first"}}
+	c.Request = httptest.NewRequest(http.MethodPut, "/v1/facebook/pipeline-mappings/first", strings.NewReader(`{"pipeline_value":"Gisht Voronkasi","pipeline_stage_field":"pipeline_gisht_voronkasi","stage_value":"Yangi Lid"}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+	(&HandlerV1{companyServices: &pipelineMappingCompany{resources: resources}, log: zap.NewNop()}).SaveFacebookPagePipelineMapping(c)
+	if recorder.Code != http.StatusOK || len(resources.updated) != 1 {
+		t.Fatalf("page update failed: %d %s", recorder.Code, recorder.Body.String())
+	}
+	got := resources.updated[0].GetSettings().GetFacebookLeads()
+	if got.GetCrmMapping().GetStageValue() != "Yangi Lid" || got.GetPageAccessToken() != "test-page-token" || resources.updated[0].GetExternalId() != "first" {
+		t.Fatalf("selected page mapping or credentials changed unexpectedly: %+v", got)
+	}
+}
+
 func TestFacebookPipelineMappingsRejectBeforeWriting(t *testing.T) {
 	for _, pageID := range []string{"unknown", "other"} {
 		t.Run(pageID, func(t *testing.T) {
