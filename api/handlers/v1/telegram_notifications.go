@@ -514,18 +514,26 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	day := now.In(location)
 	var err error
 	var metaReport models.MetaAdsDashboardResponse
-	if accountID := strings.TrimSpace(settings.MetaAdsAccountID); accountID != "" {
+	needsMeta := strings.Contains(template, "{{report.ad_spend}}") || strings.Contains(template, "{{report.leads_total}}") || strings.Contains(template, "{{report.cpl}}")
+	if needsMeta && strings.TrimSpace(settings.MetaAdsAccountID) == "" {
+		return "", fmt.Errorf("Meta Ads account is not selected for the Telegram marketing report")
+	}
+	if accountID := strings.TrimSpace(settings.MetaAdsAccountID); needsMeta && accountID != "" {
 		userToken, tokenErr := h.getFacebookUserToken(ctx, models.FacebookOAuthState{ProjectId: target.ProjectID, EnvironmentId: target.EnvironmentID})
 		if tokenErr == nil {
 			accountConf := h.baseConf
-			accountConf.MetaAdsAdAccountID = accountID
+			accountConf.MetaAdsAdAccountID = strings.TrimPrefix(accountID, "act_")
 			accountConf.MetaAdsAccessToken = userToken
 			metaReport, err = metaads.NewHandler(accountConf, h.centralRedis, h.log).DashboardForDay(ctx, day)
 		} else {
 			err = tokenErr
 		}
 		if err != nil {
-			h.log.Warn("telegram notifications: workspace Meta Ads report unavailable", logger.Error(err))
+			return "", fmt.Errorf("Meta Ads report unavailable: %w", err)
+		}
+		date := day.Format("2006-01-02")
+		if metaReport.DateRange.Since != date || metaReport.DateRange.Until != date {
+			return "", fmt.Errorf("Meta Ads report returned %s to %s instead of %s", metaReport.DateRange.Since, metaReport.DateRange.Until, date)
 		}
 	}
 	statuses, err := h.telegramDealStatusesForDay(ctx, target, day, reportPipeline)
