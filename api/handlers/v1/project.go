@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -12,7 +13,26 @@ import (
 	"ucode/ucode_go_api_gateway/api/status_http"
 
 	"github.com/gin-gonic/gin"
+	go_redis "github.com/go-redis/redis/v8"
 )
+
+const companyProjectDescriptionPrefix = "company-project:description:"
+
+type projectWithDescription struct {
+	*company_service.Project
+	Description string `json:"description"`
+}
+
+func (h *HandlerV1) projectDescription(c *gin.Context, projectID string) (string, error) {
+	if h.centralRedis == nil {
+		return "", nil
+	}
+	value, err := h.centralRedis.Get(c.Request.Context(), companyProjectDescriptionPrefix+projectID).Result()
+	if errors.Is(err, go_redis.Nil) {
+		return "", nil
+	}
+	return value, err
+}
 
 // GetCompanyProjectById godoc
 // @Security ApiKeyAuth
@@ -48,7 +68,12 @@ func (h *HandlerV1) GetCompanyProjectById(c *gin.Context) {
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, resp)
+	description, err := h.projectDescription(c, resp.GetProjectId())
+	if err != nil {
+		h.HandleResponse(c, status_http.InternalServerError, err.Error())
+		return
+	}
+	h.HandleResponse(c, status_http.OK, projectWithDescription{Project: resp, Description: description})
 }
 
 // GetCompanyProjectList godoc
@@ -143,14 +168,29 @@ func (h *HandlerV1) UpdateCompanyProject(c *gin.Context) {
 	var (
 		project   company_service.Project
 		projectId = c.Param("project_id")
+		fields    map[string]json.RawMessage
 	)
 
-	project.ProjectId = projectId
-
-	err := c.ShouldBindJSON(&project)
+	err := c.ShouldBindJSON(&fields)
 	if err != nil {
 		h.HandleResponse(c, status_http.BadRequest, err.Error())
 		return
+	}
+	body, err := json.Marshal(fields)
+	if err == nil {
+		err = json.Unmarshal(body, &project)
+	}
+	if err != nil {
+		h.HandleResponse(c, status_http.BadRequest, err.Error())
+		return
+	}
+	project.ProjectId = projectId
+	var description string
+	if raw, ok := fields["description"]; ok {
+		if err := json.Unmarshal(raw, &description); err != nil {
+			h.HandleResponse(c, status_http.BadRequest, "description must be a string")
+			return
+		}
 	}
 
 	resp, err := h.companyServices.Project().Update(c.Request.Context(), &project)
@@ -160,7 +200,23 @@ func (h *HandlerV1) UpdateCompanyProject(c *gin.Context) {
 		return
 	}
 
-	h.HandleResponse(c, status_http.OK, resp)
+	if _, ok := fields["description"]; ok {
+		if h.centralRedis == nil {
+			h.HandleResponse(c, status_http.InternalServerError, "project description storage is unavailable")
+			return
+		}
+		if err := h.centralRedis.Set(c.Request.Context(), companyProjectDescriptionPrefix+projectId, description, 0).Err(); err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+	} else {
+		description, err = h.projectDescription(c, projectId)
+		if err != nil {
+			h.HandleResponse(c, status_http.InternalServerError, err.Error())
+			return
+		}
+	}
+	h.HandleResponse(c, status_http.OK, projectWithDescription{Project: resp, Description: description})
 }
 
 // DeleteCompanyProject godoc
