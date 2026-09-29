@@ -132,6 +132,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			telegramNotifications.POST("/daily-report", h.V1.SendTelegramDailyReport)
 		}
 
+		v1.GET("/crm/missed-call-notifications", h.V1.ListMissedCallNotifications)
+
 		instagram := v1.Group("/instagram")
 		{
 			instagram.GET("/chats", h.V1.ListInstagramChats)
