@@ -60,11 +60,11 @@ func validTelegramReportStatusField(field string) bool {
 
 func (h *HandlerV1) scopedTelegramReportMessages(ctx context.Context, report telegramScheduledReport) ([]string, error) {
 	if report.reportType == "marketing" {
-		const template = "📣 <b>Маркетинговый отчёт · {{report.date}}</b>\n🕘 На {{report.as_of}} · Ташкент\n\n👥 Лиды по данным Meta: {{report.leads_total}}\n💸 Расходы: {{report.ad_spend}}\n💰 CPL Meta (расходы / лиды Meta): {{report.cpl}}"
+		const template = "📣 <b>Маркетинг · {{report.date}}</b>\n\n👥 Лиды по данным Meta: {{report.leads_total}}\n💸 Расходы: {{report.ad_spend}}\n💰 CPL Meta (расходы / лиды Meta): {{report.cpl}}"
 		message, err := h.telegramDailyReportMessageWithTemplate(ctx, report.target, report.settings, report.now, template, "")
 		if err != nil {
 			h.log.Warn("telegram marketing report data unavailable", logger.Error(err))
-			message = "📣 <b>Маркетинговый отчёт · " + report.now.In(telegramReportLocation()).Format("02.01.2006") + "</b>\n🕘 На " + report.now.In(telegramReportLocation()).Format("15:04") + " · Ташкент\n\n⚠️ Данные Meta за сегодня недоступны. Лиды, расходы и CPL не подтверждены."
+			message = "📣 <b>Маркетинг · " + report.now.In(telegramReportLocation()).Format("02.01.2006") + "</b>\n\n⚠️ Данные Meta за сегодня недоступны. Лиды, расходы и CPL не подтверждены."
 		}
 		return []string{message}, nil
 	}
@@ -178,7 +178,7 @@ func telegramCRMReportMessages(rows []map[string]any, day time.Time, pipelineNam
 		}
 		groups[status] = append(groups[status], telegramDailyDeal{Name: name, CreatedAt: created})
 	}
-	header := "📋 <b>" + html.EscapeString(pipelineName) + " · " + day.Format("02.01.2006") + "</b>\n🕘 На " + day.In(telegramReportLocation()).Format("15:04") + " · Ташкент\n👥 Создано сегодня в CRM: " + fmt.Sprint(len(rows)) + "\n📍 Текущие статусы на момент отчёта\n\n"
+	header := "📋 <b>" + html.EscapeString(pipelineName) + " · " + day.Format("02.01.2006") + "</b>\n👥 Создано сегодня в CRM: " + fmt.Sprint(len(rows)) + "\n📍 Текущие статусы на момент отчёта\n\n"
 	keys := []string{}
 	for key := range groups {
 		keys = append(keys, key)

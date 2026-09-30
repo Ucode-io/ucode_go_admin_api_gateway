@@ -57,6 +57,7 @@ func (h *HandlerV1) notifyItemAutomations(ctx context.Context, projectID, enviro
 }
 
 func (h *HandlerV1) telegramAutomationReadableItem(ctx context.Context, target telegramNotificationTarget, item map[string]any) map[string]any {
+	item = h.telegramItemWithPhone(ctx, target, item)
 	managerID := telegramDealValue(item, "users_id", "sotuv_manajeri")
 	if managerID == "" {
 		return item

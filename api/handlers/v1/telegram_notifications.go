@@ -335,7 +335,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 					ids := []int64{}
 					if err == nil && len(parts) > 0 {
 						// One explicitly requested sample, with visible disclosure if the full daily report needs continuation.
-						sample := "🧪 <b>TEST · " + time.Now().In(telegramReportLocation()).Format("02.01.2006 15:04") + " · день ещё не завершён</b>\n"
+						sample := ""
 						if len(parts) > 1 {
 							sample += fmt.Sprintf("Превью: первая часть из %d. Ежедневный отчёт содержит все части.\n", len(parts))
 						}
@@ -373,7 +373,7 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 			}
 		}
 	}
-	message = "🧪 <b>TEST · " + time.Now().In(telegramReportLocation()).Format("02.01.2006 15:04") + "</b>\n" + message
+	// Test uses the same user-requested heading as the scheduled message.
 	sent, err := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), chatID, message)
 	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
@@ -981,6 +981,9 @@ func (h *HandlerV1) NotifyDealCreated(ctx context.Context, projectID, environmen
 			continue
 		}
 		settingsList = append(settingsList, settings)
+	}
+	if len(targets) > 0 {
+		deal = h.telegramItemWithPhone(ctx, targets[0], deal)
 	}
 	for _, delivery := range telegramCreateDeliveries(settingsList, deal, time.Now()) {
 		h.sendTelegramCRMNotification(delivery.ChatID, delivery.Message)
