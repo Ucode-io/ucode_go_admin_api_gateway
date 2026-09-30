@@ -168,7 +168,7 @@ func telegramCRMReportMessages(rows []map[string]any, day time.Time, pipelineNam
 		if !ok {
 			continue
 		}
-		status := telegramDealValue(row, statusField)
+		status := telegramDealValue(row, "stage", "stage_id", "status", statusField)
 		if status == "" {
 			status = "Без статуса"
 		}

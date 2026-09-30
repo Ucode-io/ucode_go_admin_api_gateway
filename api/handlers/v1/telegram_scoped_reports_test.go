@@ -186,3 +186,12 @@ func TestTelegramScopedUncertainDeliveryNotResent(t *testing.T) {
 		t.Fatal("uncertain message resent")
 	}
 }
+
+func TestTelegramScopedCanonicalStageFallback(t *testing.T) {
+	day := time.Date(2026, 9, 30, 21, 0, 0, 0, telegramReportLocation())
+	rows := []map[string]any{{"created_at": "2026-09-30T11:41:48Z", "name": "Lead", "stage": []any{"Новая заявка"}, "pipeline_sales_project": nil, "pipeline_ufin": "WRONG"}}
+	message := telegramCRMReportMessages(rows, day, "Udevs", "pipeline_sales_project")[0]
+	if !strings.Contains(message, "Новая заявка — 1") || strings.Contains(message, "Без статуса") || strings.Contains(message, "WRONG") {
+		t.Fatal("canonical current stage lost")
+	}
+}
