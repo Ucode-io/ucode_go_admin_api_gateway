@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
 	pbo "ucode/ucode_go_api_gateway/genproto/new_object_builder_service"
@@ -252,7 +253,7 @@ func (t *telegramAPIClient) call(ctx context.Context, method string, payload any
 		if envelope.Description == "" {
 			envelope.Description = resp.Status
 		}
-		return errors.New(envelope.Description)
+		return &models.TelegramAPIRejectedError{Description: envelope.Description}
 	}
 	if result == nil || len(envelope.Result) == 0 {
 		return nil

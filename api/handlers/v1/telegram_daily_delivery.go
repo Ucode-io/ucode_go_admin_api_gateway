@@ -8,14 +8,16 @@ import (
 )
 
 type telegramScheduledReport struct {
-	target    telegramNotificationTarget
-	settings  models.TelegramNotificationSettings
-	template  string
-	pipeline  string
-	now       time.Time
-	modern    bool
-	ruleID    string
-	triggerID string
+	target      telegramNotificationTarget
+	settings    models.TelegramNotificationSettings
+	template    string
+	pipeline    string
+	reportType  string
+	statusField string
+	now         time.Time
+	modern      bool
+	ruleID      string
+	triggerID   string
 }
 
 // Several workspaces can point at one Telegram group. Prefer the configured

@@ -329,6 +329,29 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 				isDailyReport = true
 				ruleSettings := settings
 				ruleSettings.ChatID = chatID
+				if selectedAutomationTrigger != nil && (selectedAutomationTrigger.ReportType == "crm" || selectedAutomationTrigger.ReportType == "marketing") {
+					var parts []string
+					parts, err = h.scopedTelegramReportMessages(c.Request.Context(), telegramScheduledReport{target: target, settings: ruleSettings, now: time.Now().In(telegramReportLocation()), pipeline: reportPipeline, reportType: selectedAutomationTrigger.ReportType, statusField: selectedAutomationTrigger.ReportStatusField})
+					ids := []int64{}
+					if err == nil && len(parts) > 0 {
+						// One explicitly requested sample, with visible disclosure if the full daily report needs continuation.
+						sample := "🧪 <b>TEST · " + time.Now().In(telegramReportLocation()).Format("02.01.2006 15:04") + " · день ещё не завершён</b>\n"
+						if len(parts) > 1 {
+							sample += fmt.Sprintf("Превью: первая часть из %d. Ежедневный отчёт содержит все части.\n", len(parts))
+						}
+						var sent telegramMessage
+						sent, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), chatID, sample+parts[0])
+						if err == nil {
+							ids = append(ids, sent.MessageID)
+						}
+					}
+					if err != nil {
+						h.HandleResponse(c, status_http.GRPCError, gin.H{"error": err.Error(), "message_ids": ids})
+					} else {
+						h.HandleResponse(c, status_http.OK, gin.H{"sent": true, "message_ids": ids})
+					}
+					return
+				}
 				message, err = h.telegramDailyReportMessageWithTemplate(c.Request.Context(), target, ruleSettings, time.Now(), template, reportPipeline)
 				if err != nil {
 					h.HandleResponse(c, status_http.GRPCError, err.Error())
@@ -350,11 +373,13 @@ func (h *HandlerV1) SendTelegramNotificationTest(c *gin.Context) {
 			}
 		}
 	}
-	if _, err = newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), chatID, message); err != nil {
+	message = "🧪 <b>TEST · " + time.Now().In(telegramReportLocation()).Format("02.01.2006 15:04") + "</b>\n" + message
+	sent, err := newTelegramAPIClient(h.baseConf.TelegramNotificationsBotToken).sendHTMLMessage(c.Request.Context(), chatID, message)
+	if err != nil {
 		h.HandleResponse(c, status_http.GRPCError, err.Error())
 		return
 	}
-	h.HandleResponse(c, status_http.OK, gin.H{"sent": true})
+	h.HandleResponse(c, status_http.OK, gin.H{"sent": true, "message_ids": []int64{sent.MessageID}})
 }
 
 func (h *HandlerV1) SendTelegramDailyReport(c *gin.Context) {
@@ -436,11 +461,11 @@ func (h *HandlerV1) runTelegramDailyReports() {
 						if trigger.Kind == "daily_report" {
 							modernChats[ruleSettings.ChatID] = true
 						}
-						if trigger.Kind != "daily_report" || now.Format("15:04") != trigger.ReportTime {
+						if trigger.Kind != "daily_report" || !telegramReportDue(trigger, now) {
 							continue
 						}
 						if _, ok := telegramAutomationMatchingTrigger(rule, "", "daily_report", nil, nil, now); ok {
-							candidates = append(candidates, telegramScheduledReport{target: target, settings: ruleSettings, template: telegramAutomationTriggerTemplate(trigger), pipeline: trigger.ReportPipeline, now: now, modern: true, ruleID: rule.ID, triggerID: trigger.ID})
+							candidates = append(candidates, telegramScheduledReport{target: target, settings: ruleSettings, template: telegramAutomationTriggerTemplate(trigger), pipeline: trigger.ReportPipeline, reportType: trigger.ReportType, statusField: trigger.ReportStatusField, now: now, modern: true, ruleID: rule.ID, triggerID: trigger.ID})
 						}
 					}
 					continue
@@ -463,6 +488,10 @@ func (h *HandlerV1) runTelegramDailyReports() {
 }
 
 func (h *HandlerV1) sendScheduledTelegramReport(report telegramScheduledReport) {
+	if report.reportType == "crm" || report.reportType == "marketing" {
+		h.sendScopedTelegramReport(report)
+		return
+	}
 	lockKey := telegramNotificationsDailyLockPrefix + "chat:" + strings.TrimSpace(report.settings.ChatID) + ":" + report.now.Format("2006-01-02")
 	if report.ruleID != "" {
 		lockKey += ":" + report.ruleID + ":" + report.triggerID
@@ -535,13 +564,24 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 		if metaReport.DateRange.Since != date || metaReport.DateRange.Until != date {
 			return "", fmt.Errorf("Meta Ads report returned %s to %s instead of %s", metaReport.DateRange.Since, metaReport.DateRange.Until, date)
 		}
+		if strings.Contains(template, "{{report.as_of}}") {
+			if err := validateTelegramMarketingReport(metaReport, settings.MetaAdsAccountID, day); err != nil {
+				return "", err
+			}
+		}
 	}
-	statuses, err := h.telegramDealStatusesForDay(ctx, target, day, reportPipeline)
+	statuses := ""
+	if strings.Contains(template, "{{report.statuses}}") {
+		statuses, err = h.telegramDealStatusesForDay(ctx, target, day, reportPipeline)
+	}
 	if err != nil {
 		h.log.Warn("telegram notifications: CRM status report unavailable", logger.Error(err))
 		statuses = "Статусы CRM временно недоступны."
 	}
-	sales, err := h.telegramDailySalesForDay(ctx, target, day)
+	var sales telegramDailySalesTotals
+	if strings.Contains(template, "{{report.sales_") || strings.Contains(template, "{{report.bricks_count}}") {
+		sales, err = h.telegramDailySalesForDay(ctx, target, day)
+	}
 	if err != nil {
 		h.log.Warn("telegram notifications: daily sales unavailable", logger.Error(err))
 	}
@@ -573,6 +613,7 @@ func (h *HandlerV1) telegramDailyReportMessageWithTemplate(ctx context.Context, 
 	values := map[string]string{
 		"{{report.company}}":        company,
 		"{{report.date}}":           day.Format("02.01.2006"),
+		"{{report.as_of}}":          day.Format("15:04"),
 		"{{report.ad_spend}}":       telegramReportMoney(metaReport.KPIs.Spend, currency),
 		"{{report.leads_total}}":    fmt.Sprint(metaReport.KPIs.Leads),
 		"{{report.cpl}}":            cpl,

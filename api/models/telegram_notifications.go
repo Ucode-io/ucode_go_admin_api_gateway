@@ -17,20 +17,21 @@ type TelegramAutomationCondition struct {
 }
 
 type TelegramAutomationTrigger struct {
-	ID             string                           `json:"id"`
-	Kind           string                           `json:"kind"`
-	Table          string                           `json:"table"`
-	WatchField     string                           `json:"watch_field"`
-	ReportTime     string                           `json:"report_time"`
-	ReportPipeline string                           `json:"report_pipeline,omitempty"`
-	ReportType     string                           `json:"report_type,omitempty"`
-	ConditionMode  string                           `json:"condition_mode"`
-	Conditions     []TelegramAutomationCondition    `json:"conditions"`
-	MessageFields  []string                         `json:"message_fields"`
-	Template       string                           `json:"template"`
-	FieldOptions   map[string][]TelegramFieldOption `json:"field_options,omitempty"`
-	StatusField    string                           `json:"status_field,omitempty"`
-	StatusButtons  []TelegramStatusButton           `json:"status_buttons,omitempty"`
+	ID                string                           `json:"id"`
+	Kind              string                           `json:"kind"`
+	Table             string                           `json:"table"`
+	WatchField        string                           `json:"watch_field"`
+	ReportTime        string                           `json:"report_time"`
+	ReportPipeline    string                           `json:"report_pipeline,omitempty"`
+	ReportStatusField string                           `json:"report_status_field,omitempty"`
+	ReportType        string                           `json:"report_type,omitempty"`
+	ConditionMode     string                           `json:"condition_mode"`
+	Conditions        []TelegramAutomationCondition    `json:"conditions"`
+	MessageFields     []string                         `json:"message_fields"`
+	Template          string                           `json:"template"`
+	FieldOptions      map[string][]TelegramFieldOption `json:"field_options,omitempty"`
+	StatusField       string                           `json:"status_field,omitempty"`
+	StatusButtons     []TelegramStatusButton           `json:"status_buttons,omitempty"`
 }
 
 type TelegramFieldOption struct {
@@ -93,3 +94,8 @@ type TelegramNotificationTestRequest struct {
 	RuleID    string `json:"rule_id"`
 	TriggerID string `json:"trigger_id"`
 }
+
+// TelegramAPIRejectedError means Telegram explicitly rejected the request, so retry cannot duplicate an accepted message.
+type TelegramAPIRejectedError struct{ Description string }
+
+func (e *TelegramAPIRejectedError) Error() string { return e.Description }

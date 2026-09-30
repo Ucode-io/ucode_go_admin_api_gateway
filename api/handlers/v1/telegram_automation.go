@@ -91,7 +91,7 @@ func telegramAutomationMatchingTrigger(rule models.TelegramAutomation, table, ev
 	}
 	for _, trigger := range rule.TriggerConfigs {
 		if trigger.Kind == "daily_report" {
-			if event != "daily_report" || trigger.ReportTime != "" && now.Format("15:04") != trigger.ReportTime {
+			if event != "daily_report" || !telegramReportDue(trigger, now) {
 				continue
 			}
 		} else if trigger.Table != table || trigger.Kind != event && !(trigger.Kind == "field" && event == "update") {
@@ -407,6 +407,9 @@ func validateTelegramAutomationTriggers(triggers []models.TelegramAutomationTrig
 				return fmt.Errorf("automation table is invalid")
 			}
 		case "daily_report":
+			if trigger.ReportType == "crm" && (trigger.ReportPipeline == "" || trigger.ReportStatusField != "" && !validTelegramReportStatusField(trigger.ReportStatusField)) {
+				return fmt.Errorf("CRM report requires a pipeline ID and its status field")
+			}
 			if _, err := time.Parse("15:04", trigger.ReportTime); err != nil {
 				return fmt.Errorf("report time is invalid")
 			}
