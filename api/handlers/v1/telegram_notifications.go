@@ -1260,6 +1260,9 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		if strings.EqualFold(key, "summa") || strings.EqualFold(key, "amount") {
 			readable = telegramAmountString(readable)
 		}
+		if telegramFieldKey(key) == "notes" {
+			readable = telegramLeadComment(readable)
+		}
 		values["{{deal."+key+"}}"] = readable
 		values["{{item."+key+"}}"] = readable
 	}
@@ -1270,7 +1273,11 @@ func renderTelegramNotificationTemplateWithDeal(template string, deal map[string
 		for _, scope := range []string{"item", "deal"} {
 			prefix := "{{" + scope + "."
 			if strings.HasPrefix(token, prefix) {
-				values[token] = telegramDealValue(deal, strings.TrimSuffix(strings.TrimPrefix(token, prefix), "}}"))
+				field := strings.TrimSuffix(strings.TrimPrefix(token, prefix), "}}")
+				values[token] = telegramDealValue(deal, field)
+				if telegramFieldKey(field) == "notes" {
+					values[token] = telegramLeadComment(values[token])
+				}
 				break
 			}
 		}
