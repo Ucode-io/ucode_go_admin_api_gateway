@@ -495,10 +495,10 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 			customPermission.PUT("", h.V1.UpdateCustomPermission)
 			customPermission.DELETE("/:id", h.V1.DeleteCustomPermission)
 			customPermission.GET("", h.V1.GetAllCustomPermissions)
-			customPermission.GET("/accesses", h.V1.GetCustomPermissionAccesses)
 			customPermission.GET("/accesses/all", h.V1.GetAllCustomPermissionAccesses)
 			customPermission.PUT("/accesses", h.V1.UpdateCustomPermissionAccess)
 		}
+		r.GET("/v1/custom-permission/accesses", h.V1.CustomPermissionAccessAuthMiddleware(cfg), crmguard.Middleware(cfg.CRMNative), crmguard.CustomPermissionAccesses(cfg.CRMNative), h.V1.GetCustomPermissionAccesses)
 
 		aiChat := v1Admin.Group("/ai-chat")
 		{

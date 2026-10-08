@@ -2,6 +2,7 @@ package v1
 
 import (
 	"log"
+	"ucode/ucode_go_api_gateway/api/handlers/crmguard"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -240,6 +241,10 @@ func (h *HandlerV1) getCustomPermissionServices(c *gin.Context) (services.Servic
 
 	if resource.ResourceType != pb.ResourceType_POSTGRESQL {
 		h.HandleResponse(c, status_http.InvalidArgument, "resource type not supported")
+		return nil, "", config.ErrProjectIdValid
+	}
+	if crmguard.Scoped(c.Request.Context()) && (resource.ResourceEnvironmentId != h.baseConf.CRMNative.ResourceEnvironment || resource.ProjectId != h.baseConf.CRMNative.Project || resource.EnvironmentId != h.baseConf.CRMNative.Environment) {
+		h.HandleResponse(c, status_http.Forbidden, "record unavailable")
 		return nil, "", config.ErrProjectIdValid
 	}
 
