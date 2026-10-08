@@ -37,6 +37,9 @@ type ApiKey struct {
 // @Response 400 {object} status.Response{data=string} "Bad Request"
 // @Failure 500 {object} status.Response{data=string} "Server Error"
 func (h *HandlerV2) InvokeFunctionByPath(c *gin.Context) {
+	if h.handleCRMPBX(c) {
+		return
+	}
 	_ = h.MakeProxy(c, h.baseConf.GoFunctionServiceHost+h.baseConf.GoFunctionServiceHTTPPort, c.Request.URL.Path)
 }
 

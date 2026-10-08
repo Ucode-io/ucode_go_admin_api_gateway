@@ -20,7 +20,7 @@ func validID(id string) bool          { _, err := uuid.Parse(id); return err == 
 // Runs after the established auth middleware. Never consumes HTTP identity headers.
 func Middleware(cfg config.CRMNativeConfig, authorize ...func(*gin.Context) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !cfg.Enabled {
+		if !executableEnabled(cfg) {
 			c.Next()
 			return
 		}
@@ -57,6 +57,16 @@ func Middleware(cfg config.CRMNativeConfig, authorize ...func(*gin.Context) erro
 		}
 		deny := func() {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "error", "message": "record unavailable"})
+		}
+		// This closes authenticated target aliases even when their original
+		// handler selected another tenant or held a privileged managed key.
+		if executableAlias(c.Request.URL.Path) && c.Request.URL.Path != canonicalPBXInvocation {
+			denyExecutable(c)
+			return
+		}
+		if !cfg.Enabled {
+			c.Next()
+			return
 		}
 		if !validID(cfg.Project) || !validID(cfg.Environment) || !validID(cfg.ResourceEnvironment) || !verified || !selected || kind == "" || (kind == "user" && !validID(actor)) {
 			deny()
@@ -95,6 +105,9 @@ func Purpose(ctx context.Context, purpose string) context.Context {
 }
 func dangerous(path string) bool {
 	path = strings.ToLower(path)
+	if executableAlias(path) && path != canonicalPBXInvocation {
+		return true
+	}
 	// These handlers build raw queries or can serve actorless in-memory entries
 	// before the builder's row policy sees the request.
 	if strings.Contains(path, "/items/") && strings.HasSuffix(path, "/filter") {

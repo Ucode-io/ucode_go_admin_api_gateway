@@ -28,6 +28,7 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	docs.SwaggerInfo.Schemes = []string{cfg.HTTPScheme}
 
 	r.Use(customCORSMiddleware())
+	r.Use(crmguard.ExecutableBoundary(cfg.CRMNative))
 	r.Use(ginhttp.Middleware(tracer))
 
 	r.GET("/ping", h.V1.Ping)
