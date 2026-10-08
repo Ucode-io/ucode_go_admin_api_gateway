@@ -69,6 +69,7 @@ type Config struct {
 }
 
 type BaseConfig struct {
+	CRMNative   CRMNativeConfig
 	ServiceName string
 	Environment string
 	Version     string
@@ -245,6 +246,7 @@ func BaseLoad() BaseConfig {
 
 	config := BaseConfig{}
 	config.CRMNativeReviewEnabled = os.Getenv("CRM_NATIVE_REVIEW_ENABLED") == "true"
+	config.CRMNative = LoadCRMNative()
 
 	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode_go_api_gateway"))
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))

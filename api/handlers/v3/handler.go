@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"ucode/ucode_go_api_gateway/api/handlers/crmguard"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -63,7 +64,7 @@ func NewHandlerV3(cf *HandlerV3Config) HandlerV3 {
 		services:        cf.Services,
 		companyServices: cf.CompanyServices,
 		authService:     cf.AuthService,
-		redis:           cf.Redis,
+		redis:           crmguard.Cache(cf.Redis, cf.BaseConf.CRMNative),
 		centralRedis:    cf.CentralRedis,
 		cache:           cf.Cache,
 		rateLimiter:     cf.RateLimiter,

@@ -2,8 +2,10 @@ package helper
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
+	"ucode/ucode_go_api_gateway/api/handlers/crmguard"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -30,6 +32,11 @@ type HandlerInterface interface {
 }
 
 func DoInvokeFunction(request models.DoInvokeFunctionStruct, c *gin.Context, h HandlerInterface) (functionName string, err error) {
+	// Existing hooks execute with a managed key and do not carry a proven row-scoped
+	// transaction contract. Reject before key lookup/invocation in the protected scope.
+	if crmguard.Scoped(c.Request.Context()) {
+		return "", errors.New("native hook binding unavailable")
+	}
 	apiKeys, err := h.AuthService().ApiKey().GetList(context.Background(), &auth_service.GetListReq{
 		EnvironmentId: request.Resource.EnvironmentId,
 		ProjectId:     request.Resource.ProjectId,
@@ -113,7 +120,7 @@ func DoInvokeFunction(request models.DoInvokeFunctionStruct, c *gin.Context, h H
 
 		go func() {
 			if request.Resource.ResourceType == pb.ResourceType_POSTGRESQL {
-				_, err = request.Services.VersionHistory().CreateFunctionLog(c, &gb.FunctionLogReq{
+				_, err = request.Services.VersionHistory().CreateFunctionLog(context.WithoutCancel(c.Request.Context()), &gb.FunctionLogReq{
 					ProjectId:     request.Resource.ResourceEnvironmentId,
 					FunctionId:    customEvent.Functions[0].GetId(),
 					TableSlug:     request.TableSlug,

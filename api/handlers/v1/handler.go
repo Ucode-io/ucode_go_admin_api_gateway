@@ -13,6 +13,7 @@ import (
 	"unicode/utf8"
 
 	"ucode/ucode_go_api_gateway/api/handlers/ai/gemini"
+	"ucode/ucode_go_api_gateway/api/handlers/crmguard"
 	"ucode/ucode_go_api_gateway/api/models"
 	"ucode/ucode_go_api_gateway/api/status_http"
 	"ucode/ucode_go_api_gateway/config"
@@ -57,7 +58,7 @@ func NewHandlerV1(baseConf config.BaseConfig, projectConfs map[string]config.Con
 		services:          svcs,
 		companyServices:   cmpServ,
 		authService:       authService,
-		redis:             redis,
+		redis:             crmguard.Cache(redis, baseConf.CRMNative),
 		centralRedis:      centralRedis,
 		cache:             cache,
 		rateLimiter:       limiter,
