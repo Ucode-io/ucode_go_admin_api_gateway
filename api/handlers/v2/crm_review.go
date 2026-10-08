@@ -111,6 +111,11 @@ func crmNativeReviewReport(data map[string]any) (map[string]any, bool) {
 		return nil, false
 	}
 	report["native_catalog"], report["native_catalog_count"] = catalog, count
+	login, ok := crmNativeReviewLogin(raw, catalog)
+	if !ok {
+		return nil, false
+	}
+	report["login_compatibility"] = login
 	for _, key := range []string{"native_schema", "executor_role"} {
 		value, ok := raw[key].(string)
 		if !ok || value == "" || len(value) > 128 {

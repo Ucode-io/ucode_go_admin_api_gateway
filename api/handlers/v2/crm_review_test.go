@@ -102,6 +102,7 @@ func reviewFixtureReport() map[string]any {
 	return map[string]any{
 		"deals_table_id": crmReviewDealsTable, "contacts_table_id": crmReviewContactsTable, "native_schema": "public", "executor_role": "fixture_builder",
 		"executor_bypasses_rls": false, "can_insert_deals": true, "can_update_deals": true, "can_insert_contacts": true,
+		"login_compatibility":  reviewFixtureLoginMetadata(),
 		"native_catalog_count": 4.,
 		"native_catalog": []any{
 			map[string]any{"id": crmReviewDealsTable, "slug": "deals", "is_login_table": false, "is_system": false},
