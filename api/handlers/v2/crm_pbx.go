@@ -187,7 +187,9 @@ func (h *HandlerV2) crmPBXApp(ctx context.Context) (string, error) {
 		return "", errors.New("record unavailable")
 	}
 	key, err := h.authService.ApiKey().Get(ctx, &as.GetReq{Id: id})
-	if err != nil || key == nil || key.GetId() != id || key.GetProjectId() != crmReviewProject || key.GetEnvironmentId() != crmReviewEnvironment || key.GetDisable() || strings.ToUpper(key.GetStatus()) != "ACTIVE" || key.GetAppId() == "" || len(key.GetAppId()) > 8192 {
+	// AuthService creates protected Function/OpenFaaS keys with disable=true;
+	// revocation uses status INACTIVE. Get(id) may omit the edit-protection flag.
+	if err != nil || key == nil || key.GetId() != id || key.GetProjectId() != crmReviewProject || key.GetEnvironmentId() != crmReviewEnvironment || key.GetName() != "Function" || key.GetRoleId() != crmReviewRole || key.GetClientTypeId() != crmReviewClientType || key.GetClientPlatform().GetId() != crmPBXAppPlatform || strings.ToUpper(key.GetStatus()) != "ACTIVE" || key.GetAppId() == "" || len(key.GetAppId()) > 8192 {
 		return "", errors.New("record unavailable")
 	}
 	return key.GetAppId(), nil

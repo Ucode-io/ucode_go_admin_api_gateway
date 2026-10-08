@@ -2,6 +2,7 @@ package v2
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -9,9 +10,91 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 	"ucode/ucode_go_api_gateway/config"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
+	"ucode/ucode_go_api_gateway/services"
 )
+
+type crmPBXAppKeys struct {
+	as.ApiKeysClient
+	get func(context.Context, *as.GetReq) (*as.GetRes, error)
+}
+
+func (f crmPBXAppKeys) Get(ctx context.Context, req *as.GetReq, _ ...grpc.CallOption) (*as.GetRes, error) {
+	return f.get(ctx, req)
+}
+
+type crmPBXAppAuth struct {
+	services.AuthServiceManagerI
+	keys as.ApiKeysClient
+}
+
+func (f crmPBXAppAuth) ApiKey() as.ApiKeysClient { return f.keys }
+
+func TestCRMPBXExistingFunctionKeyLifecycle(t *testing.T) {
+	const recordID = "4613c637-b70a-11f1-a0b5-36f82065c03b"
+	for _, name := range []string{"protected-function", "get-omits-disable", "inactive", "deleted", "service-error", "nil-record", "different-record", "different-project", "different-environment", "different-role", "different-client", "public-key-name", "missing-platform", "different-platform", "missing-status", "missing-app", "oversized-app", "invalid-reference"} {
+		t.Run(name, func(t *testing.T) {
+			key := &as.GetRes{Id: recordID, Name: "Function", ProjectId: crmReviewProject, EnvironmentId: crmReviewEnvironment, RoleId: crmReviewRole, ClientTypeId: crmReviewClientType, Status: "ACTIVE", Disable: true, ClientPlatform: &as.ClientPlatform{Id: crmPBXAppPlatform}, AppId: "synthetic-existing-app"}
+			var lookupErr error
+			configuredID := recordID
+			switch name {
+			case "get-omits-disable":
+				key.Disable = false
+			case "inactive":
+				key.Status = "INACTIVE"
+			case "deleted", "service-error":
+				key, lookupErr = nil, errors.New("synthetic lookup unavailable")
+			case "nil-record":
+				key = nil
+			case "different-record":
+				key.Id = "55555555-5555-4555-8555-555555555555"
+			case "different-project":
+				key.ProjectId = "other"
+			case "different-environment":
+				key.EnvironmentId = "other"
+			case "different-role":
+				key.RoleId = crmPBXOperatorRole
+			case "different-client":
+				key.ClientTypeId = crmPBXOperatorClient
+			case "public-key-name":
+				key.Name = "Browser"
+			case "missing-platform":
+				key.ClientPlatform = nil
+			case "different-platform":
+				key.ClientPlatform.Id = "other"
+			case "missing-status":
+				key.Status = ""
+			case "missing-app":
+				key.AppId = ""
+			case "oversized-app":
+				key.AppId = strings.Repeat("x", 8193)
+			case "invalid-reference":
+				configuredID = "not-a-record-id"
+			}
+			calls := 0
+			h := &HandlerV2{baseConf: config.BaseConfig{CRMNative: config.CRMNativeConfig{ServerScopeID: configuredID}}, authService: crmPBXAppAuth{keys: crmPBXAppKeys{get: func(_ context.Context, req *as.GetReq) (*as.GetRes, error) {
+				calls++
+				if req.Id != recordID {
+					t.Fatal("configured record selection changed")
+				}
+				return key, lookupErr
+			}}}}
+			app, err := h.crmPBXApp(context.Background())
+			allowed := name == "protected-function" || name == "get-omits-disable"
+			if allowed && (err != nil || app != "synthetic-existing-app" || calls != 1) {
+				t.Fatal("existing protected Function context rejected")
+			}
+			if !allowed && (err == nil || app != "") {
+				t.Fatal("invalid Function context accepted")
+			}
+			if name == "invalid-reference" && calls != 0 {
+				t.Fatal("invalid record reference reached AuthService")
+			}
+		})
+	}
+}
 
 type crmPBXRoundTrip func(*http.Request) (*http.Response, error)
 
