@@ -9,9 +9,13 @@ const (
 	crmReviewContactsTable       = "cdd353a8-7fa9-4a1b-9976-f8b826737af4"
 	crmReviewRole                = "adedea48-d3bc-4c1b-93d7-e2ac68027bb3"
 	crmReviewClientType          = "8dd86304-3778-46b5-8d77-dd9684d2012e"
+	crmReviewCatalogLimit        = 1024
 	crmReviewSQL                 = `jsonb_build_object(
 'deals_table_id',(SELECT id::text FROM "table" WHERE slug='deals'),
 'contacts_table_id',(SELECT id::text FROM "table" WHERE slug='contacts'),
+'native_catalog_count',(SELECT count(*) FROM public."table"),
+'native_catalog',(SELECT jsonb_agg(jsonb_build_object('id',t.id::text,'slug',t.slug,'is_login_table',t.is_login_table,'is_system',t.is_system) ORDER BY t.slug,t.id)
+ FROM (SELECT id,slug,is_login_table,is_system FROM public."table" ORDER BY slug,id LIMIT 1025) t),
 'native_schema',(SELECT n.nspname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.oid=to_regclass('deals')),
 'columns',(SELECT jsonb_agg(jsonb_build_object('table',c.relname,'column',a.attname,'type',format_type(a.atttypid,NULL),'nullable',NOT a.attnotnull,'default_present',ad.oid IS NOT NULL) ORDER BY c.relname,a.attnum)
  FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid LEFT JOIN pg_attrdef ad ON ad.adrelid=a.attrelid AND ad.adnum=a.attnum

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"math"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -100,8 +102,109 @@ func reviewFixtureReport() map[string]any {
 	return map[string]any{
 		"deals_table_id": crmReviewDealsTable, "contacts_table_id": crmReviewContactsTable, "native_schema": "public", "executor_role": "fixture_builder",
 		"executor_bypasses_rls": false, "can_insert_deals": true, "can_update_deals": true, "can_insert_contacts": true,
+		"native_catalog_count": 4.,
+		"native_catalog": []any{
+			map[string]any{"id": crmReviewDealsTable, "slug": "deals", "is_login_table": false, "is_system": false},
+			map[string]any{"id": crmReviewContactsTable, "slug": "contacts", "is_login_table": false, "is_system": false},
+			map[string]any{"id": "11111111-1111-4111-8111-111111111111", "slug": "users", "is_login_table": true, "is_system": false},
+			map[string]any{"id": "22222222-2222-4222-8222-222222222222", "slug": "hidden_system", "is_login_table": true, "is_system": true, "api_key": "secret-fixture", "default": "secret-fixture", "url": "https://secret-fixture.invalid"},
+		},
 		"columns":     []any{map[string]any{"table": "deals", "column": "pbx_branch", "type": "text[]", "nullable": true, "default_present": false, "default_expression": "secret-fixture", "attributes": "secret-fixture"}},
 		"hook_counts": map[string]any{"deals_create": 0., "deals_update": 0., "contacts_create": 0., "contacts_update": 0.}, "token": "secret-fixture",
+	}
+}
+
+func TestCRMNativeReviewCompleteCatalog(t *testing.T) {
+	raw := reviewFixtureReport()
+	report, ok := crmNativeReviewReport(map[string]any{"data": []any{map[string]any{"result": raw}}})
+	if !ok || report["native_catalog_count"] != 4 {
+		t.Fatal("complete catalog rejected")
+	}
+	rows := report["native_catalog"].([]map[string]any)
+	if len(rows) != 4 || rows[3]["slug"] != "hidden_system" || rows[3]["is_system"] != true || rows[3]["is_login_table"] != true {
+		t.Fatal("system/login tables omitted from catalog")
+	}
+	for _, row := range rows {
+		if len(row) != 4 {
+			t.Fatal("catalog contains unapproved fields")
+		}
+	}
+	encoded, err := json.Marshal(report)
+	if err != nil || strings.Contains(string(encoded), "secret-fixture") || strings.Contains(string(encoded), "https://") {
+		t.Fatal("unapproved catalog metadata leaked")
+	}
+	if !strings.Contains(crmReviewSQL, "'native_catalog_count',(SELECT count(*) FROM public.\"table\")") || !strings.Contains(crmReviewSQL, "FROM public.\"table\" ORDER BY slug,id LIMIT 1025") {
+		t.Fatal("catalog is not the bounded unfiltered public catalog")
+	}
+}
+
+func TestCRMNativeReviewCatalogRejectsMalformed(t *testing.T) {
+	for _, name := range []string{"missing-catalog", "missing-count", "string-count", "fractional-count", "negative-count", "nan-count", "infinite-count", "count-mismatch", "oversize-count", "malformed-row", "invalid-id", "nil-id", "duplicate-id", "duplicate-slug", "invalid-slug", "long-slug", "invalid-login", "invalid-system", "missing-flag", "wrong-core-id", "missing-core-table"} {
+		t.Run(name, func(t *testing.T) {
+			raw := reviewFixtureReport()
+			rows := raw["native_catalog"].([]any)
+			row := rows[3].(map[string]any)
+			switch name {
+			case "missing-catalog":
+				delete(raw, "native_catalog")
+			case "missing-count":
+				delete(raw, "native_catalog_count")
+			case "string-count":
+				raw["native_catalog_count"] = "4"
+			case "fractional-count":
+				raw["native_catalog_count"] = 4.5
+			case "negative-count":
+				raw["native_catalog_count"] = -1.
+			case "nan-count":
+				raw["native_catalog_count"] = math.NaN()
+			case "infinite-count":
+				raw["native_catalog_count"] = math.Inf(1)
+			case "count-mismatch":
+				raw["native_catalog_count"] = 3.
+			case "oversize-count":
+				raw["native_catalog_count"] = float64(crmReviewCatalogLimit + 1)
+				raw["native_catalog"] = make([]any, crmReviewCatalogLimit+1)
+			case "malformed-row":
+				rows[3] = "invalid"
+			case "invalid-id":
+				row["id"] = "not-a-uuid"
+			case "nil-id":
+				row["id"] = "00000000-0000-0000-0000-000000000000"
+			case "duplicate-id":
+				row["id"] = strings.ToUpper(crmReviewDealsTable)
+			case "duplicate-slug":
+				row["slug"] = "deals"
+			case "invalid-slug":
+				row["slug"] = "https://injected.invalid"
+			case "long-slug":
+				row["slug"] = strings.Repeat("x", 64)
+			case "invalid-login":
+				row["is_login_table"] = "true"
+			case "invalid-system":
+				row["is_system"] = 1.
+			case "missing-flag":
+				delete(row, "is_system")
+			case "wrong-core-id":
+				rows[0].(map[string]any)["id"] = "33333333-3333-4333-8333-333333333333"
+			case "missing-core-table":
+				rows[0].(map[string]any)["slug"] = "other"
+			}
+			if _, ok := crmNativeReviewReport(map[string]any{"data": []any{map[string]any{"result": raw}}}); ok {
+				t.Fatal("malformed catalog accepted")
+			}
+		})
+	}
+}
+
+func TestCRMNativeReviewCatalogLimit(t *testing.T) {
+	raw := reviewFixtureReport()
+	rows := raw["native_catalog"].([]any)
+	for i := len(rows); i < crmReviewCatalogLimit; i++ {
+		rows = append(rows, map[string]any{"id": fmt.Sprintf("33333333-3333-4333-8333-%012x", i), "slug": fmt.Sprintf("table_%d", i), "is_login_table": false, "is_system": true})
+	}
+	raw["native_catalog"], raw["native_catalog_count"] = rows, float64(len(rows))
+	if _, count, ok := crmNativeReviewCatalog(raw); !ok || count != crmReviewCatalogLimit {
+		t.Fatal("complete catalog at supported limit rejected")
 	}
 }
 

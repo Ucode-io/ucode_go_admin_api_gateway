@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/structpb"
 	as "ucode/ucode_go_api_gateway/genproto/auth_service"
 	pb "ucode/ucode_go_api_gateway/genproto/company_service"
@@ -105,6 +106,11 @@ func crmNativeReviewReport(data map[string]any) (map[string]any, bool) {
 		return nil, false
 	}
 	report := map[string]any{"deals_table_id": crmReviewDealsTable, "contacts_table_id": crmReviewContactsTable, "safe_to_activate": false, "privilege_subject": "builder_database_executor"}
+	catalog, count, ok := crmNativeReviewCatalog(raw)
+	if !ok {
+		return nil, false
+	}
+	report["native_catalog"], report["native_catalog_count"] = catalog, count
 	for _, key := range []string{"native_schema", "executor_role"} {
 		value, ok := raw[key].(string)
 		if !ok || value == "" || len(value) > 128 {
@@ -161,4 +167,54 @@ func crmNativeReviewReport(data map[string]any) (map[string]any, bool) {
 	}
 	report["columns"], report["hook_counts"], report["hooks_clear"] = safeColumns, safeCounts, hooksClear
 	return report, true
+}
+
+// Copy only catalog identity flags; never expose other table attributes.
+func crmNativeReviewCatalog(raw map[string]any) ([]map[string]any, int, bool) {
+	count, ok := raw["native_catalog_count"].(float64)
+	if !ok || math.IsNaN(count) || math.IsInf(count, 0) || count < 2 || count > crmReviewCatalogLimit || count != math.Trunc(count) {
+		return nil, 0, false
+	}
+	rows, ok := raw["native_catalog"].([]any)
+	if !ok || len(rows) != int(count) {
+		return nil, 0, false
+	}
+	catalog := make([]map[string]any, 0, len(rows))
+	ids, slugs := make(map[string]bool, len(rows)), make(map[string]string, len(rows))
+	for _, value := range rows {
+		row, ok := value.(map[string]any)
+		if !ok {
+			return nil, 0, false
+		}
+		id, idOK := row["id"].(string)
+		slug, slugOK := row["slug"].(string)
+		parsed, err := uuid.Parse(id)
+		if !idOK || err != nil || parsed == uuid.Nil || len(id) != 36 || parsed.String() != strings.ToLower(id) || !slugOK || !crmNativeReviewIdentifier(slug) || ids[parsed.String()] || slugs[slug] != "" {
+			return nil, 0, false
+		}
+		login, loginOK := row["is_login_table"].(bool)
+		system, systemOK := row["is_system"].(bool)
+		if !loginOK || !systemOK {
+			return nil, 0, false
+		}
+		ids[parsed.String()], slugs[slug] = true, parsed.String()
+		catalog = append(catalog, map[string]any{"id": parsed.String(), "slug": slug, "is_login_table": login, "is_system": system})
+	}
+	if slugs["deals"] != crmReviewDealsTable || slugs["contacts"] != crmReviewContactsTable {
+		return nil, 0, false
+	}
+	return catalog, int(count), true
+}
+
+func crmNativeReviewIdentifier(value string) bool {
+	if len(value) == 0 || len(value) > 63 {
+		return false
+	}
+	for i := 0; i < len(value); i++ {
+		c := value[i]
+		if c != '_' && !(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && !(i > 0 && c >= '0' && c <= '9') {
+			return false
+		}
+	}
+	return true
 }
