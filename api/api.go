@@ -30,6 +30,8 @@ func SetUpAPI(r *gin.Engine, h handlers.Handler, cfg config.BaseConfig, tracer o
 	r.Use(ginhttp.Middleware(tracer))
 
 	r.GET("/ping", h.V1.Ping)
+	// Separate bounded reader: no function-service, PBX invocation or scope activation.
+	r.POST("/v1/crm-pbx/native-review", h.V2.CRMNativeReviewGuard(), h.V1.AuthMiddleware(cfg), h.V2.CRMNativeReview)
 	uploadFile := r.Group("/v2/upload-file")
 	uploadFile.Use(h.V1.AuthMiddleware(cfg))
 	uploadFile.Any("/*any", h.V2.MovieUpload)

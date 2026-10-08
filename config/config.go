@@ -236,12 +236,15 @@ type BaseConfig struct {
 	InstagramLegacyClientSecrets []string
 	InstagramOAuthAuthorizeURL   string
 	InstagramOAuthAccessTokenURL string
+
+	CRMNativeReviewEnabled bool
 }
 
 func BaseLoad() BaseConfig {
 	loadRuntimeEnvironment()
 
 	config := BaseConfig{}
+	config.CRMNativeReviewEnabled = os.Getenv("CRM_NATIVE_REVIEW_ENABLED") == "true"
 
 	config.ServiceName = cast.ToString(GetOrReturnDefaultValue("SERVICE_NAME", "ucode_go_api_gateway"))
 	config.Environment = cast.ToString(GetOrReturnDefaultValue("ENVIRONMENT", DebugMode))
