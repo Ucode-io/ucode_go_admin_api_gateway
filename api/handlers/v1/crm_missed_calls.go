@@ -24,6 +24,8 @@ const (
 	missedCallNotificationsPrefix    = "crm:missed-calls:notifications:"
 	missedCallNotificationDataPrefix = "crm:missed-calls:notification-data:"
 	missedCallRetention              = 5 * 365 * 24 * time.Hour
+	missedCallExcludedProject        = "577d03aa-8301-4d40-88ce-196f2f7a0324"
+	missedCallExcludedEnvironment    = "8eb5d8c2-1ff0-43a4-9008-7fef20bea388"
 )
 
 type missedCallTarget struct {
@@ -42,6 +44,10 @@ type missedCallNotification struct {
 
 func missedCallTargetKey(target missedCallTarget) string {
 	return target.ProjectID + "|" + target.EnvironmentID + "|" + target.CompanyID
+}
+
+func missedCallTargetExcluded(target missedCallTarget) bool {
+	return target.ProjectID == missedCallExcludedProject && target.EnvironmentID == missedCallExcludedEnvironment
 }
 
 func missedCallDealID(projectID, callID string) string {
@@ -71,11 +77,17 @@ func (h *HandlerV1) ListMissedCallNotifications(c *gin.Context) {
 		h.HandleResponse(c, status_http.InvalidArgument, "project, environment and company-id are required")
 		return
 	}
+	target := missedCallTarget{ProjectID: fmt.Sprint(project), EnvironmentID: fmt.Sprint(environment), CompanyID: companyID}
+	// This workspace is owned by the PBX function; old clients must not register
+	// a second creator or read legacy notices after the cutover.
+	if missedCallTargetExcluded(target) {
+		h.HandleResponse(c, status_http.OK, []missedCallNotification{})
+		return
+	}
 	if h.centralRedis == nil {
 		h.HandleResponse(c, status_http.InternalServerError, "notification storage is unavailable")
 		return
 	}
-	target := missedCallTarget{ProjectID: fmt.Sprint(project), EnvironmentID: fmt.Sprint(environment), CompanyID: companyID}
 	targetKey := missedCallTargetKey(target)
 	ctx := c.Request.Context()
 	if err := h.centralRedis.SetNX(ctx, missedCallRegisteredPrefix+targetKey, time.Now().UTC().Add(-2*time.Minute).Format(time.RFC3339Nano), missedCallRetention).Err(); err != nil {
@@ -155,6 +167,10 @@ func (h *HandlerV1) pollMissedCalls(ctx context.Context) {
 }
 
 func (h *HandlerV1) pollMissedCallTarget(ctx context.Context, target missedCallTarget) error {
+	// Also ignore any registration retained from an older gateway revision.
+	if missedCallTargetExcluded(target) {
+		return nil
+	}
 	key := missedCallTargetKey(target)
 	registered, err := h.centralRedis.Get(ctx, missedCallRegisteredPrefix+key).Result()
 	if err != nil {
